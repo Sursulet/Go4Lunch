@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Go4Lunch</string>
+    <string name="toolbar_title">I\'m Hungry</string>
+    <string name="title_search">SEARCH</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_map">Map View</string>
+    <string name="title_list">List View</string>
+    <string name="title_workmates">Workmates</string>
+</resources>
