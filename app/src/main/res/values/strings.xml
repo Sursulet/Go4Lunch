@@ -7,4 +7,9 @@
     <string name="title_map">Map View</string>
     <string name="title_list">List View</string>
     <string name="title_workmates">Workmates</string>
+    <string name="title_your_lunch">YOUR LUNCH</string>
+    <string name="title_settings">SETTINGS</string>
+    <string name="title_logout">LOGOUT</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
 </resources>
