@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.sursulet.go4lunch.R;
+import com.sursulet.go4lunch.model.GooglePlacesNearbySearchResult;
+import com.sursulet.go4lunch.remote.IGoogleAPIService;
+import com.sursulet.go4lunch.remote.RetrofitClient;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MapFragment extends Fragment {
 
@@ -53,7 +61,24 @@ public class MapFragment extends Fragment {
         //Initialize fused location provider client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
 
+        IGoogleAPIService mService = RetrofitClient.getClient("https://maps.googleapis.com/")
+                .create(IGoogleAPIService.class);
+        mService.getNearByPlaces(
+                "AIzaSyCrjCEYFwsO2biAp-GJw8MO6HbpjC5Tbzw",
+                "48.8534,2.3488",
+                "restaurant",
+                "500"
+        ).enqueue(new Callback<GooglePlacesNearbySearchResult>() {
+            @Override
+            public void onResponse(Call<GooglePlacesNearbySearchResult> call, Response<GooglePlacesNearbySearchResult> response) {
+                Log.d("COURGETTE", "onResponse: " + response.body().getResults().get(0).getName());
+            }
 
+            @Override
+            public void onFailure(Call<GooglePlacesNearbySearchResult> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
     }
 
     private void getCurrentLocation() {
