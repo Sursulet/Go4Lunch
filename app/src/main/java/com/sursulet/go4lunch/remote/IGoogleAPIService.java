@@ -9,7 +9,7 @@ import retrofit2.http.Url;
 
 public interface IGoogleAPIService {
 
-    @GET("maps/api/place/nearbysearch/json/")
+    @GET("maps/api/place/nearbysearch/json")
     Call<GooglePlacesNearbySearchResult> getNearByPlaces(
             @Query("key") String key,
             @Query("location") String location,
