@@ -1,5 +1,6 @@
 package com.sursulet.go4lunch.ui.workmates;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -23,16 +24,15 @@ import butterknife.ButterKnife;
 
 public class WorkmatesFragment extends Fragment {
 
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference workmatesRef = db.collection("Users");
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final CollectionReference workmatesRef = db.collection("Users");
 
     private WorkmatesAdapter adapter;
 
+    @SuppressLint("NonConstantResourceId")
     @BindView(R.id.workmates_recyclerview) RecyclerView mRecyclerView;
 
-    public WorkmatesFragment() {
-        // Required empty public constructor
-    }
+    public WorkmatesFragment() {}
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -46,28 +46,15 @@ public class WorkmatesFragment extends Fragment {
         return view;
     }
 
-    private void setUpRecyclerView() {
-        Query query= workmatesRef.orderBy("placeId", Query.Direction.DESCENDING);
-
-        FirestoreRecyclerOptions<User> options = new FirestoreRecyclerOptions.Builder<User>()
-                .setQuery(query, User.class)
-                .build();
-
-        adapter = new WorkmatesAdapter(options);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.setAdapter(adapter);
-    }
+    private void setUpRecyclerView() {}
 
     @Override
     public void onStart() {
         super.onStart();
-        adapter.startListening();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        adapter.stopListening();
     }
 }
