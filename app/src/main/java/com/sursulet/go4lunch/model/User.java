@@ -9,11 +9,11 @@ public class User {
     @Nullable private String avatarUrl;
     private String placeId;
 
-    public User(String uid, String username, @Nullable String avatarUrl, String placeId) {
+    public User(String uid, String username, @Nullable String avatarUrl/*, String placeId*/) {
         this.uid = uid;
         this.username = username;
         this.avatarUrl = avatarUrl;
-        this.placeId = placeId;
+        //this.placeId = placeId;
     }
 
     public String getUid() {
