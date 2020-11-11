@@ -5,6 +5,9 @@ import android.util.Log;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.sursulet.go4lunch.model.GooglePlacesNearbySearchResult;
 import com.sursulet.go4lunch.model.Result;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
@@ -21,11 +24,11 @@ public class NearbyPlacesRepository {
     IGoogleAPIService mService = RetrofitClient.getClient("https://maps.googleapis.com/")
             .create(IGoogleAPIService.class);
 
-    private final MutableLiveData<Integer> placeLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Integer> nearbyPlacesLiveData = new MutableLiveData<>();
 
-    public LiveData<List<Result>> getNearByPlaces(Double lat, Double lng) {
+    public LiveData<List<Result>> getNearByPlaces() {
+
         MutableLiveData<List<Result>> places = new MutableLiveData<>();
-
         mService.getNearByPlaces(
                 "AIzaSyDvUeXTbuq87mNoavyfSj_1AWVOK_dMyiE", //getResources().getString(R.string.google_api_key),
                 "48.8534,2.3488",
@@ -34,7 +37,21 @@ public class NearbyPlacesRepository {
         ).enqueue(new Callback<GooglePlacesNearbySearchResult>() {
             @Override
             public void onResponse(Call<GooglePlacesNearbySearchResult> call, Response<GooglePlacesNearbySearchResult> response) {
-                Log.d("PEACH", "onResponse: " + response.body().getResults().get(0).getName());
+
+                if (response.isSuccessful()) {
+                    if (response.body() != null && response.body().getResults() != null) {
+                        for (int i = 0; i < response.body().getResults().size(); i++) {
+                            //Results place = response.body().getResults()[i];
+
+                            double lat = response.body().getResults().get(i).getGeometry().getLocation().getLat();
+                            double lng = response.body().getResults().get(i).getGeometry().getLocation().getLng();
+
+                            String name = response.body().getResults().get(i).getName();
+                            LatLng latlng = new LatLng(lat, lng);
+
+                        }
+                    }
+                }
             }
 
             @Override

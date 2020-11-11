@@ -16,7 +16,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
 
     private final UserRepository userRepository;
     private final CurrentLocationRepository currentLocationRepository;
-    private final NearbyPlacesRepository nearByPlacesRepository;
+    private final NearbyPlacesRepository nearbyPlacesRepository;
 
     private ViewModelFactory(
             UserRepository userRepository,
@@ -25,7 +25,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
     ) {
         this.userRepository = userRepository;
         this.currentLocationRepository = currentLocationRepository;
-        this.nearByPlacesRepository = nearByPlacesRepository;
+        this.nearbyPlacesRepository = nearByPlacesRepository;
     }
 
     public static ViewModelFactory getInstance() {
@@ -49,8 +49,8 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(MapViewModel.class)) {
             return (T) new MapViewModel(
-                    currentLocationRepository,
-                    nearByPlacesRepository);
+                    //currentLocationRepository,
+                    nearbyPlacesRepository);
         } else if (modelClass.isAssignableFrom(MainViewModel.class)) {
             return (T) new MainViewModel(
                     userRepository

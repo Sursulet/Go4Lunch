@@ -16,7 +16,7 @@ import com.google.android.gms.location.LocationServices;
 
 public class CurrentLocationRepository {
 
-    private final Context context;
+    private Context context;
 
     private final MutableLiveData<Location> mutableLiveData = new MutableLiveData<>();
 
@@ -26,7 +26,7 @@ public class CurrentLocationRepository {
 
     public LiveData<Location> getLocation() { return mutableLiveData; }
 
-    public CurrentLocationRepository(Context context) { this.context = context; }
+    //public CurrentLocationRepository(Context context) { this.context = context; }
     public void init () {
         createLocationRequest();
         createLocationCallback();

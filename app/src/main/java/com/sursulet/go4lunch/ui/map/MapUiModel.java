@@ -1,16 +1,28 @@
 package com.sursulet.go4lunch.ui.map;
 
+import com.sursulet.go4lunch.model.Result;
+
+import java.util.List;
+
 public class MapUiModel {
 
     private final String name;
     private final String placeId;
     private final String imageUrl;
     //private int icon;
+    //private final Marker marker;
+    private final Double lat;
+    private final Double lng;
 
-    public MapUiModel(String name, String placeId, String imageUrl) {
+    private final List<Result> places;
+
+    public MapUiModel(String name, String placeId, String imageUrl, Double lat, Double lng, List<Result> places) {
         this.name = name;
         this.placeId = placeId;
         this.imageUrl = imageUrl;
+        this.lat = lat;
+        this.lng = lng;
+        this.places = places;
     }
 
     public String getName() {
@@ -23,5 +35,17 @@ public class MapUiModel {
 
     public String getImageUrl() {
         return imageUrl;
+    }
+
+    public Double getLat() {
+        return lat;
+    }
+
+    public Double getLng() {
+        return lng;
+    }
+
+    public List<Result> getPlaces() {
+        return places;
     }
 }

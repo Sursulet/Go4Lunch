@@ -51,6 +51,10 @@ dependencies {
     //PICASSO
     implementation 'com.squareup.picasso:picasso:2.71828'
 
+    //GLIDE
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+
     //RETROFIT
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
@@ -68,6 +72,10 @@ dependencies {
     //Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:25.12.0')
     implementation 'com.firebaseui:firebase-ui-firestore:6.3.0'
+    implementation 'com.firebaseui:firebase-ui-auth:6.3.0'
+
+    //Facebook login
+    implementation 'com.facebook.android:facebook-android-sdk:4.42.0'
 
     implementation 'androidx.cardview:cardview:1.0.0';
 }
