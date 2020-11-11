@@ -14,15 +14,13 @@ public class MapUiModel {
     private final Double lat;
     private final Double lng;
 
-    private final List<Result> places;
 
-    public MapUiModel(String name, String placeId, String imageUrl, Double lat, Double lng, List<Result> places) {
+    public MapUiModel(String name, String placeId, String imageUrl, Double lat, Double lng) {
         this.name = name;
         this.placeId = placeId;
         this.imageUrl = imageUrl;
         this.lat = lat;
         this.lng = lng;
-        this.places = places;
     }
 
     public String getName() {
@@ -43,9 +41,5 @@ public class MapUiModel {
 
     public Double getLng() {
         return lng;
-    }
-
-    public List<Result> getPlaces() {
-        return places;
     }
 }

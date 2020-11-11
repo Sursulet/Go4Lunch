@@ -40,16 +40,7 @@ public class NearbyPlacesRepository {
 
                 if (response.isSuccessful()) {
                     if (response.body() != null && response.body().getResults() != null) {
-                        for (int i = 0; i < response.body().getResults().size(); i++) {
-                            //Results place = response.body().getResults()[i];
-
-                            double lat = response.body().getResults().get(i).getGeometry().getLocation().getLat();
-                            double lng = response.body().getResults().get(i).getGeometry().getLocation().getLng();
-
-                            String name = response.body().getResults().get(i).getName();
-                            LatLng latlng = new LatLng(lat, lng);
-
-                        }
+                        places.setValue(response.body().getResults());
                     }
                 }
             }

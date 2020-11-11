@@ -32,19 +32,6 @@ public class MapFragment extends Fragment {
 
     GoogleMap map;
     Boolean mapReady = false;
-    List<Result> places;
-    LatLng latLng;
-    String name;
-    Marker marker;
-
-    private OnMapReadyCallback callback = new OnMapReadyCallback() {
-
-        @Override
-        public void onMapReady(GoogleMap googleMap) {
-            map = googleMap;
-            mapReady = true;
-        }
-    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -63,34 +50,36 @@ public class MapFragment extends Fragment {
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
-            mapFragment.getMapAsync(callback);
+            mapFragment.getMapAsync(new OnMapReadyCallback() {
+
+                @Override
+                public void onMapReady(GoogleMap googleMap) {
+                    map = googleMap;
+                    mapReady = true;
+
+                    map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(48.8534,2.3488)));
+                    map.animateCamera(CameraUpdateFactory.zoomTo(15));
+                }
+            });
         }
 
         /* invoquer pour obtenir l'emplacement du mobile : currentLocation */
-        mapViewModel.getMapUiModelLiveData().observe(this, new Observer<MapUiModel>() {
+        mapViewModel.getMapUiModelLiveData().observe(getViewLifecycleOwner(), new Observer<List<MapUiModel>>() {
             @Override
-            public void onChanged(MapUiModel mapUiModel) {
-                places = mapUiModel.getPlaces();
-
-                //double lat = mapUiModel.getLat(); double lng = mapUiModel.getLng();
+            public void onChanged(List<MapUiModel> models) {
+                updateUi(models);
             }
         });
 
-        for(Result place : places) {
-            MarkerOptions markerOptions = new MarkerOptions();
+    }
 
-            double lat = place.getGeometry().getLocation().getLat();
-            double lng = place.getGeometry().getLocation().getLng();
-
-            LatLng latLng = new LatLng(lat, lng);
-            markerOptions.position(latLng)
-                    .title(name);
-
-            map.addMarker(markerOptions);
-            map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-            map.animateCamera(CameraUpdateFactory.zoomTo(15));
-
+    public void updateUi(List<MapUiModel> models) {
+        for (MapUiModel model : models) {
+            map.addMarker(
+                    new MarkerOptions()
+                            .position(new LatLng(model.getLat(), model.getLng()))
+                            .title(model.getName())
+            );
         }
-
     }
 }
