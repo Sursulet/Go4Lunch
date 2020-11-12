@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.sursulet.go4lunch.MainApplication;
 import com.sursulet.go4lunch.MainViewModel;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.NearbyPlacesRepository;
@@ -38,7 +39,9 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
                 if (sFactory == null) {
                     sFactory = new ViewModelFactory(
                             new UserRepository(),
-                            new CurrentLocationRepository(),
+                            new CurrentLocationRepository(
+                                MainApplication.getApplication()
+                            ),
                             new NearbyPlacesRepository(),
                             new WorkmatesRepository());
                 }
@@ -48,12 +51,13 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         return sFactory;
     }
 
+    @SuppressWarnings("unchecked")
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(MapViewModel.class)) {
             return (T) new MapViewModel(
-                    //currentLocationRepository,
+                    currentLocationRepository,
                     nearbyPlacesRepository);
         } else if (modelClass.isAssignableFrom(WorkmatesViewModel.class)) {
             return (T) new WorkmatesViewModel(

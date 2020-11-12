@@ -55,6 +55,9 @@ public class MapFragment extends Fragment {
                 @Override
                 public void onMapReady(GoogleMap googleMap) {
                     map = googleMap;
+
+                    // TODO Stephanie à déplacer dans le ViewModel : il faut considérer le "map ready" comme une LiveData
+                    //  qui va déclencher "l'écoute" du LocationRepository qui va déclencher... (etc, etc)
                     mapReady = true;
 
                     map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(48.8534,2.3488)));
