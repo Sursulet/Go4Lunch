@@ -15,9 +15,9 @@ import com.bumptech.glide.Glide;
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.model.User;
 
-public class WorkmatesAdapter extends ListAdapter<User, WorkmatesAdapter.WorkmatesViewHolder> {
+public class WorkmatesAdapter extends ListAdapter<WorkmatesUiModel, WorkmatesAdapter.WorkmatesViewHolder> {
 
-    protected WorkmatesAdapter(@NonNull DiffUtil.ItemCallback<User> diffCallback) {
+    protected WorkmatesAdapter(@NonNull DiffUtil.ItemCallback<WorkmatesUiModel> diffCallback) {
         super(diffCallback);
     }
 
@@ -33,8 +33,8 @@ public class WorkmatesAdapter extends ListAdapter<User, WorkmatesAdapter.Workmat
 
     @Override
     public void onBindViewHolder(@NonNull WorkmatesViewHolder holder, int position) {
-        User user = getItem(position);
-        holder.bind(user);
+        WorkmatesUiModel workmatesUiModel = getItem(position);
+        holder.bind(workmatesUiModel);
     }
 
     static class WorkmatesViewHolder extends RecyclerView.ViewHolder {
@@ -49,11 +49,11 @@ public class WorkmatesAdapter extends ListAdapter<User, WorkmatesAdapter.Workmat
             txt = itemView.findViewById(R.id.workmate_text);
         }
 
-        public void bind(User user) {
-            String b = user.getUsername() + " is eating " ; //+
+        public void bind(WorkmatesUiModel workmatesUiModel) {
+            String b = workmatesUiModel.getTxt();
             txt.setText(b);
             Glide.with(photo)
-                    .load(user.getAvatarUrl())
+                    .load(workmatesUiModel.photo)
                     .circleCrop()
                     .into(photo);
         }

@@ -20,16 +20,12 @@ public class MapViewModel extends ViewModel {
     //private final CurrentLocationRepository currentLocationRepository;
     private final NearbyPlacesRepository nearbyPlacesRepository;
 
-    private MediatorLiveData<MapUiModel> mapUiModelMediatorLiveData;
-
     public MapViewModel(
             //CurrentLocationRepository currentLocationRepository,
             NearbyPlacesRepository nearbyPlacesRepository
     ) {
         //this.currentLocationRepository = currentLocationRepository;
         this.nearbyPlacesRepository = nearbyPlacesRepository;
-
-        LiveData<List<Result>> placesLiveData = nearbyPlacesRepository.getNearByPlaces();
     }
 
     public LiveData<List<MapUiModel>> getMapUiModelLiveData() {
@@ -53,9 +49,5 @@ public class MapViewModel extends ViewModel {
                 return results;
             }
         });
-    }
-
-    public void getNearbyPlaces() {
-        nearbyPlacesRepository.getNearByPlaces();
     }
 }

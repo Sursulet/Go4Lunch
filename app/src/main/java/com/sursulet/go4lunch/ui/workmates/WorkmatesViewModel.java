@@ -1,7 +1,10 @@
 package com.sursulet.go4lunch.ui.workmates;
 
+import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.sursulet.go4lunch.model.User;
@@ -12,27 +15,29 @@ import java.util.List;
 
 public class WorkmatesViewModel extends ViewModel {
 
-    private WorkmatesRepository workmatesRepository;
-    private MutableLiveData<List<User>> usermutableLiveData;
+    private final WorkmatesRepository workmatesRepository;
 
-    public WorkmatesViewModel(/*LiveData<List<User>> users*/) {
-        //this.usermutableLiveData = users;
+    public WorkmatesViewModel(WorkmatesRepository workmatesRepository) {
+        this.workmatesRepository = workmatesRepository;
     }
 
-    public LiveData<List<User>> getUsers() {
-        if(usermutableLiveData == null) {
-            usermutableLiveData = new MutableLiveData<>();
-            initUsers();
-        }
+    public LiveData<List<WorkmatesUiModel>> getWorkmatesUiModelLiveData() {
+        return Transformations.map(workmatesRepository.getWorkmates(), new Function<List<User>, List<WorkmatesUiModel>>() {
+            @Override
+            public List<WorkmatesUiModel> apply(List<User> input) {
+                List<WorkmatesUiModel> results = new ArrayList<>();
 
-        return usermutableLiveData;
-    }
+                for (User user : input) {
+                    WorkmatesUiModel workmatesUiModel = new WorkmatesUiModel(
+                            user.getUid(),
+                            user.getUsername() + " is eating ",
+                            user.getAvatarUrl()
+                    );
+                    results.add(workmatesUiModel);
+                }
 
-    private void initUsers() {
-        List<User> userList = new ArrayList<>();
-        userList.add(new User("1", "Noel", null));
-        userList.add(new User("2", "Gerald", null));
-        userList.add(new User("3", "Jojo", null));
-        usermutableLiveData.setValue(userList);
+                return results;
+            }
+        });
     }
 }
