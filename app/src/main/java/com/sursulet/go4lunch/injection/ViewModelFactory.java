@@ -9,6 +9,7 @@ import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.NearbyPlacesRepository;
 import com.sursulet.go4lunch.repository.UserRepository;
 import com.sursulet.go4lunch.ui.map.MapViewModel;
+import com.sursulet.go4lunch.ui.workmates.WorkmatesViewModel;
 
 public class ViewModelFactory implements ViewModelProvider.Factory {
 
@@ -51,7 +52,9 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
             return (T) new MapViewModel(
                     //currentLocationRepository,
                     nearbyPlacesRepository);
-        } else if (modelClass.isAssignableFrom(MainViewModel.class)) {
+        } else if (modelClass.isAssignableFrom(WorkmatesViewModel.class)) {
+            return (T) new WorkmatesViewModel();
+        }else if (modelClass.isAssignableFrom(MainViewModel.class)) {
             return (T) new MainViewModel(
                     userRepository
             );

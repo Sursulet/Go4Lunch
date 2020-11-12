@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,13 +14,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
-import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
 import com.sursulet.go4lunch.R;
+import com.sursulet.go4lunch.injection.ViewModelFactory;
 import com.sursulet.go4lunch.model.User;
+
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,12 +44,21 @@ public class WorkmatesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_workmates, container, false);
         ButterKnife.bind(this, view);
 
-        setUpRecyclerView();
+        RecyclerView recyclerView = view.findViewById(R.id.workmates_recyclerview);
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        WorkmatesAdapter adapter = new WorkmatesAdapter(User.DIFF_CALLBACK);
+        recyclerView.setAdapter(adapter);
+
+        WorkmatesViewModel workmatesViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance()).get(WorkmatesViewModel.class);
+        workmatesViewModel.getUsers().observe(getViewLifecycleOwner(), new Observer<List<User>>() {
+            @Override
+            public void onChanged(List<User> workmates) {
+                adapter.submitList(workmates);
+            }
+        });
 
         return view;
     }
-
-    private void setUpRecyclerView() {}
 
     @Override
     public void onStart() {

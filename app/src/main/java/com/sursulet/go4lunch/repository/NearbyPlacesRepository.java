@@ -1,13 +1,8 @@
 package com.sursulet.go4lunch.repository;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.sursulet.go4lunch.model.GooglePlacesNearbySearchResult;
 import com.sursulet.go4lunch.model.Result;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
