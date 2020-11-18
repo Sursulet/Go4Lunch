@@ -1,13 +1,21 @@
 package com.sursulet.go4lunch.ui.map;
 
+import android.Manifest;
+import android.app.Application;
+import android.content.pm.PackageManager;
 import android.location.Location;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import com.sursulet.go4lunch.MainApplication;
 import com.sursulet.go4lunch.model.Result;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.NearbyPlacesRepository;
@@ -17,21 +25,25 @@ import java.util.List;
 
 public class MapViewModel extends ViewModel {
 
-    private CurrentLocationRepository currentLocationRepository;
-    private final NearbyPlacesRepository nearbyPlacesRepository;
+    @NonNull
+    private final Application application;
+    @NonNull
+    private final CurrentLocationRepository currentLocationRepository;
 
-    private boolean mapReady;
-    private boolean hasPermissions;
+    private final MutableLiveData<Boolean> isMapReadyLiveData = new MutableLiveData<>();
+
+    private final MutableLiveData<String> userQueryLiveData = new MutableLiveData<>();
+
+    private final MediatorLiveData<List<MapUiModel>> uiModelsMediatorLiveData = new MediatorLiveData<>();
 
     public MapViewModel(
-            CurrentLocationRepository currentLocationRepository,
-            NearbyPlacesRepository nearbyPlacesRepository
+        @NonNull Application application,
+        @NonNull CurrentLocationRepository currentLocationRepository,
+        @NonNull NearbyPlacesRepository nearbyPlacesRepository
     ) {
+        this.application = application;
         this.currentLocationRepository = currentLocationRepository;
-        this.nearbyPlacesRepository = nearbyPlacesRepository;
-    }
 
-    public LiveData<List<MapUiModel>> getMapUiModelLiveData() {
         // TODO Stephanie Transformation.switchMap() permet de "regénérer" une nouvelle LiveData quand la valeur initiale change.
         //  Ici, quand la LiveData de Location change, on "redemande" au NearbyPlaceRepository quels sont les restaurants à proximité
         //  de la nouvelle position GPS.
@@ -42,35 +54,72 @@ public class MapViewModel extends ViewModel {
             }
         });
 
-        // TODO Stephanie Transformation.map() permet de simplement changer le type encapsulé d'une LiveData
-        //  (ici, de List<PlaceDetailResult> en List<MapUiModel>)
-        //  On voit qu'on "chaine" les map et switchMap, ça permet de "dessiner" les liens entre les flux :
-        //  1/ quand la Location change, on réémet une LiveData qui plus tard va se pleupler avec les nouvelles "nearby" trouvées
-        //  2/ on transforme les POJO "PlaceDetailResult" en objets utilisable par la vue (MapUiModel)
-        return Transformations.map(nearbyPlacesDependingOnGps, new Function<List<Result>, List<MapUiModel>>() {
+        uiModelsMediatorLiveData.addSource(nearbyPlacesDependingOnGps, new Observer<List<Result>>() {
             @Override
-            public List<MapUiModel> apply(List<Result> input) {
-                List<MapUiModel> results = new ArrayList<>();
+            public void onChanged(List<Result> results) {
+                combine(results, isMapReadyLiveData.getValue());
+            }
+        });
 
-                for (Result result : input) {
-                    MapUiModel mapUiModel = new MapUiModel(
-                        result.getName(),
-                        result.getPlaceId(),
-                        null,
-                        result.getGeometry().getLocation().getLat(),
-                        result.getGeometry().getLocation().getLng()
-                    );
+        uiModelsMediatorLiveData.addSource(isMapReadyLiveData, new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean isMapReady) {
+                combine(nearbyPlacesDependingOnGps.getValue(), isMapReady);
+            }
+        });
 
-                    results.add(mapUiModel);
-                }
-
-                return results;
+        uiModelsMediatorLiveData.addSource(userQueryLiveData, new Observer<String>() {
+            @Override
+            public void onChanged(String userQuery) {
+                combine(nearbyPlacesDependingOnGps.getValue(), isMapReadyLiveData.getValue(), userQuery);
             }
         });
     }
 
-    public void getGps(boolean permissions) {
-        hasPermissions = permissions;
-        if(hasPermissions) currentLocationRepository = new CurrentLocationRepository(MainApplication.getApplication());
+    private void combine(@Nullable List<Result> resultsFromServer, @Nullable Boolean isMapReady, @Nullable String userQuery) {
+        if (resultsFromServer == null || isMapReady == null) {
+            return;
+        }
+
+        List<MapUiModel> results = new ArrayList<>();
+
+        if (isMapReady) {
+            for (Result result : resultsFromServer) {
+                MapUiModel mapUiModel = new MapUiModel(
+                    result.getName(),
+                    result.getPlaceId(),
+                    null,
+                    result.getGeometry().getLocation().getLat(),
+                    result.getGeometry().getLocation().getLng()
+                );
+
+                results.add(mapUiModel);
+            }
+        }
+
+        uiModelsMediatorLiveData.setValue(results);
+    }
+
+    public LiveData<List<MapUiModel>> getMapUiModelLiveData() {
+        return uiModelsMediatorLiveData;
+    }
+
+    public void onUserQueryChanged(String query) {
+        userQueryLiveData.setValue(query);
+    }
+
+    public void onMapReady() {
+        isMapReadyLiveData.setValue(true);
+    }
+
+    public void checkPermission() {
+        if (hasGpsPermissions()) {
+            currentLocationRepository.startLocationUpdates();
+        }
+    }
+
+    private boolean hasGpsPermissions() {
+        return ContextCompat.checkSelfPermission(application, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            || ContextCompat.checkSelfPermission(application, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 }

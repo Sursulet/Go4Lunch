@@ -1,32 +1,23 @@
 package com.sursulet.go4lunch.ui.map;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
-import com.sursulet.go4lunch.model.GooglePlacesNearbySearchResult;
-import com.sursulet.go4lunch.model.Result;
 
 import java.util.List;
 
@@ -52,8 +43,7 @@ public class MapFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        SupportMapFragment mapFragment =
-                (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(new OnMapReadyCallback() {
 
@@ -63,7 +53,7 @@ public class MapFragment extends Fragment {
 
                     // TODO Stephanie à déplacer dans le ViewModel : il faut considérer le "map ready" comme une LiveData
                     //  qui va déclencher "l'écoute" du LocationRepository qui va déclencher... (etc, etc)
-                    mapViewModel.getGps(checkPermissions());
+                    mapViewModel.onMapReady();
                 }
             });
         }
@@ -75,28 +65,22 @@ public class MapFragment extends Fragment {
                 updateUi(models);
             }
         });
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        mapViewModel.checkPermission();
     }
 
     public void updateUi(List<MapUiModel> models) {
         for (MapUiModel model : models) {
             map.addMarker(
-                    new MarkerOptions()
-                            .position(new LatLng(model.getLat(), model.getLng()))
-                            .title(model.getName())
+                new MarkerOptions()
+                    .position(new LatLng(model.getLat(), model.getLng()))
+                    .title(model.getName())
             );
-        }
-    }
-
-    private boolean checkPermissions() {
-        if (ContextCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            ActivityCompat.requestPermissions(requireActivity(),
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-            return false;
         }
     }
 }
