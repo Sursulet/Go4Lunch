@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ImageView
+        android:id="@+id/photo_restaurant"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/people_eating"
+        android:contentDescription="@string/desc_restaurant" />
+
+    <TextView
+        android:id="@+id/distance_restaurant"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toStartOf="@+id/photo_restaurant"
+        app:layout_constraintTop_toTopOf="@+id/photo_restaurant"
+        tools:text="120m" />
+
+    <TextView
+        android:id="@+id/nbWorkmates_restaurant"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/photo_restaurant"
+        app:layout_constraintEnd_toEndOf="@+id/distance_restaurant"
+        app:layout_constraintTop_toTopOf="@+id/photo_restaurant"
+        tools:text="(2)"
+        app:drawableLeftCompat="@drawable/ic_baseline_person_outline_24" />
+
+    <RatingBar
+        android:id="@+id/rating_restaurant"
+        style="?android:attr/ratingBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:max="5"
+        android:stepSize="0.5"
+        android:isIndicator="true"
+        app:layout_constraintBottom_toBottomOf="@+id/photo_restaurant"
+        app:layout_constraintEnd_toEndOf="@+id/distance_restaurant"
+        tools:rating="3"
+        tools:numStars="3" />
+
+    <TextView
+        android:id="@+id/name_restaurant"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/distance_restaurant"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/photo_restaurant"
+        tools:text="Le Zinc" />
+
+
+    <TextView
+        android:id="@+id/txt_restaurant"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        app:layout_constraintBottom_toBottomOf="@+id/photo_restaurant"
+        app:layout_constraintEnd_toStartOf="@+id/nbWorkmates_restaurant"
+        app:layout_constraintStart_toStartOf="@+id/name_restaurant"
+        app:layout_constraintTop_toTopOf="@+id/photo_restaurant"
+        tools:text="French - 12 rue du Faubourg Poissonnière" />
+
+    <TextView
+        android:id="@+id/opening_restaurant"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textStyle="italic"
+        app:layout_constraintBottom_toBottomOf="@+id/photo_restaurant"
+        app:layout_constraintEnd_toStartOf="@+id/rating_restaurant"
+        app:layout_constraintStart_toStartOf="@+id/name_restaurant"
+        tools:text="Open until 7pm" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import com.sursulet.go4lunch.MainApplication;
 import com.sursulet.go4lunch.model.Result;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.NearbyPlacesRepository;
@@ -16,8 +17,11 @@ import java.util.List;
 
 public class MapViewModel extends ViewModel {
 
-    private final CurrentLocationRepository currentLocationRepository;
+    private CurrentLocationRepository currentLocationRepository;
     private final NearbyPlacesRepository nearbyPlacesRepository;
+
+    private boolean mapReady;
+    private boolean hasPermissions;
 
     public MapViewModel(
             CurrentLocationRepository currentLocationRepository,
@@ -39,10 +43,10 @@ public class MapViewModel extends ViewModel {
         });
 
         // TODO Stephanie Transformation.map() permet de simplement changer le type encapsulé d'une LiveData
-        //  (ici, de List<Result> en List<MapUiModel>)
+        //  (ici, de List<PlaceDetailResult> en List<MapUiModel>)
         //  On voit qu'on "chaine" les map et switchMap, ça permet de "dessiner" les liens entre les flux :
         //  1/ quand la Location change, on réémet une LiveData qui plus tard va se pleupler avec les nouvelles "nearby" trouvées
-        //  2/ on transforme les POJO "Result" en objets utilisable par la vue (MapUiModel)
+        //  2/ on transforme les POJO "PlaceDetailResult" en objets utilisable par la vue (MapUiModel)
         return Transformations.map(nearbyPlacesDependingOnGps, new Function<List<Result>, List<MapUiModel>>() {
             @Override
             public List<MapUiModel> apply(List<Result> input) {
@@ -63,5 +67,10 @@ public class MapViewModel extends ViewModel {
                 return results;
             }
         });
+    }
+
+    public void getGps(boolean permissions) {
+        hasPermissions = permissions;
+        if(hasPermissions) currentLocationRepository = new CurrentLocationRepository(MainApplication.getApplication());
     }
 }

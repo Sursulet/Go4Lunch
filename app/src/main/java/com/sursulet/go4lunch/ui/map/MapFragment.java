@@ -1,9 +1,13 @@
 package com.sursulet.go4lunch.ui.map;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -28,6 +32,7 @@ import java.util.List;
 
 public class MapFragment extends Fragment {
 
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     MapViewModel mapViewModel;
 
     GoogleMap map;
@@ -58,10 +63,7 @@ public class MapFragment extends Fragment {
 
                     // TODO Stephanie à déplacer dans le ViewModel : il faut considérer le "map ready" comme une LiveData
                     //  qui va déclencher "l'écoute" du LocationRepository qui va déclencher... (etc, etc)
-                    mapReady = true;
-
-                    map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(48.8534,2.3488)));
-                    map.animateCamera(CameraUpdateFactory.zoomTo(15));
+                    mapViewModel.getGps(checkPermissions());
                 }
             });
         }
@@ -83,6 +85,18 @@ public class MapFragment extends Fragment {
                             .position(new LatLng(model.getLat(), model.getLng()))
                             .title(model.getName())
             );
+        }
+    }
+
+    private boolean checkPermissions() {
+        if (ContextCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            ActivityCompat.requestPermissions(requireActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            return false;
         }
     }
 }

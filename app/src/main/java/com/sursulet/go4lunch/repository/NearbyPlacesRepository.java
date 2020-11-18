@@ -26,7 +26,7 @@ public class NearbyPlacesRepository {
         MutableLiveData<List<Result>> places = new MutableLiveData<>();
         mService.getNearByPlaces(
             "AIzaSyDvUeXTbuq87mNoavyfSj_1AWVOK_dMyiE", //getResources().getString(R.string.google_api_key),
-            latitude + "," + longitude,
+                "48.8534,2.3488", //latitude + "," + longitude,
             "restaurant",
             "500"
         ).enqueue(new Callback<GooglePlacesNearbySearchResult>() {

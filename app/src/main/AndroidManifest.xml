@@ -24,7 +24,7 @@
             android:value="@string/google_maps_key" />
 
         <activity android:name=".ui.SettingsActivity" />
-        <activity android:name=".ui.DetailsActivity" />
+        <activity android:name=".ui.DetailPlaceActivity" />
         <activity
             android:name=".MainActivity"
             android:theme="@style/Theme.Go4Lunch.NoActionBar">

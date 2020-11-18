@@ -25,9 +25,8 @@ import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.sursulet.go4lunch.ui.DetailsActivity;
+import com.sursulet.go4lunch.ui.DetailPlaceActivity;
 import com.sursulet.go4lunch.ui.SettingsActivity;
 
 public class MainActivity extends AppCompatActivity
@@ -88,7 +87,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_your_lunch:
-                startActivity(new Intent(getApplicationContext(), DetailsActivity.class));
+                startActivity(new Intent(getApplicationContext(), DetailPlaceActivity.class));
                 break;
 
             case R.id.action_settings:

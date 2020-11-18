@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.DetailsActivity">
+    tools:context=".ui.DetailPlaceActivity">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/place_app_bar_layout"
@@ -29,34 +29,48 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/activity_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:background="@color/purple_200">
+
+        <TextView
+            android:id="@+id/place_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Le Zinc" />
+
+        <RatingBar
+            style="?android:attr/ratingBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:max="5"
+            android:stepSize="0.5"
+            app:layout_constraintBottom_toBottomOf="@+id/place_name"
+            app:layout_constraintStart_toEndOf="@+id/place_name"
+            app:layout_constraintTop_toTopOf="@+id/place_name" />
+
+        <TextView
+            android:id="@+id/place_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@+id/place_name"
+            app:layout_constraintTop_toBottomOf="@+id/place_name"
+            tools:text="French restaurant - 12 rue du Faubourg Poissonière" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" >
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:background="@color/purple_200">
-
-            <TextView
-                android:id="@+id/place_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:textSize="20sp"
-                tools:text="Le Zinc"
-                app:drawableRightCompat="@drawable/ic_baseline_star_24" />
-
-            <TextView
-                android:id="@+id/place_address"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                tools:text="French restaurant - 12 rue du Faubourg Poissonière" />
-        </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
 
