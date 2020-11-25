@@ -1,5 +1,6 @@
 package com.sursulet.go4lunch.ui.list;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.sursulet.go4lunch.R;
 
 public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapter.RestaurantViewHolder> {
@@ -63,8 +63,14 @@ public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapte
             name.setText(listUiModel.name);
             txt.setText(listUiModel.getTxt());
             distance.setText(listUiModel.getDistance());
+            int numStars = 0;
+            try{
+                numStars = Integer.parseInt(listUiModel.getRating());
+            } catch(NumberFormatException nfe) {
+                System.out.println("Could not parse " + nfe);
+            }
+            ratingBar.setNumStars(numStars);
             ratingBar.setRating(Float.parseFloat(listUiModel.getRating()));
-            //ratingBar.setNumStars(Integer.parseInt(listUiModel.getRating()));
 
             Glide.with(photo)
                     .load(listUiModel.photoUrl)

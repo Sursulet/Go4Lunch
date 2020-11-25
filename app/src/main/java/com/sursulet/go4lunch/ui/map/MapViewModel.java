@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.Application;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,9 +18,11 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import com.google.android.gms.maps.model.Marker;
 import com.sursulet.go4lunch.model.Result;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.NearbyPlacesRepository;
+import com.sursulet.go4lunch.ui.DetailPlaceActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,15 +72,15 @@ public class MapViewModel extends ViewModel {
             }
         });
 
-        uiModelsMediatorLiveData.addSource(userQueryLiveData, new Observer<String>() {
+        /*uiModelsMediatorLiveData.addSource(userQueryLiveData, new Observer<String>() {
             @Override
             public void onChanged(String userQuery) {
                 combine(nearbyPlacesDependingOnGps.getValue(), isMapReadyLiveData.getValue(), userQuery);
             }
-        });
+        });*/
     }
 
-    private void combine(@Nullable List<Result> resultsFromServer, @Nullable Boolean isMapReady, @Nullable String userQuery) {
+    private void combine(@Nullable List<Result> resultsFromServer, @Nullable Boolean isMapReady/*, @Nullable String userQuery*/) {
         if (resultsFromServer == null || isMapReady == null) {
             return;
         }
@@ -92,6 +96,7 @@ public class MapViewModel extends ViewModel {
                     result.getGeometry().getLocation().getLat(),
                     result.getGeometry().getLocation().getLng()
                 );
+                Log.d("MARIO", "combine: " + result.getPlaceId());
 
                 results.add(mapUiModel);
             }
@@ -121,5 +126,20 @@ public class MapViewModel extends ViewModel {
     private boolean hasGpsPermissions() {
         return ContextCompat.checkSelfPermission(application, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
             || ContextCompat.checkSelfPermission(application, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+
+    View.OnClickListener onClickMarker(String id) {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //launchDetailPlaceActivity(id);
+                application.startActivity(DetailPlaceActivity.getStartIntent(application, id));
+            }
+        };
+    }
+
+    public void launchDetailPlaceActivity(String id) {
+        application.startActivity(DetailPlaceActivity.getStartIntent(application, id));
     }
 }

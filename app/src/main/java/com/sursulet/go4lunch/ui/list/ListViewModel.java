@@ -49,14 +49,15 @@ public class ListViewModel extends ViewModel {
                             result.getName(),
                             getPhotoPlaceUrl(result.getPhotos().get(0).getPhotoReference(), "1000"),
                             result.getVicinity(),
-                            result.getOpeningHours().getOpenNow().toString(),
+                            null, //result.getOpeningHours().getOpenNow().toString(),
                             getDistance(
-                                    //nearbyPlacesDependingOnGps.getValue().get(0).getGeometry().getLocation().getLat()
-                                    48.8511334,2.34837,
+                                    currentLocationRepository.getLocationLiveData().getValue().getLatitude(),
+                                    currentLocationRepository.getLocationLiveData().getValue().getLongitude(),
+                                    //48.8511334,2.34837,
                                     result.getGeometry().getLocation().getLat(),
                                     result.getGeometry().getLocation().getLng()
-                            ) + "m",
-                            "4",//result.getRating().toString(),
+                            ) + " m",
+                            getRating(result.getRating()),
                             null
                     );
                     results.add(listUiModel);
@@ -75,8 +76,6 @@ public class ListViewModel extends ViewModel {
         return url;
     }
 
-    //LiveData<String> getDistancePlace() {}
-
     private String getDistance(double lat1, double lng1, double lat2, double lng2) {
         /*double theta = lng1 - lng2;
         double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) + Math.cos(Math.toRadians(lat1));
@@ -90,8 +89,14 @@ public class ListViewModel extends ViewModel {
         Location.distanceBetween(lat1,lng1,lat2,lng2,results);
         float distance =  results[0];
         DecimalFormat df = new DecimalFormat("###.#");
-        String distancetxt = df.format(distance);
-        return String.valueOf(distancetxt);
+        String distanceString = df.format(distance);
+        return String.valueOf(distanceString);
+    }
+
+    private String getRating(double rating) {
+        rating = Math.round(rating);
+
+        return String.valueOf(rating);
     }
 
 }
