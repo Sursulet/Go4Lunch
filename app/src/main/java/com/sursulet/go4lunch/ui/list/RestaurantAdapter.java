@@ -1,6 +1,5 @@
 package com.sursulet.go4lunch.ui.list;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,11 +51,11 @@ public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapte
         public RestaurantViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            photo = itemView.findViewById(R.id.photo_restaurant);
-            name = itemView.findViewById(R.id.name_restaurant);
-            txt = itemView.findViewById(R.id.txt_restaurant);
-            distance = itemView.findViewById(R.id.distance_restaurant);
-            ratingBar = itemView.findViewById(R.id.rating_restaurant);
+            photo = itemView.findViewById(R.id.restaurant_photo);
+            name = itemView.findViewById(R.id.restaurant_name);
+            txt = itemView.findViewById(R.id.restaurant_txt);
+            distance = itemView.findViewById(R.id.restaurant_distance);
+            ratingBar = itemView.findViewById(R.id.restaurant_rating_bar);
         }
 
         public void bind(ListUiModel listUiModel) {

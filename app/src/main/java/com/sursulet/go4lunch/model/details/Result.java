@@ -5,7 +5,7 @@ import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class PlaceDetailResult {
+public class Result {
 
     @SerializedName("address_components")
     @Expose
@@ -34,6 +34,9 @@ public class PlaceDetailResult {
     @SerializedName("name")
     @Expose
     private String name;
+    @SerializedName("opening_hours")
+    @Expose
+    private OpeningHours openingHours;
     @SerializedName("photos")
     @Expose
     private List<Photo> photos = null;
@@ -43,6 +46,9 @@ public class PlaceDetailResult {
     @SerializedName("plus_code")
     @Expose
     private PlusCode plusCode;
+    @SerializedName("price_level")
+    @Expose
+    private Integer priceLevel;
     @SerializedName("rating")
     @Expose
     private Double rating;
@@ -67,9 +73,6 @@ public class PlaceDetailResult {
     @SerializedName("vicinity")
     @Expose
     private String vicinity;
-    @SerializedName("website")
-    @Expose
-    private String website;
 
     public List<AddressComponent> getAddressComponents() {
         return addressComponents;
@@ -143,6 +146,14 @@ public class PlaceDetailResult {
         this.name = name;
     }
 
+    public OpeningHours getOpeningHours() {
+        return openingHours;
+    }
+
+    public void setOpeningHours(OpeningHours openingHours) {
+        this.openingHours = openingHours;
+    }
+
     public List<Photo> getPhotos() {
         return photos;
     }
@@ -165,6 +176,14 @@ public class PlaceDetailResult {
 
     public void setPlusCode(PlusCode plusCode) {
         this.plusCode = plusCode;
+    }
+
+    public Integer getPriceLevel() {
+        return priceLevel;
+    }
+
+    public void setPriceLevel(Integer priceLevel) {
+        this.priceLevel = priceLevel;
     }
 
     public Double getRating() {
@@ -229,14 +248,6 @@ public class PlaceDetailResult {
 
     public void setVicinity(String vicinity) {
         this.vicinity = vicinity;
-    }
-
-    public String getWebsite() {
-        return website;
-    }
-
-    public void setWebsite(String website) {
-        this.website = website;
     }
 
 }

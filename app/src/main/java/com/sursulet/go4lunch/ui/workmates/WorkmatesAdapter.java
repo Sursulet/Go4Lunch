@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.sursulet.go4lunch.R;
-import com.sursulet.go4lunch.model.User;
 
 public class WorkmatesAdapter extends ListAdapter<WorkmatesUiModel, WorkmatesAdapter.WorkmatesViewHolder> {
 
@@ -46,7 +45,7 @@ public class WorkmatesAdapter extends ListAdapter<WorkmatesUiModel, WorkmatesAda
             super(itemView);
 
             photo = itemView.findViewById(R.id.workmate_photo);
-            txt = itemView.findViewById(R.id.workmate_text);
+            txt = itemView.findViewById(R.id.workmate_txt);
         }
 
         public void bind(WorkmatesUiModel workmatesUiModel) {

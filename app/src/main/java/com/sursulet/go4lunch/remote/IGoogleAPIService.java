@@ -1,6 +1,7 @@
 package com.sursulet.go4lunch.remote;
 
 import com.sursulet.go4lunch.model.GooglePlacesNearbySearchResult;
+import com.sursulet.go4lunch.model.autocomplete.GooglePlacesAutocompleteResult;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 
 import retrofit2.Call;
@@ -25,8 +26,11 @@ public interface IGoogleAPIService {
     );
 
     @GET("maps/api/place/autocomplete")
-    Call<GooglePlacesNearbySearchResult> getAutocompletePlace(
+    Call<GooglePlacesAutocompleteResult> getAutocompletePlaces(
+            @Query("key") String key,
             @Query("input") String input,
-            @Query("key") String key
+            @Query("location") String location,
+            @Query("radius") String radius,
+            @Query("types") String types
     );
 }

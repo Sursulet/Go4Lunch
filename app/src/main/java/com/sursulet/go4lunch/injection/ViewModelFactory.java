@@ -76,10 +76,11 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
             );
         } else if (modelClass.isAssignableFrom(DetailPlaceViewModel.class)) {
             return (T) new DetailPlaceViewModel(
-                    detailPlaceRepository
-            );
+                    detailPlaceRepository,
+                    workmatesRepository, userRepository);
         } else if (modelClass.isAssignableFrom(MainViewModel.class)) {
             return (T) new MainViewModel(
+                    MainApplication.getApplication(),
                     userRepository
             );
         }

@@ -11,8 +11,8 @@ public class User {
     private String username;
     @Nullable private String avatarUrl;
 
-    public User(String placeId, String username, @Nullable String avatarUrl) {
-        this.placeId = placeId;
+    public User(String uid, String username, @Nullable String avatarUrl) {
+        this.uid = uid;
         this.username = username;
         this.avatarUrl = avatarUrl;
     }

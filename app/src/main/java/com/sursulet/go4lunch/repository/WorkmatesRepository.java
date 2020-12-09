@@ -16,9 +16,9 @@ public class WorkmatesRepository {
         if(workmates == null) {
             workmates = new MutableLiveData<>();
             List<User> userList = new ArrayList<>();
-            userList.add(new User("1", "Noel", null));
-            userList.add(new User("2", "Gerald", null));
-            userList.add(new User("3", "Jojo", null));
+            userList.add(new User("1", "Noel", "https://randomuser.me/api/portraits/men/34.jpg"));
+            userList.add(new User("2", "Gerald", "https://randomuser.me/api/portraits/men/88.jpg"));
+            userList.add(new User("3", "Jojo", "https://randomuser.me/api/portraits/men/77.jpg"));
             workmates.setValue(userList);
         }
 

@@ -7,4 +7,10 @@ public class MainUiModel {
     String username;
     String mail;
     Uri photo;
+
+    public MainUiModel(String username, String mail, Uri photo) {
+        this.username = username;
+        this.mail = mail;
+        this.photo = photo;
+    }
 }

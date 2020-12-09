@@ -24,6 +24,8 @@ public class CurrentLocationRepository {
     private final MutableLiveData<Location> locationMutableLiveData = new MutableLiveData<>();
 
     private boolean initialized;
+    FusedLocationProviderClient client;
+    LocationCallback locationCallback;
 
     // Inject application
     public CurrentLocationRepository(Application application) {
@@ -34,28 +36,34 @@ public class CurrentLocationRepository {
         if (!initialized) {
             initialized = true;
 
+            client = LocationServices.getFusedLocationProviderClient(application);
+
             LocationRequest locationRequest = new LocationRequest()
                 .setInterval(10_000)
                 .setFastestInterval(5_000)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-            FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(application);
+            locationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    locationMutableLiveData.postValue(locationResult.getLastLocation());
+                }
+            };
 
             try {
                 client.requestLocationUpdates(
                     locationRequest,
-                    new LocationCallback() {
-                        @Override
-                        public void onLocationResult(LocationResult locationResult) {
-                            locationMutableLiveData.postValue(locationResult.getLastLocation());
-                        }
-                    },
+                    locationCallback,
                     Looper.getMainLooper()
                 );
             } catch (SecurityException e) {
                 Log.e("Exception %s: ", e.getMessage());
             }
         }
+    }
+
+    public void stopLocationUpdates() {
+        client.removeLocationUpdates(locationCallback);
     }
 
     public LiveData<Location> getLocationLiveData() {

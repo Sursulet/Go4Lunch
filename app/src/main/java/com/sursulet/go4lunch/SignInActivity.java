@@ -33,8 +33,8 @@ public class SignInActivity extends AppCompatActivity {
 
     public void createSignInIntent() {
         List<AuthUI.IdpConfig> providers = Arrays.asList(
-                new AuthUI.IdpConfig.EmailBuilder().build(),
-                //new AuthUI.IdpConfig.FacebookBuilder().build(),
+                //new AuthUI.IdpConfig.EmailBuilder().build(),
+                new AuthUI.IdpConfig.FacebookBuilder().build(),
                 new AuthUI.IdpConfig.GoogleBuilder().build());
 
         // Create and launch sign-in intent
@@ -42,6 +42,7 @@ public class SignInActivity extends AppCompatActivity {
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
                         .setAvailableProviders(providers)
+                        .setIsSmartLockEnabled(false, true)
                         .setTheme(R.style.LoginTheme)
                         .setLogo(R.drawable.ic_hot_food_in_a_bowl)
                         .build(),
@@ -52,24 +53,22 @@ public class SignInActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RC_SIGN_IN) {
-            IdpResponse response = IdpResponse.fromResultIntent(data);
+        IdpResponse response = IdpResponse.fromResultIntent(data);
 
+        if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
+                showSnackBar(this.coordinatorLayout, getString(R.string.connection_succeed));
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 Toast.makeText(this, ""+user.getEmail(), Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(this, MainActivity.class));
                 finish();
             } else {
                 if (response == null) {
-                    //showSnackBar(this.coordinatorLayout, getString(R.string.error_authentication_canceled));
-                    return;
+                    showSnackBar(this.coordinatorLayout, getString(R.string.error_authentication_canceled));
                 } else if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
-                    //showSnackBar(this.coordinatorLayout, getString(R.string.error_no_internet));
+                    showSnackBar(this.coordinatorLayout, getString(R.string.error_no_internet));
                 } else if (response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
-                    //showSnackBar(this.coordinatorLayout, getString(R.string.error_unknown_error));
-                    Toast.makeText(this, ""+response.getError().getMessage(), Toast.LENGTH_SHORT).show();
-                    return;
+                    showSnackBar(this.coordinatorLayout, getString(R.string.error_unknown_error));
                 }
             }
         }

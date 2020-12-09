@@ -1,7 +1,15 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Go4Lunch</string>
     <string name="toolbar_title">I\'m Hungry</string>
     <string name="title_search">SEARCH</string>
+
+    <!-- NOTIFICATION SERVICE -->
+    <string name="default_notification_channel_id" translatable="false">fcm_default_channel</string>
+    <string name="notification_title">"Vous avez reçu une notification"</string>
+
+    <!-- FACEBOOK PURPOSE -->
+    <string name="facebook_application_id" translatable="false">339989790592056</string>
+    <string name="facebook_login_protocol_scheme" translatable="false" tools:ignore="UnusedResources">fb339989790592056</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_map">Map View</string>
@@ -21,4 +29,25 @@
     <string name="error_unknown_error">Une erreur inconnue s\'est produite&#8230;</string>
     <string name="connection_succeed">Authentification réussie !</string>
     <string name="desc_restaurant">Photo restaurant</string>
+    <string name="action_call">CALL</string>
+    <string name="action_website">WEBSITE</string>
+    <string name="action_like">LIKE</string>
+    <string name="detail_floating_action_button">Detail floating action button</string>
+    <string name="workmate_photo">Workmate photo</string>
+    <string name="info_no_email_found">Info no email found</string>
+    <string name="info_no_username_found">Info no username found</string>
+
+    <!-- MENTOR_CHAT ACTIVITY -->
+    <string name="toolbar_title_mentor_chat_activity">Chats de discussions</string>
+    <string name="text_input_title_mentor_chat_activity">Composer votre message</string>
+    <string name="button_title_mentor_chat_activity">ENVOYER</string>
+    <string name="text_view_mentor_chat_error">Ce fil de discussion ne contient pour le moment aucun message&#8230;</string>
+    <string name="popup_title_permission_files_access">Cette application a besoin de permission pour fonctionner.</string>
+    <string name="toast_title_no_image_chosen">Aucune image choisie&#8230;</string>
+
+    <!-- MAP -->
+    <string name="permission_rationale">Location permission is needed for core functionality</string>
+    <string name="permission_denied_explanation">Permission was denied, but is needed for core
+        functionality.</string>
+    <string name="settings">Settings</string>
 </resources>

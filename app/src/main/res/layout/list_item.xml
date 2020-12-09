@@ -7,7 +7,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <ImageView
-        android:id="@+id/photo_restaurant"
+        android:id="@+id/restaurant_photo"
         android:layout_width="75dp"
         android:layout_height="75dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -16,40 +16,41 @@
         android:contentDescription="@string/desc_restaurant" />
 
     <TextView
-        android:id="@+id/distance_restaurant"
+        android:id="@+id/restaurant_distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:textSize="18sp"
-        app:layout_constraintEnd_toStartOf="@+id/photo_restaurant"
-        app:layout_constraintTop_toTopOf="@+id/photo_restaurant"
+        app:layout_constraintEnd_toStartOf="@+id/restaurant_photo"
+        app:layout_constraintTop_toTopOf="@+id/restaurant_photo"
         tools:text="120m" />
 
     <TextView
-        android:id="@+id/nbWorkmates_restaurant"
+        android:id="@+id/restaurant_nbWorkmates"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/photo_restaurant"
-        app:layout_constraintEnd_toEndOf="@+id/distance_restaurant"
-        app:layout_constraintTop_toTopOf="@+id/photo_restaurant"
+        app:layout_constraintBottom_toBottomOf="@+id/restaurant_photo"
+        app:layout_constraintEnd_toEndOf="@+id/restaurant_distance"
+        app:layout_constraintTop_toTopOf="@+id/restaurant_photo"
         tools:text="(2)"
+        android:textStyle="bold"
         app:drawableLeftCompat="@drawable/ic_baseline_person_outline_24" />
 
     <RatingBar
-        android:id="@+id/rating_restaurant"
+        android:id="@+id/restaurant_rating_bar"
         style="?android:attr/ratingBarStyleSmall"
         android:theme="@style/RatingBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:stepSize="0.1"
         android:isIndicator="true"
-        app:layout_constraintBottom_toBottomOf="@+id/photo_restaurant"
-        app:layout_constraintEnd_toEndOf="@+id/distance_restaurant"
+        app:layout_constraintBottom_toBottomOf="@+id/restaurant_photo"
+        app:layout_constraintEnd_toEndOf="@+id/restaurant_distance"
         tools:rating="3"
         tools:numStars="3" />
 
     <TextView
-        android:id="@+id/name_restaurant"
+        android:id="@+id/restaurant_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
@@ -58,35 +59,35 @@
         android:textColor="@color/black"
         android:textSize="18sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/distance_restaurant"
+        app:layout_constraintEnd_toStartOf="@+id/restaurant_distance"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/photo_restaurant"
+        app:layout_constraintTop_toTopOf="@+id/restaurant_photo"
         tools:text="Le Zinc" />
 
 
     <TextView
-        android:id="@+id/txt_restaurant"
+        android:id="@+id/restaurant_txt"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="1"
-        app:layout_constraintBottom_toBottomOf="@+id/photo_restaurant"
-        app:layout_constraintEnd_toStartOf="@+id/nbWorkmates_restaurant"
-        app:layout_constraintStart_toStartOf="@+id/name_restaurant"
-        app:layout_constraintTop_toTopOf="@+id/photo_restaurant"
+        app:layout_constraintBottom_toBottomOf="@+id/restaurant_photo"
+        app:layout_constraintEnd_toStartOf="@+id/restaurant_nbWorkmates"
+        app:layout_constraintStart_toStartOf="@+id/restaurant_name"
+        app:layout_constraintTop_toTopOf="@+id/restaurant_photo"
         tools:text="French - 12 rue du Faubourg Poissonnière" />
 
     <TextView
-        android:id="@+id/opening_restaurant"
+        android:id="@+id/restaurant_opening"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:ellipsize="end"
         android:maxLines="1"
         android:textStyle="italic"
-        app:layout_constraintBottom_toBottomOf="@+id/photo_restaurant"
-        app:layout_constraintEnd_toStartOf="@+id/rating_restaurant"
-        app:layout_constraintStart_toStartOf="@+id/name_restaurant"
+        app:layout_constraintBottom_toBottomOf="@+id/restaurant_photo"
+        app:layout_constraintEnd_toStartOf="@+id/restaurant_rating_bar"
+        app:layout_constraintStart_toStartOf="@+id/restaurant_name"
         tools:text="Open until 7pm" />
 </androidx.constraintlayout.widget.ConstraintLayout>
