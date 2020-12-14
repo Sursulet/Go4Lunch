@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity
 
         mainViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance()).get(MainViewModel.class);
 
-        if (this.checkCurrentUserLogged()) {
+        if (mainViewModel.isCurrentUserLogged()) {
             getUserProfile();
         } else {
             createSignInIntent();
@@ -167,10 +167,6 @@ public class MainActivity extends AppCompatActivity
                 .build(MainActivity.this);
         startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
 
-    }
-
-    private boolean checkCurrentUserLogged() {
-        return mainViewModel.isCurrentUserLogged();
     }
 
     public void getUserProfile() {

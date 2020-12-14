@@ -21,13 +21,6 @@ import java.util.List;
 
 public class UserRepository {
 
-    private final MutableLiveData<FirebaseUser> currentUserLiveData = new MutableLiveData<>();
-
-    @Nullable
-    public FirebaseUser getCurrentUser() {
-        return FirebaseAuth.getInstance().getCurrentUser();
-    }
-
     public LiveData<List<User>> getUsers() {
         MutableLiveData<List<User>> mutableLiveData = new MutableLiveData<>();
 
@@ -43,36 +36,6 @@ public class UserRepository {
                 }
 
                 mutableLiveData.setValue(users);
-            }
-        });
-
-        return mutableLiveData;
-    }
-
-    private void createUserInFirestore() {
-        FirebaseUser userValue = currentUserLiveData.getValue();
-
-        if(userValue != null) {
-            String urlPicture = (userValue.getPhotoUrl() != null) ? userValue.getPhotoUrl().toString() : null;
-            String username = userValue.getDisplayName();
-            String uid = userValue.getUid();
-
-            //UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
-        }
-    }
-/*
-    public LiveData<FirebaseUser> getCurrentUser() {
-        currentUserLiveData.setValue(FirebaseAuth.getInstance().getCurrentUser());
-        return currentUserLiveData;
-    }*/
-
-    public LiveData<User> getUser(String uid) {
-        MutableLiveData<User> mutableLiveData = new MutableLiveData<>();
-
-        UserHelper.getUser(uid).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                mutableLiveData.postValue(documentSnapshot.toObject(User.class));
             }
         });
 

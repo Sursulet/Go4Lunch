@@ -63,6 +63,8 @@ public class CurrentLocationRepository {
     }
 
     public void stopLocationUpdates() {
+        initialized = false;
+
         client.removeLocationUpdates(locationCallback);
     }
 

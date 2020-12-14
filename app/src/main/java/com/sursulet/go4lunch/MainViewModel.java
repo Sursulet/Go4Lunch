@@ -14,6 +14,7 @@ import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.sursulet.go4lunch.api.UserHelper;
 import com.sursulet.go4lunch.repository.UserRepository;
@@ -21,35 +22,33 @@ import com.sursulet.go4lunch.repository.UserRepository;
 public class MainViewModel extends ViewModel {
 
     private final Application application;
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final FirebaseAuth firebaseAuth;
 
-    // -- DATA
-    private  final MutableLiveData<FirebaseUser> currentUser = new MutableLiveData<>();
+    private final MutableLiveData<MainUiModel> uiModelMutableLiveData = new MutableLiveData<>();
 
-    public MainViewModel(Application application, UserRepository userRepository) {
+    public MainViewModel(Application application, UserRepository userRepository, FirebaseAuth firebaseAuth) {
         this.application = application;
         this.userRepository = userRepository;
+        this.firebaseAuth = firebaseAuth;
 
-        currentUser.setValue(userRepository.getCurrentUser());
+        if (firebaseAuth.getCurrentUser() != null) {
+            uiModelMutableLiveData.setValue(
+                new MainUiModel(
+                    getCurrentUserName(firebaseAuth.getCurrentUser().getDisplayName()),
+                    getCurrentUserEmail(firebaseAuth.getCurrentUser().getEmail()),
+                    getCurrentUserPhoto(firebaseAuth.getCurrentUser().getPhotoUrl())
+                )
+            );
+        }
     }
 
     public Boolean isCurrentUserLogged() {
-        return (currentUser.getValue() != null);
+        return firebaseAuth.getCurrentUser() != null;
     }
 
     public LiveData<MainUiModel> getUiModelLiveData() {
-        return Transformations.map(currentUser,
-                new Function<FirebaseUser, MainUiModel>() {
-                    @Override
-                    public MainUiModel apply(FirebaseUser result) {
-
-                        return new MainUiModel(
-                                getCurrentUserName(result.getDisplayName()),
-                                getCurrentUserEmail(result.getEmail()),
-                                getCurrentUserPhoto(result.getPhotoUrl())
-                        );
-                    }
-                });
+        return uiModelMutableLiveData;
     }
 
     private String getCurrentUserName(String name) {
@@ -66,12 +65,8 @@ public class MainViewModel extends ViewModel {
         return url;
     }
 
-    public void launchSingInActivity() {
-        application.startActivity(new Intent(application, SignInActivity.class));
-    }
-
     public void createUser() {
-        FirebaseUser userValue = currentUser.getValue();
+        FirebaseUser userValue = firebaseAuth.getCurrentUser();
 
         if(userValue != null) {
             String urlPicture = (userValue.getPhotoUrl() != null) ? userValue.getPhotoUrl().toString() : null;

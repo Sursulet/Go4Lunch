@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import com.sursulet.go4lunch.SingleLiveEvent;
 import com.sursulet.go4lunch.model.Result;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.NearbyPlacesRepository;
@@ -33,6 +34,8 @@ public class MapViewModel extends ViewModel {
     private final MutableLiveData<String> userQueryLiveData = new MutableLiveData<>();
 
     private final MediatorLiveData<List<MapUiModel>> uiModelsMediatorLiveData = new MediatorLiveData<>();
+
+    private final SingleLiveEvent<String> singleLiveEventLaunchDetailActivity = new SingleLiveEvent<>();
 
     public MapViewModel(
             @NonNull Application application,
@@ -104,6 +107,10 @@ public class MapViewModel extends ViewModel {
         return uiModelsMediatorLiveData;
     }
 
+    public SingleLiveEvent<String> getSingleLiveEventLaunchDetailActivity() {
+        return singleLiveEventLaunchDetailActivity;
+    }
+
     public void onUserQueryChanged(String query) {
         userQueryLiveData.setValue(query);
     }
@@ -127,6 +134,6 @@ public class MapViewModel extends ViewModel {
     }
 
     public void launchDetailPlaceActivity(String id) {
-        application.startActivity(DetailPlaceActivity.getStartIntent(application, id));
+        singleLiveEventLaunchDetailActivity.setValue(id);
     }
 }

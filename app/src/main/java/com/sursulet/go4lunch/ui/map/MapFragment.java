@@ -32,6 +32,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.sursulet.go4lunch.BuildConfig;
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
+import com.sursulet.go4lunch.ui.DetailPlaceActivity;
 
 import java.util.List;
 
@@ -70,6 +71,7 @@ public class MapFragment extends Fragment {
                 public void onMapReady(GoogleMap googleMap) {
                     map = googleMap;
 
+                    map.setMyLocationEnabled(true);
                     mapViewModel.onMapReady();
                     map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                         @Override
@@ -89,6 +91,13 @@ public class MapFragment extends Fragment {
                 updateUi(models);
             }
         });
+
+        mapViewModel.getSingleLiveEventLaunchDetailActivity().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String id) {
+                requireActivity().startActivity(DetailPlaceActivity.getStartIntent(requireActivity(), id));
+            }
+        });
     }
 
     @Override
@@ -102,14 +111,6 @@ public class MapFragment extends Fragment {
         } else {
             mapViewModel.getStartLocationUpdates();
         }
-
-        /* invoquer pour obtenir l'emplacement du mobile : currentLocation */
-        mapViewModel.getMapUiModelLiveData().observe(getViewLifecycleOwner(), new Observer<List<MapUiModel>>() {
-            @Override
-            public void onChanged(List<MapUiModel> models) {
-                updateUi(models);
-            }
-        });
     }
 
     @Override
@@ -129,10 +130,10 @@ public class MapFragment extends Fragment {
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_baseline_location_on_24))
                             .snippet(model.getPlaceId())
             );
-
-            map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(model.getLat(), model.getLng())));
-            map.animateCamera(CameraUpdateFactory.zoomTo(15));
         }
+
+        map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(models.get(0).getLat(), models.get(0).getLng())));
+        map.animateCamera(CameraUpdateFactory.zoomTo(15));
     }
 
     private boolean checkPermissions() {

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.sursulet.go4lunch.MainApplication;
 import com.sursulet.go4lunch.MainViewModel;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
@@ -86,7 +87,8 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         } else if (modelClass.isAssignableFrom(MainViewModel.class)) {
             return (T) new MainViewModel(
                     MainApplication.getApplication(),
-                    userRepository
+                    userRepository,
+                    FirebaseAuth.getInstance()
             );
         }
         throw new IllegalArgumentException("Unknown ViewModel class");
