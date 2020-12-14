@@ -65,19 +65,24 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
             return (T) new MapViewModel(
                     MainApplication.getApplication(),
                     currentLocationRepository,
-                    nearbyPlacesRepository);
+                    nearbyPlacesRepository
+            );
         } else if (modelClass.isAssignableFrom(ListViewModel.class)) {
             return (T) new ListViewModel(
                     currentLocationRepository,
-                    nearbyPlacesRepository);
+                    nearbyPlacesRepository
+            );
         } else if (modelClass.isAssignableFrom(WorkmatesViewModel.class)) {
             return (T) new WorkmatesViewModel(
-                    workmatesRepository
+                    userRepository,
+                    detailPlaceRepository
             );
         } else if (modelClass.isAssignableFrom(DetailPlaceViewModel.class)) {
             return (T) new DetailPlaceViewModel(
                     detailPlaceRepository,
-                    workmatesRepository, userRepository);
+                    workmatesRepository,
+                    userRepository
+            );
         } else if (modelClass.isAssignableFrom(MainViewModel.class)) {
             return (T) new MainViewModel(
                     MainApplication.getApplication(),

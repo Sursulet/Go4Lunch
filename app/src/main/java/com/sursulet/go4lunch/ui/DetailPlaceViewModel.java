@@ -1,9 +1,10 @@
 package com.sursulet.go4lunch.ui;
 
-import android.util.Log;
-
+import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
@@ -25,10 +26,19 @@ public class DetailPlaceViewModel extends ViewModel {
     private final UserRepository userRepository;
 
     private String restaurantId;
+    private String restaurantName;
 
+    MediatorLiveData<DetailPlaceUiModel> uiModelMediatorLiveData = new MediatorLiveData<>();
     LiveData<DetailPlaceUiModel> detailPlaceUiModelLiveData;
+    LiveData<GooglePlacesDetailResult> placesDetailResultLiveData;
+    LiveData<List<User>> usersLiveData;
+    LiveData<List<WorkmatesUiModel>> workmatesUiLiveData;
 
-    public DetailPlaceViewModel(DetailPlaceRepository detailPlaceRepository, WorkmatesRepository workmatesRepository, UserRepository userRepository) {
+    public DetailPlaceViewModel(
+            DetailPlaceRepository detailPlaceRepository,
+            WorkmatesRepository workmatesRepository,
+            UserRepository userRepository
+    ) {
         this.detailPlaceRepository = detailPlaceRepository;
         this.workmatesRepository = workmatesRepository;
         this.userRepository = userRepository;
@@ -36,21 +46,76 @@ public class DetailPlaceViewModel extends ViewModel {
 
     public void startDetailPlace(String id) {
         restaurantId = id;
-        Log.d("PEACH", "startDetailPlace: " + id);
-
+/*
         detailPlaceUiModelLiveData = Transformations.map(detailPlaceRepository.getDetailPlace(id),
                 new Function<GooglePlacesDetailResult, DetailPlaceUiModel>() {
             @Override
             public DetailPlaceUiModel apply(GooglePlacesDetailResult result) {
-                Log.d("PEACH", "apply: " + result.getResult().getPhotos().get(0).getPhotoReference());
 
                 return new DetailPlaceUiModel(
                         result.getResult().getName(),
                         getPhotoOfPlace(result.getResult().getPhotos().get(0).getPhotoReference()),
-                        result.getResult().getFormattedAddress()
+                        result.getResult().getFormattedAddress(),
+                        null
                 );
             }
+        });*/
+
+        placesDetailResultLiveData = detailPlaceRepository.getDetailPlace(id);
+        usersLiveData = userRepository.getUsersForRestaurant(restaurantId);
+        workmatesUiLiveData = Transformations.map(usersLiveData, new Function<List<User>, List<WorkmatesUiModel>>() {
+            @Override
+            public List<WorkmatesUiModel> apply(List<User> input) {
+
+                List<WorkmatesUiModel> results = new ArrayList<>();
+
+                for (User user : input) {
+                    String phrase = user.getUsername() + " is joining! ";
+
+                    WorkmatesUiModel workmatesUiModel = new WorkmatesUiModel(
+                            user.getUid(),
+                            phrase,
+                            user.getAvatarUrl()
+                    );
+                    results.add(workmatesUiModel);
+                }
+
+                return results;
+            }
         });
+
+        uiModelMediatorLiveData.addSource(workmatesUiLiveData, new Observer<List<WorkmatesUiModel>>() {
+            @Override
+            public void onChanged(List<WorkmatesUiModel> workmatesUiModels) {
+                combine(placesDetailResultLiveData.getValue(), workmatesUiModels);
+            }
+        });
+
+        uiModelMediatorLiveData.addSource(placesDetailResultLiveData, new Observer<GooglePlacesDetailResult>() {
+            @Override
+            public void onChanged(GooglePlacesDetailResult result) {
+                combine(result, workmatesUiLiveData.getValue());
+            }
+        });
+    }
+
+    private void combine(GooglePlacesDetailResult resultFromServer,@Nullable List<WorkmatesUiModel> workmates) {
+        if(resultFromServer == null || workmatesUiLiveData == null) {
+            return;
+        }
+
+        restaurantName = resultFromServer.getResult().getName();
+
+        uiModelMediatorLiveData.setValue(new DetailPlaceUiModel(
+                restaurantName,
+                getPhotoOfPlace(resultFromServer.getResult().getPhotos().get(0).getPhotoReference()),
+                resultFromServer.getResult().getFormattedAddress(),
+                workmates
+        ));
+    }
+
+    public LiveData<DetailPlaceUiModel> getUiModelLiveData() {
+        return uiModelMediatorLiveData;
     }
 
     public LiveData<DetailPlaceUiModel> getDetailPlaceUiModelLiveData() {
@@ -66,9 +131,12 @@ public class DetailPlaceViewModel extends ViewModel {
         return url.toString();
     }
 
+    public void onGoingButtonClick() {
+        detailPlaceRepository.addRestaurantToUser(restaurantId, restaurantName, FirebaseAuth.getInstance().getCurrentUser().getUid());
+    }
+
     public void onLikeButtonClick() {
-        //detailPlaceRepository.addRestaurantToFavorite(restaurantId, FirebaseAuth.getInstance().getCurrentUser().getUid());
-        detailPlaceRepository.addLikeToRestaurant(FirebaseAuth.getInstance().getCurrentUser().getUid(), restaurantId);
+        detailPlaceRepository.addRestaurantToFavorite(restaurantId, FirebaseAuth.getInstance().getCurrentUser().getUid());
     }
 
     public LiveData<List<WorkmatesUiModel>> getWorkmatesUiModelLiveData() {

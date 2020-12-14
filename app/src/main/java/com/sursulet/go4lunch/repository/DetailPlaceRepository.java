@@ -1,7 +1,5 @@
 package com.sursulet.go4lunch.repository;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -9,7 +7,6 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -35,7 +32,7 @@ public class DetailPlaceRepository {
 
         mService.getDetailPlace(
                 place_id,
-                "AIzaSyDvUeXTbuq87mNoavyfSj_1AWVOK_dMyiE" //getResources().getString(R.string.google_api_key),
+                "AIzaSyDvUeXTbuq87mNoavyfSj_1AWVOK_dMyiE"
         ).enqueue(new Callback<GooglePlacesDetailResult>() {
             @Override
             public void onResponse(
@@ -58,6 +55,14 @@ public class DetailPlaceRepository {
         return placeMutableLiveData;
     }
 
+    public void addRestaurantToUser(String restaurantId, String restaurantName, String userId) {
+        Restaurant restaurant = new Restaurant(restaurantId, restaurantName);
+        UserHelper.updateRestaurant(restaurant, userId); //TODO: rajouter onsucceslistener
+        /*FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(userId)
+                .update("placeId", restaurantId);*/
+    }
 
     public void addRestaurantToFavorite(String restaurantId, String userId) {
         FirebaseFirestore.getInstance()

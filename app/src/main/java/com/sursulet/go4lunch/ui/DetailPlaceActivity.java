@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
@@ -17,14 +16,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.sursulet.go4lunch.R;
-import com.sursulet.go4lunch.api.UserHelper;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
 import com.sursulet.go4lunch.ui.workmates.WorkmatesAdapter;
 import com.sursulet.go4lunch.ui.workmates.WorkmatesUiModel;
-
-import java.util.List;
 
 public class DetailPlaceActivity extends AppCompatActivity {
 
@@ -32,7 +28,10 @@ public class DetailPlaceActivity extends AppCompatActivity {
     TextView name;
     TextView address;
     RatingBar rating;
+    TextView callBtn;
     TextView likeBtn;
+    TextView websiteBtn;
+    FloatingActionButton fab;
 
     boolean isLike;
 
@@ -53,24 +52,40 @@ public class DetailPlaceActivity extends AppCompatActivity {
         photo = findViewById(R.id.detail_photo);
         name = findViewById(R.id.detail_name);
         address = findViewById(R.id.detail_address);
+        callBtn = findViewById(R.id.detail_call_btn);
         likeBtn = findViewById(R.id.detail_like_btn);
+        websiteBtn = findViewById(R.id.detail_website_btn);
+        fab = findViewById(R.id.detail_fab);
 
         final DetailPlaceViewModel placeViewModel =
                 new ViewModelProvider(this, ViewModelFactory.getInstance())
                         .get(DetailPlaceViewModel.class);
 
         placeViewModel.startDetailPlace(id);
-        placeViewModel.getDetailPlaceUiModelLiveData().observe(this, new Observer<DetailPlaceUiModel>() {
+        placeViewModel.getUiModelLiveData().observe(this, new Observer<DetailPlaceUiModel>() {
             @Override
             public void onChanged(DetailPlaceUiModel detailPlaceUiModel) {
                 name.setText(detailPlaceUiModel.getName());
-                Log.d("PEACH", "onChanged: "+detailPlaceUiModel.getUrlPhoto());
 
                 Glide.with(photo)
                         .load(detailPlaceUiModel.getUrlPhoto())
                         .into(photo);
 
                 address.setText(detailPlaceUiModel.getTxt());
+
+                RecyclerView recyclerView = findViewById(R.id.detail_workmates);
+                recyclerView.addItemDecoration(new DividerItemDecoration(DetailPlaceActivity.this, DividerItemDecoration.VERTICAL));
+                WorkmatesAdapter adapter = new WorkmatesAdapter(WorkmatesUiModel.DIFF_CALLBACK);
+                recyclerView.setAdapter(adapter);
+                adapter.submitList(detailPlaceUiModel.getWorkmates());
+            }
+        });
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(DetailPlaceActivity.this, "GOING", Toast.LENGTH_SHORT).show();
+                placeViewModel.onGoingButtonClick();
             }
         });
 
@@ -81,27 +96,20 @@ public class DetailPlaceActivity extends AppCompatActivity {
                 placeViewModel.onLikeButtonClick();
             }
         });
-/*
-        RecyclerView recyclerView = findViewById(R.id.detail_workmates);
-        recyclerView.addItemDecoration(new DividerItemDecoration(DetailPlaceActivity.this, DividerItemDecoration.VERTICAL));
-        WorkmatesAdapter adapter = new WorkmatesAdapter(WorkmatesUiModel.DIFF_CALLBACK);
-        recyclerView.setAdapter(adapter);
 
-        placeViewModel.getWorkmatesUiModelLiveData().observe(this, new Observer<List<WorkmatesUiModel>>() {
+        callBtn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onChanged(List<WorkmatesUiModel> workmatesUiModels) {
-                adapter.submitList(workmatesUiModels);
+            public void onClick(View v) {
+                //onMakeCall();
             }
-        });*/
+        });
 
-    }
+        websiteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //
+            }
+        });
 
-    private String getPhotoOfPlace(String reference, int maxWitch) {
-        StringBuilder url = new StringBuilder("https://maps.googleapis.com/maps/api/place/photo");
-        url.append("?maxwidth=" + maxWitch);
-        url.append("&photoreference=" + reference);
-        url.append("&key=" + getResources().getString(R.string.google_api_key));
-
-        return url.toString();
     }
 }

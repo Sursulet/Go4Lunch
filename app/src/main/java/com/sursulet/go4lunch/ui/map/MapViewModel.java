@@ -1,19 +1,11 @@
 package com.sursulet.go4lunch.ui.map;
 
-import android.Manifest;
-import android.app.Activity;
 import android.app.Application;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.arch.core.util.Function;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -21,8 +13,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import com.google.android.material.snackbar.Snackbar;
-import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.model.Result;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.NearbyPlacesRepository;
@@ -52,9 +42,6 @@ public class MapViewModel extends ViewModel {
         this.application = application;
         this.currentLocationRepository = currentLocationRepository;
 
-        // TODO Stephanie Transformation.switchMap() permet de "regénérer" une nouvelle LiveData quand la valeur initiale change.
-        //  Ici, quand la LiveData de Location change, on "redemande" au NearbyPlaceRepository quels sont les restaurants à proximité
-        //  de la nouvelle position GPS.
         LiveData<List<Result>> nearbyPlacesDependingOnGps =
                 Transformations.switchMap(currentLocationRepository.getLocationLiveData(),
                         new Function<Location, LiveData<List<Result>>>() {

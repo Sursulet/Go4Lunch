@@ -3,25 +3,20 @@ package com.sursulet.go4lunch.model;
 public class Restaurant {
 
     String id;
-    String userId;
-    boolean isLike = false;
-    boolean isGoing = false;
+    String name;
 
-    public Restaurant(String id, String userId) {
+    public Restaurant() {}
+
+    public Restaurant(String id, String name) {
         this.id = id;
-        this.userId = userId;
-        this.isLike = isLike;
+        this.name = name;
     }
 
     // -- GETTERS
     public String getId() { return id; }
-    public String getUserId() { return userId; }
-    public boolean isLike() { return isLike; }
-    public boolean isGoing() { return isGoing; }
+    public String getName() { return name; }
 
     // -- SETTERS
     public void setId(String id) { this.id = id; }
-    public void setUserId(String userId) { this.userId = userId; }
-    public void setLike(boolean like) { isLike = like; }
-    public void setGoing(boolean going) { isGoing = going; }
+    public void setName(String name) { this.name = name; }
 }

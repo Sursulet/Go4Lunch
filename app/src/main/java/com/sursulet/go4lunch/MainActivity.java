@@ -1,12 +1,12 @@
 package com.sursulet.go4lunch;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -15,7 +15,6 @@ import androidx.navigation.ui.NavigationUI;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,17 +28,18 @@ import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.sursulet.go4lunch.api.UserHelper;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
-import com.sursulet.go4lunch.model.User;
 import com.sursulet.go4lunch.ui.DetailPlaceActivity;
 import com.sursulet.go4lunch.ui.SettingsActivity;
 
@@ -51,12 +51,14 @@ public class MainActivity extends AppCompatActivity
 
     private static final int RC_SIGN_IN = 123;
     private static final int SIGN_OUT_TASK = 10;
+    private static final String TAG = "MAIN ACTIVITY";
+    private static int AUTOCOMPLETE_REQUEST_CODE = 1;
 
     MainViewModel mainViewModel;
 
     private DrawerLayout drawer;
     private TextView userName;
-    private TextView userMail;
+    private TextView userEmail;
     private ImageView userPhoto;
 
     @Override
@@ -72,17 +74,16 @@ public class MainActivity extends AppCompatActivity
 
         View headerView = navView.getHeaderView(0);
         userName = headerView.findViewById(R.id.drawer_username);
-        userMail = headerView.findViewById(R.id.drawer_email);
+        userEmail = headerView.findViewById(R.id.drawer_email);
         userPhoto = headerView.findViewById(R.id.drawer_photo);
 
         BottomNavigationView bottom = findViewById(R.id.bottom_nav);
 
         mainViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance()).get(MainViewModel.class);
 
-        if (this.isCurrentUserLogged()) {
+        if (this.checkCurrentUserLogged()) {
             getUserProfile();
         } else {
-            //mainViewModel.launchSingInActivity();
             createSignInIntent();
         }
 
@@ -101,6 +102,19 @@ public class MainActivity extends AppCompatActivity
         NavController navCtrl = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navCtrl, mAppBarConfig);
         NavigationUI.setupWithNavController(bottom, navCtrl);
+
+        String apiKey = getString(R.string.google_api_key);
+
+        /**
+         * Initialize Places. For simplicity, the API key is hard-coded. In a production
+         * environment we recommend using a secure mechanism to manage API keys.
+         */
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), apiKey);
+        }
+
+        // Create a new Places client instance.
+        PlacesClient placesClient = Places.createClient(this);
     }
 
     @Override
@@ -129,58 +143,50 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    @Nullable
-    protected FirebaseUser getCurrentUser() {
-        return FirebaseAuth.getInstance().getCurrentUser();
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_search:
+                Toast.makeText(this, "HERRRRE", Toast.LENGTH_SHORT).show();
+                onSearchCalled();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
-    protected Boolean isCurrentUserLogged() {
-        return (this.getCurrentUser() != null);
+    public void onSearchCalled() {
+        // Set the fields to specify which types of place data to
+        // return after the user has made a selection.
+        List<Place.Field> fields = Arrays.asList(
+                Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME
+        );
+
+        // Start the autocomplete intent.
+        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+                .build(MainActivity.this);
+        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+
+    }
+
+    private boolean checkCurrentUserLogged() {
+        return mainViewModel.isCurrentUserLogged();
     }
 
     public void getUserProfile() {
-        if (this.getCurrentUser() != null) {
-            if (this.getCurrentUser().getPhotoUrl() != null) {
-                Glide.with(this)
-                        .load(this.getCurrentUser().getPhotoUrl())
+        mainViewModel.getUiModelLiveData()
+                .observe(this, new Observer<MainUiModel>() {
+            @Override
+            public void onChanged(MainUiModel mainUiModel) {
+                userName.setText(mainUiModel.getUsername());
+                userEmail.setText(mainUiModel.getEmail());
+
+                Glide.with(userPhoto)
+                        .load(mainUiModel.getPhotoUrl())
                         .apply(RequestOptions.circleCropTransform())
-                        .into(this.userPhoto);
+                        .into(userPhoto);
             }
-
-            //Get email & username from Firebase
-            String email = TextUtils.isEmpty(this.getCurrentUser().getEmail()) ?
-                    getString(R.string.info_no_email_found) : this.getCurrentUser().getEmail();
-
-            /*String name = TextUtils.isEmpty(this.getCurrentUser().getDisplayName()) ?
-                    getString(R.string.info_no_username_found) : this.getCurrentUser().getDisplayName();
-
-            userName.setText(name);*/
-
-            this.userMail.setText(email);
-
-            UserHelper.getUser(this.getCurrentUser().getUid())
-                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                            /*User currentUser = documentSnapshot.toObject(User.class);
-                            Log.d("PEACH", "onSuccess: " + currentUser.getUid() + " " + currentUser.getUsername());
-                            String name = TextUtils.isEmpty(currentUser.getUsername()) ?
-                                    getString(R.string.info_no_username_found) : currentUser.getUsername();
-
-                            userName.setText(name);*/
-                        }
-                    });
-        }
-    }
-
-    private void createUserInFirestore() {
-        if(this.getCurrentUser() != null) {
-            String urlPicture = (this.getCurrentUser().getPhotoUrl() != null) ? this.getCurrentUser().getPhotoUrl().toString() : null;
-            String username = this.getCurrentUser().getDisplayName();
-            String uid = this.getCurrentUser().getUid();
-
-            UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
-        }
+        });
     }
 
     public void signOutUserFromFirebase() {
@@ -200,22 +206,8 @@ public class MainActivity extends AppCompatActivity
         };
     }
 
-    // --------------------
-    // ERROR HANDLER
-    // --------------------
-
-    protected OnFailureListener onFailureListener() {
-        return new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
-            }
-        };
-    }
-
     public void createSignInIntent() {
         List<AuthUI.IdpConfig> providers = Arrays.asList(
-                //new AuthUI.IdpConfig.EmailBuilder().build(),
                 new AuthUI.IdpConfig.FacebookBuilder().build(),
                 new AuthUI.IdpConfig.GoogleBuilder().build());
 
@@ -239,7 +231,7 @@ public class MainActivity extends AppCompatActivity
 
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) {
-                this.createUserInFirestore();
+                mainViewModel.createUser();
                 showSnackBar(this.drawer, getString(R.string.connection_succeed));
             } else {
                 if (response == null) {
@@ -250,6 +242,24 @@ public class MainActivity extends AppCompatActivity
                     showSnackBar(this.drawer, getString(R.string.error_unknown_error));
                     Toast.makeText(this, ""+response.getError().getMessage(), Toast.LENGTH_SHORT).show();
                 }
+            }
+        }
+
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Place place = Autocomplete.getPlaceFromIntent(data);
+                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId() + ", " + place.getAddress());
+                Toast.makeText(MainActivity.this, "ID: " + place.getId() + "address:" + place.getAddress() + "Name:" + place.getName() + " latlong: " + place.getLatLng(), Toast.LENGTH_LONG).show();
+                String address = place.getAddress();
+                // do query with address
+
+            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                // TODO: Handle the error.
+                Status status = Autocomplete.getStatusFromIntent(data);
+                Toast.makeText(MainActivity.this, "Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
+                Log.i(TAG, status.getStatusMessage());
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
             }
         }
     }

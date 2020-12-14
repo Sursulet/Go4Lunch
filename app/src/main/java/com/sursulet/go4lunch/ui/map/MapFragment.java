@@ -24,6 +24,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -125,6 +126,7 @@ public class MapFragment extends Fragment {
                     new MarkerOptions()
                             .position(new LatLng(model.getLat(), model.getLng()))
                             .title(model.getName())
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_baseline_location_on_24))
                             .snippet(model.getPlaceId())
             );
 

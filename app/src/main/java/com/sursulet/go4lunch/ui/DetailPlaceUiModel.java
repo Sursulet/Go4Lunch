@@ -1,5 +1,9 @@
 package com.sursulet.go4lunch.ui;
 
+import com.sursulet.go4lunch.ui.workmates.WorkmatesUiModel;
+
+import java.util.List;
+
 public class DetailPlaceUiModel {
 
     String name;
@@ -10,12 +14,14 @@ public class DetailPlaceUiModel {
     String phoneNumber;
     String like;
     String urlWebsite;
+    List<WorkmatesUiModel> workmates;
 
 
-    public DetailPlaceUiModel(String name, String urlPhoto, String txt) {
+    public DetailPlaceUiModel(String name, String urlPhoto, String txt, List<WorkmatesUiModel> workmates) {
         this.name = name;
         this.urlPhoto = urlPhoto;
         this.txt = txt;
+        this.workmates = workmates;
     }
 
     public String getName() {
@@ -43,4 +49,6 @@ public class DetailPlaceUiModel {
     public String getUrlWebsite() {
         return urlWebsite;
     }
+
+    public List<WorkmatesUiModel> getWorkmates() { return workmates; }
 }

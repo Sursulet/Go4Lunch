@@ -16,7 +16,7 @@ import com.sursulet.go4lunch.R;
 
 public class WorkmatesAdapter extends ListAdapter<WorkmatesUiModel, WorkmatesAdapter.WorkmatesViewHolder> {
 
-    protected WorkmatesAdapter(@NonNull DiffUtil.ItemCallback<WorkmatesUiModel> diffCallback) {
+    public WorkmatesAdapter(@NonNull DiffUtil.ItemCallback<WorkmatesUiModel> diffCallback) {
         super(diffCallback);
     }
 
@@ -46,6 +46,13 @@ public class WorkmatesAdapter extends ListAdapter<WorkmatesUiModel, WorkmatesAda
 
             photo = itemView.findViewById(R.id.workmate_photo);
             txt = itemView.findViewById(R.id.workmate_txt);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //
+                }
+            });
         }
 
         public void bind(WorkmatesUiModel workmatesUiModel) {

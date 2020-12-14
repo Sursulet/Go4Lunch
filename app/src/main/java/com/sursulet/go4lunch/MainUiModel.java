@@ -5,12 +5,24 @@ import android.net.Uri;
 public class MainUiModel {
 
     String username;
-    String mail;
-    Uri photo;
+    String email;
+    Uri photoUrl;
 
-    public MainUiModel(String username, String mail, Uri photo) {
+    public MainUiModel(String username, String email, Uri photoUrl) {
         this.username = username;
-        this.mail = mail;
-        this.photo = photo;
+        this.email = email;
+        this.photoUrl = photoUrl;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public Uri getPhotoUrl() {
+        return photoUrl;
     }
 }
