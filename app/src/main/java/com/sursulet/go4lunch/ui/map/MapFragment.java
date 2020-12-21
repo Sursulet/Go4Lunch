@@ -3,6 +3,7 @@ package com.sursulet.go4lunch.ui.map;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -22,11 +23,9 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.sursulet.go4lunch.BuildConfig;
@@ -40,10 +39,14 @@ public class MapFragment extends Fragment {
 
     private static final String TAG = MapFragment.class.getSimpleName();
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
+    // A default location (Paris, France) and default zoom to use when location permission is not granted.
+    private final LatLng defaultLocation = new LatLng(48.8534, 2.3488);
+    private static final int DEFAULT_ZOOM = 15;
 
     MapViewModel mapViewModel;
     GoogleMap map;
-    private boolean requestingLocationUpdates;
+    double latitude;
+    double longitude;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -62,25 +65,31 @@ public class MapFragment extends Fragment {
         SupportMapFragment mapFragment =
                 (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
-        requestingLocationUpdates = false;
         mapViewModel.getStartLocationUpdates();
 
         if (mapFragment != null) {
-            mapFragment.getMapAsync(new OnMapReadyCallback() {
-                @Override
-                public void onMapReady(GoogleMap googleMap) {
-                    map = googleMap;
+            mapFragment.getMapAsync(googleMap -> {
+                map = googleMap;
+                /*map.setMinZoomPreference(6.0f);
+                map.setMaxZoomPreference(14.0f);
 
-                    map.setMyLocationEnabled(true);
-                    mapViewModel.onMapReady();
-                    map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                        @Override
-                        public boolean onMarkerClick(Marker marker) {
-                            mapViewModel.launchDetailPlaceActivity(marker.getSnippet());
-                            return true;
-                        }
-                    });
-                }
+                //TODO : Put a default location
+                mapViewModel.getLastLocation().observe(getViewLifecycleOwner(), new Observer<Location>() {
+                    @Override
+                    public void onChanged(Location location) {
+                        map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+                        map.animateCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM));
+                    }
+                });*/
+
+                //map.setMyLocationEnabled(true);
+                mapViewModel.onMapReady();
+                map.setOnMarkerClickListener(marker -> {
+                    if(marker.getSnippet() != null && !marker.getSnippet().isEmpty()){
+                        mapViewModel.launchDetailPlaceActivity(marker.getSnippet());
+                    }
+                    return true;
+                });
             });
         }
 
@@ -127,16 +136,20 @@ public class MapFragment extends Fragment {
                     new MarkerOptions()
                             .position(new LatLng(model.getLat(), model.getLng()))
                             .title(model.getName())
-                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_baseline_location_on_24))
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                             .snippet(model.getPlaceId())
             );
-        }
 
-        map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(models.get(0).getLat(), models.get(0).getLng())));
-        map.animateCamera(CameraUpdateFactory.zoomTo(15));
+            latitude = latitude + model.getLat();
+            longitude = longitude + model.getLng();
+        }
+        //TODO : J'ai fait la moyenne de la latitude et de la longitude
+        map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latitude/models.size(), longitude/models.size())));
+        map.animateCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM));
     }
 
     private boolean checkPermissions() {
+        //TODO: Modification add setMyLocationEnabled
         return (ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -159,12 +172,9 @@ public class MapFragment extends Fragment {
         if (shouldProvideRationale) {
             Log.i(TAG, "Displaying permission rationale to provide additional context.");
             showSnackbar(R.string.permission_rationale,
-                    android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            // Request permission
-                            startLocationPermissionRequest();
-                        }
+                    android.R.string.ok, view -> {
+                        // Request permission
+                        startLocationPermissionRequest();
                     });
         } else {
             Log.i(TAG, "Requesting permission");
@@ -198,19 +208,16 @@ public class MapFragment extends Fragment {
             } else {
                 Toast.makeText(requireContext(), "Permission denied", Toast.LENGTH_SHORT).show();
                 showSnackbar(R.string.permission_denied_explanation,
-                        R.string.settings, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                // Build intent that displays the App settings screen.
-                                Intent intent = new Intent();
-                                intent.setAction(
-                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                Uri uri = Uri.fromParts("package",
-                                        BuildConfig.APPLICATION_ID, null);
-                                intent.setData(uri);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(intent);
-                            }
+                        R.string.settings, view -> {
+                            // Build intent that displays the App settings screen.
+                            Intent intent = new Intent();
+                            intent.setAction(
+                                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            Uri uri = Uri.fromParts("package",
+                                    BuildConfig.APPLICATION_ID, null);
+                            intent.setData(uri);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
                         });
             }
         }

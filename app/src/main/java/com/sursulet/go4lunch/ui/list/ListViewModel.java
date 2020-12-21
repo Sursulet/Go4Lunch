@@ -4,12 +4,20 @@ import android.location.Location;
 
 import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import com.sursulet.go4lunch.SingleLiveEvent;
 import com.sursulet.go4lunch.model.Result;
+import com.sursulet.go4lunch.model.User;
+import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
+import com.sursulet.go4lunch.repository.DetailPlaceRepository;
 import com.sursulet.go4lunch.repository.NearbyPlacesRepository;
+import com.sursulet.go4lunch.repository.UserRepository;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -19,15 +27,77 @@ public class ListViewModel extends ViewModel {
 
     private final CurrentLocationRepository currentLocationRepository;
     private final NearbyPlacesRepository nearbyPlacesRepository;
+    private final DetailPlaceRepository detailPlaceRepository;
+    private final UserRepository userRepository;
+
+    MediatorLiveData<ListUiModel> uiModelMediatorLiveData = new MediatorLiveData<>();
+    MutableLiveData<ListUiModel> mutableRestaurant = new MutableLiveData<>();
+
+    private final SingleLiveEvent<String> singleLiveEventOpenDetailActivity = new SingleLiveEvent<>();
 
     public ListViewModel(
             CurrentLocationRepository currentLocationRepository,
-            NearbyPlacesRepository nearbyPlacesRepository) {
+            NearbyPlacesRepository nearbyPlacesRepository,
+            DetailPlaceRepository detailPlaceRepository,
+            UserRepository userRepository
+    ) {
         this.currentLocationRepository = currentLocationRepository;
         this.nearbyPlacesRepository = nearbyPlacesRepository;
+        this.detailPlaceRepository = detailPlaceRepository;
+        this.userRepository = userRepository;
+
+        LiveData<String> idRestaurantLiveData;
+        //LiveData<List<User>> workmatesLiveData = userRepository.getUsersForRestaurant();
+        MediatorLiveData<List<User>> workmatesMediatorLiveData = new MediatorLiveData<>();
+        MediatorLiveData<GooglePlacesDetailResult> detailPlaceMediatorLiveData = new MediatorLiveData<>();
+
+        LiveData<GooglePlacesDetailResult> detailPlaceLiveData;
+
+        LiveData<List<Result>> nearbyPlacesDependingOnGps = Transformations.switchMap(
+                currentLocationRepository.getLocationLiveData(),
+                new Function<Location, LiveData<List<Result>>>() {
+                    @Override
+                    public LiveData<List<Result>> apply(Location location) {
+                        return nearbyPlacesRepository.getNearByPlaces(location.getLatitude(), location.getLongitude());
+                    }
+                }
+        );
+
+        uiModelMediatorLiveData.addSource(nearbyPlacesDependingOnGps, new Observer<List<Result>>() {
+            @Override
+            public void onChanged(List<Result> results) {
+                combine(results,
+                        detailPlaceMediatorLiveData.getValue(),
+                        workmatesMediatorLiveData.getValue());
+            }
+        });
+        uiModelMediatorLiveData.addSource(detailPlaceMediatorLiveData, new Observer<GooglePlacesDetailResult>() {
+            @Override
+            public void onChanged(GooglePlacesDetailResult result) {
+                combine(nearbyPlacesDependingOnGps.getValue(), result, workmatesMediatorLiveData.getValue());
+            }
+        });
+
+        uiModelMediatorLiveData.addSource(workmatesMediatorLiveData, new Observer<List<User>>() {
+            @Override
+            public void onChanged(List<User> users) {
+                combine(nearbyPlacesDependingOnGps.getValue(), detailPlaceMediatorLiveData.getValue(), users);
+            }
+        });
+    }
+
+    private void combine(List<Result> nearbyPlaces, GooglePlacesDetailResult resultFromServer, List<User> usersList) {
+        if(nearbyPlaces == null || resultFromServer == null || usersList == null) return;
+
+        List<ListUiModel> listUiModels = new ArrayList<>();
+
+        for(Result result : nearbyPlaces) {
+            //resultFromServer.getResult()
+        }
     }
 
     public LiveData<List<ListUiModel>> getListUiModelLiveData() {
+
         LiveData<List<Result>> nearbyPlacesDependingOnGps = Transformations.switchMap(
                 currentLocationRepository.getLocationLiveData(),
                 new Function<Location, LiveData<List<Result>>>() {
@@ -47,16 +117,16 @@ public class ListViewModel extends ViewModel {
                     ListUiModel listUiModel = new ListUiModel(
                             result.getPlaceId(),
                             result.getName(),
-                            getPhotoPlaceUrl(result.getPhotos().get(0).getPhotoReference(), "1000"),
+                            null, //getPhotoPlaceUrl(result.getPhotos().get(0).getPhotoReference(), "1000"),
                             result.getVicinity(),
                             null, //result.getOpeningHours().getOpenNow().toString(),
-                            getDistance(
+                            null,/*getDistance(
                                     currentLocationRepository.getLocationLiveData().getValue().getLatitude(),
                                     currentLocationRepository.getLocationLiveData().getValue().getLongitude(),
                                     //48.8511334,2.34837,
                                     result.getGeometry().getLocation().getLat(),
                                     result.getGeometry().getLocation().getLng()
-                            ) + " m",
+                            ) + " m",*/
                             getRating(result.getRating()),
                             null
                     );
@@ -72,7 +142,7 @@ public class ListViewModel extends ViewModel {
         String url = "https://maps.googleapis.com/maps/api/place/photo" +
                 "?maxwidth=" + max_width +
                 "&photoreference=" + photo_reference +
-                "&key=" + "AIzaSyDvUeXTbuq87mNoavyfSj_1AWVOK_dMyiE";
+                "&key=" + null; //TODO : KEY
         return url;
     }
 
@@ -99,4 +169,11 @@ public class ListViewModel extends ViewModel {
         return String.valueOf(rating);
     }
 
+    public SingleLiveEvent<String> getSingleLiveEventOpenDetailActivity() {
+        return singleLiveEventOpenDetailActivity;
+    }
+
+    public void openDetailPlaceActivity(String id) {
+        singleLiveEventOpenDetailActivity.setValue(id);
+    }
 }

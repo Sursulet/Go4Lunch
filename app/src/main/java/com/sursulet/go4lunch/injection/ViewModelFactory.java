@@ -31,7 +31,8 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
             UserRepository userRepository,
             CurrentLocationRepository currentLocationRepository,
             NearbyPlacesRepository nearByPlacesRepository,
-            DetailPlaceRepository detailPlaceRepository, WorkmatesRepository workmatesRepository) {
+            DetailPlaceRepository detailPlaceRepository, WorkmatesRepository workmatesRepository
+    ) {
         this.userRepository = userRepository;
         this.currentLocationRepository = currentLocationRepository;
         this.nearbyPlacesRepository = nearByPlacesRepository;
@@ -50,7 +51,8 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
                             ),
                             new NearbyPlacesRepository(),
                             new DetailPlaceRepository(),
-                            new WorkmatesRepository());
+                            new WorkmatesRepository()
+                    );
                 }
             }
         }
@@ -66,12 +68,14 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
             return (T) new MapViewModel(
                     MainApplication.getApplication(),
                     currentLocationRepository,
-                    nearbyPlacesRepository
-            );
+                    nearbyPlacesRepository,
+                    userRepository);
         } else if (modelClass.isAssignableFrom(ListViewModel.class)) {
             return (T) new ListViewModel(
                     currentLocationRepository,
-                    nearbyPlacesRepository
+                    nearbyPlacesRepository,
+                    detailPlaceRepository,
+                    userRepository
             );
         } else if (modelClass.isAssignableFrom(WorkmatesViewModel.class)) {
             return (T) new WorkmatesViewModel(

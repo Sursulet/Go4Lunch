@@ -28,7 +28,7 @@ public class AutocompleteRepository {
         MutableLiveData<List<Prediction>> places = new MutableLiveData<>();
 
         mService.getAutocompletePlaces(
-                "AIzaSyDvUeXTbuq87mNoavyfSj_1AWVOK_dMyiE",
+                null, //TODO : KEY
                 input,
                 location.getLatitude() + "," + location.getLongitude(),
                 "500",

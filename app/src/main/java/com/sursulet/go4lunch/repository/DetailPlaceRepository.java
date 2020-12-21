@@ -6,12 +6,14 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.sursulet.go4lunch.api.UserHelper;
 import com.sursulet.go4lunch.model.Restaurant;
+import com.sursulet.go4lunch.model.User;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
 import com.sursulet.go4lunch.remote.RetrofitClient;
@@ -83,12 +85,6 @@ public class DetailPlaceRepository {
                 .document(userId)
                 .collection("Likes")
                 .add(new Restaurant(restaurantId, userId));
-    }
-
-    public CollectionReference getLikeRestaurant(String userId) {
-        return UserHelper.getUsersCollection()
-                .document(userId)
-                .collection("Likes");
     }
 
     // --- DELETE ---

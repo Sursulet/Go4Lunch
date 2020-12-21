@@ -14,21 +14,26 @@ import android.view.ViewGroup;
 
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
+import com.sursulet.go4lunch.ui.DetailPlaceActivity;
+import com.sursulet.go4lunch.ui.OnItemClickListener;
 
 import java.util.List;
 
-public class ListFragment extends Fragment {
+public class ListFragment extends Fragment implements OnItemClickListener {
+
+    ListViewModel listViewModel;
+    RestaurantAdapter adapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_list, container, false);
 
-        ListViewModel listViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance()).get(ListViewModel.class);
+        listViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance()).get(ListViewModel.class);
 
         RecyclerView recyclerView = v.findViewById(R.id.list_recyclerview);
-        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
-        RestaurantAdapter adapter = new RestaurantAdapter(ListUiModel.DIFF_CALLBACK);
+        recyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL));
+        adapter = new RestaurantAdapter(ListUiModel.DIFF_CALLBACK, this);
         recyclerView.setAdapter(adapter);
 
         listViewModel.getListUiModelLiveData().observe(getViewLifecycleOwner(), new Observer<List<ListUiModel>>() {
@@ -38,6 +43,19 @@ public class ListFragment extends Fragment {
             }
         });
 
+        listViewModel.getSingleLiveEventOpenDetailActivity().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String id) {
+                requireActivity().startActivity(DetailPlaceActivity.getStartIntent(requireActivity(), id));
+            }
+        });
+
         return v;
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        ListUiModel place = adapter.getCurrentList().get(position);
+        listViewModel.openDetailPlaceActivity(place.getId());
     }
 }

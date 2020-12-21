@@ -139,9 +139,11 @@
         android:layout_height="wrap_content"
         app:elevation="6dp"
         android:layout_margin="16dp"
+        android:backgroundTint="@color/white"
         app:layout_anchor="@id/detail_collapsing_toolbar"
         app:layout_anchorGravity="bottom|right|end"
         app:srcCompat="@drawable/ic_baseline_check_circle_24"
+        app:tint="@color/secondary"
         android:contentDescription="@string/detail_floating_action_button" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

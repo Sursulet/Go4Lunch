@@ -8,6 +8,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,11 +16,19 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.sursulet.go4lunch.R;
+import com.sursulet.go4lunch.ui.OnItemClickListener;
 
 public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapter.RestaurantViewHolder> {
 
-    protected RestaurantAdapter(@NonNull DiffUtil.ItemCallback<ListUiModel> diffCallback) {
+    //private final ListViewModel listViewModel;
+    private final OnItemClickListener onItemClickListener;
+
+    protected RestaurantAdapter(
+            @NonNull DiffUtil.ItemCallback<ListUiModel> diffCallback,
+            OnItemClickListener onItemClickListener
+    ) {
         super(diffCallback);
+        this.onItemClickListener = onItemClickListener;
     }
 
     @NonNull
@@ -38,7 +47,9 @@ public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapte
         holder.bind(listUiModel);
     }
 
-    public static class RestaurantViewHolder extends RecyclerView.ViewHolder {
+    public class RestaurantViewHolder extends RecyclerView.ViewHolder {
+
+        ConstraintLayout item;
 
         ImageView photo;
         TextView name;
@@ -51,6 +62,7 @@ public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapte
         public RestaurantViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            item = itemView.findViewById(R.id.item_restaurant);
             photo = itemView.findViewById(R.id.restaurant_photo);
             name = itemView.findViewById(R.id.restaurant_name);
             txt = itemView.findViewById(R.id.restaurant_txt);
@@ -75,6 +87,13 @@ public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapte
                     .load(listUiModel.photoUrl)
                     .transform(new CenterCrop())
                     .into(photo);
+
+            item.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onItemClickListener.onItemClick(getAdapterPosition());
+                }
+            });
         }
     }
 }

@@ -5,19 +5,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.sursulet.go4lunch.R;
+import com.sursulet.go4lunch.ui.OnItemClickListener;
 
 public class WorkmatesAdapter extends ListAdapter<WorkmatesUiModel, WorkmatesAdapter.WorkmatesViewHolder> {
 
-    public WorkmatesAdapter(@NonNull DiffUtil.ItemCallback<WorkmatesUiModel> diffCallback) {
+    private final OnItemClickListener onItemClickListener;
+
+    public WorkmatesAdapter(@NonNull DiffUtil.ItemCallback<WorkmatesUiModel> diffCallback, OnItemClickListener onItemClickListener) {
         super(diffCallback);
+        this.onItemClickListener = onItemClickListener;
     }
 
     @NonNull
@@ -36,21 +42,23 @@ public class WorkmatesAdapter extends ListAdapter<WorkmatesUiModel, WorkmatesAda
         holder.bind(workmatesUiModel);
     }
 
-    static class WorkmatesViewHolder extends RecyclerView.ViewHolder {
+    class WorkmatesViewHolder extends RecyclerView.ViewHolder {
 
+        CardView workmatesItem;
         ImageView photo;
         TextView txt;
 
         public WorkmatesViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            workmatesItem = itemView.findViewById(R.id.workmates_item);
             photo = itemView.findViewById(R.id.workmate_photo);
             txt = itemView.findViewById(R.id.workmate_txt);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //
+                    onItemClickListener.onItemClick(getAdapterPosition());
                 }
             });
         }

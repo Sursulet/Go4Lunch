@@ -1,5 +1,6 @@
 package com.sursulet.go4lunch.ui.workmates;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -11,13 +12,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
+import com.sursulet.go4lunch.ui.OnItemClickListener;
+import com.sursulet.go4lunch.ui.chat.ChatActivity;
 
 import java.util.List;
 
-public class WorkmatesFragment extends Fragment {
+public class WorkmatesFragment extends Fragment implements OnItemClickListener {
+
+    WorkmatesViewModel workmatesViewModel;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -27,10 +33,10 @@ public class WorkmatesFragment extends Fragment {
 
         RecyclerView recyclerView = view.findViewById(R.id.workmates_recyclerview);
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
-        WorkmatesAdapter adapter = new WorkmatesAdapter(WorkmatesUiModel.DIFF_CALLBACK);
+        WorkmatesAdapter adapter = new WorkmatesAdapter(WorkmatesUiModel.DIFF_CALLBACK, this);
         recyclerView.setAdapter(adapter);
 
-        WorkmatesViewModel workmatesViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance()).get(WorkmatesViewModel.class);
+        workmatesViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance()).get(WorkmatesViewModel.class);
 
         workmatesViewModel.getWorkmatesUiModelLiveData().observe(getViewLifecycleOwner(), new Observer<List<WorkmatesUiModel>>() {
             @Override
@@ -50,5 +56,10 @@ public class WorkmatesFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        startActivity(new Intent(requireContext(), ChatActivity.class));
     }
 }
