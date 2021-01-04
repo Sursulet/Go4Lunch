@@ -1,7 +1,5 @@
 package com.sursulet.go4lunch.ui;
 
-import android.content.res.ColorStateList;
-
 import com.sursulet.go4lunch.ui.workmates.WorkmatesUiModel;
 
 import java.util.List;
@@ -17,6 +15,7 @@ public class DetailPlaceUiModel {
     int isLike;
     String urlWebsite;
     List<WorkmatesUiModel> workmates;
+    String openingHours;
 
 
     public DetailPlaceUiModel(
@@ -28,7 +27,8 @@ public class DetailPlaceUiModel {
             String phoneNumber,
             int isLike,
             String urlWebsite,
-            List<WorkmatesUiModel> workmates
+            List<WorkmatesUiModel> workmates,
+            String openingHours
     ) {
         this.name = name;
         this.urlPhoto = urlPhoto;
@@ -39,6 +39,7 @@ public class DetailPlaceUiModel {
         this.isLike = isLike;
         this.urlWebsite = urlWebsite;
         this.workmates = workmates;
+        this.openingHours = openingHours;
     }
 
     public String getName() {
@@ -60,4 +61,8 @@ public class DetailPlaceUiModel {
         return urlWebsite;
     }
     public List<WorkmatesUiModel> getWorkmates() { return workmates; }
+
+    public String getOpeningHours() {
+        return openingHours;
+    }
 }

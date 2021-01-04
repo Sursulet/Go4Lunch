@@ -1,17 +1,18 @@
 package com.sursulet.go4lunch.ui.map;
 
-import com.google.android.gms.maps.model.BitmapDescriptor;
+import androidx.annotation.DrawableRes;
 
 public class MapUiModel {
 
     private final String name;
     private final String placeId;
-    private final BitmapDescriptor icon;
+    @DrawableRes
+    private final int icon;
     private final Double lat;
     private final Double lng;
 
 
-    public MapUiModel(String name, String placeId, BitmapDescriptor icon, Double lat, Double lng) {
+    public MapUiModel(String name, String placeId, @DrawableRes int icon, Double lat, Double lng) {
         this.name = name;
         this.placeId = placeId;;
         this.icon = icon;
@@ -27,7 +28,8 @@ public class MapUiModel {
         return placeId;
     }
 
-    public BitmapDescriptor getIcon() { return icon; }
+    @DrawableRes
+    public int getIcon() { return icon; }
 
     public Double getLat() {
         return lat;

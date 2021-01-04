@@ -25,13 +25,16 @@ public class NearbyPlacesRepository {
 
         MutableLiveData<List<Result>> places = new MutableLiveData<>();
         mService.getNearByPlaces(
-                "AIzaSyDvUeXTbuq87mNoavyfSj_1AWVOK_dMyiE", //TODO : KEY
+                "", //TODO : KEY
                 latitude + "," + longitude,
                 "restaurant",
                 "500"
         ).enqueue(new Callback<GooglePlacesNearbySearchResult>() {
             @Override
-            public void onResponse(Call<GooglePlacesNearbySearchResult> call, Response<GooglePlacesNearbySearchResult> response) {
+            public void onResponse(
+                    Call<GooglePlacesNearbySearchResult> call,
+                    Response<GooglePlacesNearbySearchResult> response
+            ) {
 
                 if (response.isSuccessful()) {
                     if (response.body() != null && response.body().getResults() != null) {

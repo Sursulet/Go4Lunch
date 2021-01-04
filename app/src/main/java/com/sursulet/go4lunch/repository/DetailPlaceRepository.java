@@ -34,7 +34,7 @@ public class DetailPlaceRepository {
 
         mService.getDetailPlace(
                 place_id,
-                "AIzaSyDvUeXTbuq87mNoavyfSj_1AWVOK_dMyiE"
+                "null //TODO : KEY"
         ).enqueue(new Callback<GooglePlacesDetailResult>() {
             @Override
             public void onResponse(

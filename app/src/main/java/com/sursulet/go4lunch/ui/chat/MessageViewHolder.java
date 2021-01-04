@@ -33,7 +33,7 @@ public class MessageViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.chat_item_profile_container) LinearLayout profileContainer;
     @BindView(R.id.chat_item_profile_container_profile_image)
     ImageView imageViewProfile;
-    @BindView(R.id.chat_item_profile_container_is_mentor_image) ImageView imageViewIsMentor;
+    @BindView(R.id.chat_item_profile_container_is_image) ImageView imageViewIsMentor;
 
     //MESSAGE CONTAINER
     @BindView(R.id.chat_item_message_container) RelativeLayout messageContainer;

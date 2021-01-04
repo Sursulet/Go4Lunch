@@ -1,35 +1,26 @@
 package com.sursulet.go4lunch.ui.map;
 
 import android.app.Application;
-import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.arch.core.util.Function;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.SingleLiveEvent;
 import com.sursulet.go4lunch.model.Result;
-import com.sursulet.go4lunch.model.User;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.NearbyPlacesRepository;
 import com.sursulet.go4lunch.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class MapViewModel extends ViewModel {
 
@@ -40,11 +31,9 @@ public class MapViewModel extends ViewModel {
     @NonNull
     private final UserRepository userRepository;
 
-    private final MutableLiveData<Boolean> isMapReadyLiveData = new MutableLiveData<>();
-
-    private final MutableLiveData<String> userQueryLiveData = new MutableLiveData<>();
-
     private final MediatorLiveData<List<MapUiModel>> uiModelsMediatorLiveData = new MediatorLiveData<>();
+    private final MutableLiveData<Boolean> isMapReadyLiveData = new MutableLiveData<>();
+    private final MutableLiveData<String> userQueryLiveData = new MutableLiveData<>();
 
     private final SingleLiveEvent<String> singleLiveEventLaunchDetailActivity = new SingleLiveEvent<>();
 
@@ -58,41 +47,54 @@ public class MapViewModel extends ViewModel {
         this.userRepository = userRepository;
 
         LiveData<List<Result>> nearbyPlacesDependingOnGps =
-                Transformations.switchMap(currentLocationRepository.getLocationLiveData(),
-                        new Function<Location, LiveData<List<Result>>>() {
-                            @Override
-                            public LiveData<List<Result>> apply(Location location) {
-                                return nearbyPlacesRepository.getNearByPlaces(
-                                        location.getLatitude(),
-                                        location.getLongitude()
-                                );
-                            }
-                        });
+                Transformations.switchMap(
+                        currentLocationRepository.getLocationLiveData(),
+                        location -> nearbyPlacesRepository.getNearByPlaces(
+                                location.getLatitude(),
+                                location.getLongitude()
+                        ));
 
+        LiveData<Set<String>> activeRestaurantsLiveData = userRepository.getActiveRestaurants();
 
-        uiModelsMediatorLiveData.addSource(nearbyPlacesDependingOnGps, new Observer<List<Result>>() {
-            @Override
-            public void onChanged(List<Result> results) {
-                combine(results, isMapReadyLiveData.getValue(), userQueryLiveData.getValue());
-            }
-        });
+        uiModelsMediatorLiveData.addSource(
+                activeRestaurantsLiveData,
+                activeRestaurants -> combine(
+                        nearbyPlacesDependingOnGps.getValue(),
+                        isMapReadyLiveData.getValue(),
+                        userQueryLiveData.getValue(),
+                        activeRestaurants));
 
-        uiModelsMediatorLiveData.addSource(isMapReadyLiveData, new Observer<Boolean>() {
-            @Override
-            public void onChanged(Boolean isMapReady) {
-                combine(nearbyPlacesDependingOnGps.getValue(), isMapReady, userQueryLiveData.getValue());
-            }
-        });
+        uiModelsMediatorLiveData.addSource(
+                nearbyPlacesDependingOnGps,
+                results -> combine(
+                        results,
+                        isMapReadyLiveData.getValue(),
+                        userQueryLiveData.getValue(),
+                        activeRestaurantsLiveData.getValue()));
 
-        uiModelsMediatorLiveData.addSource(userQueryLiveData, new Observer<String>() {
-            @Override
-            public void onChanged(String userQuery) {
-                combine(nearbyPlacesDependingOnGps.getValue(), isMapReadyLiveData.getValue(), userQuery);
-            }
-        });
+        uiModelsMediatorLiveData.addSource(
+                isMapReadyLiveData,
+                isMapReady -> combine(
+                        nearbyPlacesDependingOnGps.getValue(),
+                        isMapReady,
+                        userQueryLiveData.getValue(),
+                        activeRestaurantsLiveData.getValue()));
+
+        uiModelsMediatorLiveData.addSource(
+                userQueryLiveData,
+                userQuery -> combine(
+                        nearbyPlacesDependingOnGps.getValue(),
+                        isMapReadyLiveData.getValue(),
+                        userQuery,
+                        activeRestaurantsLiveData.getValue()));
     }
 
-    private void combine(@Nullable List<Result> resultsFromServer, @Nullable Boolean isMapReady, @Nullable String userQuery) {
+    private void combine(
+            @Nullable List<Result> resultsFromServer,
+            @Nullable Boolean isMapReady,
+            @Nullable String userQuery,
+            @Nullable Set<String> activeRestaurants
+    ) {
         if (resultsFromServer == null || isMapReady == null) {
             return;
         }
@@ -102,14 +104,12 @@ public class MapViewModel extends ViewModel {
         if (isMapReady) {
             for (Result result : resultsFromServer) {
 
-                //TODO: Doit-on mettre une MutableLiveData/MediatorLiveData ?
-                List<User> usersGoingToRestaurant = userRepository.getUsersForRestaurant(result.getPlaceId()).getValue();
-                Boolean isGoing = usersGoingToRestaurant != null && usersGoingToRestaurant.size() > 0;
+                boolean isGoing = activeRestaurants != null && activeRestaurants.contains(result.getPlaceId());
 
                 MapUiModel mapUiModel = new MapUiModel(
                         result.getName(),
                         result.getPlaceId(),
-                        bitmapDescriptorFromVector(application, isGoing),
+                        isGoing ? R.drawable.ic_map_marker_24 : R.drawable.ic_map_marker_48dp,
                         result.getGeometry().getLocation().getLat(),
                         result.getGeometry().getLocation().getLng()
                 );
@@ -126,23 +126,11 @@ public class MapViewModel extends ViewModel {
         return currentLocationRepository.getLocationLiveData();
     }
 
-    //TODO : Custom map marker
-    private BitmapDescriptor bitmapDescriptorFromVector(Context context, Boolean isGoing) {
-        int color = (isGoing) ? R.drawable.ic_map_marker_24 : R.drawable.ic_map_marker_default_24;
-        Drawable vectorDrawable = ContextCompat.getDrawable(context, color);
-        assert vectorDrawable != null;
-        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
-        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        vectorDrawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
-
     public LiveData<List<MapUiModel>> getMapUiModelLiveData() {
         return uiModelsMediatorLiveData;
     }
 
-    public SingleLiveEvent<String> getSingleLiveEventLaunchDetailActivity() {
+    public SingleLiveEvent<String> getSingleLiveEventOpenDetailActivity() {
         return singleLiveEventLaunchDetailActivity;
     }
 
@@ -168,7 +156,7 @@ public class MapViewModel extends ViewModel {
         currentLocationRepository.stopLocationUpdates();
     }
 
-    public void launchDetailPlaceActivity(String id) {
+    public void openDetailPlaceActivity(String id) {
         singleLiveEventLaunchDetailActivity.setValue(id);
     }
 }

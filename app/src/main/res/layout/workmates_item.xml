@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="16dp"
-            android:textStyle="bold"
+            android:textStyle="italic"
             tools:text="Scarlett is eating french (Le Zinc)" />
 
     </LinearLayout>

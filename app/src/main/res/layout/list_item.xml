@@ -44,11 +44,11 @@
         android:layout_height="wrap_content"
         android:isIndicator="true"
         android:stepSize="0.1"
+        android:numStars="3"
         android:theme="@style/RatingBar"
         app:layout_constraintBottom_toBottomOf="@+id/restaurant_photo"
         app:layout_constraintEnd_toEndOf="@+id/restaurant_distance"
-        tools:numStars="3"
-        tools:rating="3" />
+        tools:rating="2" />
 
     <TextView
         android:id="@+id/restaurant_name"

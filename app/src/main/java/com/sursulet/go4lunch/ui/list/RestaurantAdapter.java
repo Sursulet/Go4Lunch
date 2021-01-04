@@ -81,19 +81,14 @@ public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapte
                 System.out.println("Could not parse " + nfe);
             }
             ratingBar.setNumStars(numStars);
-            ratingBar.setRating(Float.parseFloat(listUiModel.getRating()));
+            //ratingBar.setRating(Float.parseFloat(listUiModel.getRating()));
 
             Glide.with(photo)
                     .load(listUiModel.photoUrl)
                     .transform(new CenterCrop())
                     .into(photo);
 
-            item.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onItemClickListener.onItemClick(getAdapterPosition());
-                }
-            });
+            item.setOnClickListener(v -> onItemClickListener.onItemClick(getAdapterPosition()));
         }
     }
 }

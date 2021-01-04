@@ -1,29 +1,35 @@
 package com.sursulet.go4lunch.ui.map;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -40,7 +46,7 @@ public class MapFragment extends Fragment {
     private static final String TAG = MapFragment.class.getSimpleName();
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
     // A default location (Paris, France) and default zoom to use when location permission is not granted.
-    private final LatLng defaultLocation = new LatLng(48.8534, 2.3488);
+    private final LatLng defaultLocation = new LatLng(48.8534, 2.3488); //Paris
     private static final int DEFAULT_ZOOM = 15;
 
     MapViewModel mapViewModel;
@@ -58,6 +64,7 @@ public class MapFragment extends Fragment {
         return v;
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -70,6 +77,8 @@ public class MapFragment extends Fragment {
         if (mapFragment != null) {
             mapFragment.getMapAsync(googleMap -> {
                 map = googleMap;
+                map.moveCamera(CameraUpdateFactory.newLatLng(defaultLocation));
+                map.animateCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM));
                 /*map.setMinZoomPreference(6.0f);
                 map.setMaxZoomPreference(14.0f);
 
@@ -82,11 +91,12 @@ public class MapFragment extends Fragment {
                     }
                 });*/
 
-                //map.setMyLocationEnabled(true);
+                map.setMyLocationEnabled(true);
                 mapViewModel.onMapReady();
+
                 map.setOnMarkerClickListener(marker -> {
-                    if(marker.getSnippet() != null && !marker.getSnippet().isEmpty()){
-                        mapViewModel.launchDetailPlaceActivity(marker.getSnippet());
+                    if (marker.getSnippet() != null && !marker.getSnippet().isEmpty()) {
+                        mapViewModel.openDetailPlaceActivity(marker.getSnippet());
                     }
                     return true;
                 });
@@ -94,19 +104,12 @@ public class MapFragment extends Fragment {
         }
 
         /* invoquer pour obtenir l'emplacement du mobile : currentLocation */
-        mapViewModel.getMapUiModelLiveData().observe(getViewLifecycleOwner(), new Observer<List<MapUiModel>>() {
-            @Override
-            public void onChanged(List<MapUiModel> models) {
-                updateUi(models);
-            }
-        });
+        mapViewModel.getMapUiModelLiveData().observe(getViewLifecycleOwner(), this::updateUi);
 
-        mapViewModel.getSingleLiveEventLaunchDetailActivity().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(String id) {
-                requireActivity().startActivity(DetailPlaceActivity.getStartIntent(requireActivity(), id));
-            }
-        });
+        mapViewModel.getSingleLiveEventOpenDetailActivity()
+                .observe(getViewLifecycleOwner(),
+                        id -> requireActivity().startActivity(DetailPlaceActivity
+                                .getStartIntent(requireActivity(), id)));
     }
 
     @Override
@@ -131,12 +134,13 @@ public class MapFragment extends Fragment {
     }
 
     public void updateUi(List<MapUiModel> models) {
+        latitude = 0; longitude = 0;
         for (MapUiModel model : models) {
             map.addMarker(
                     new MarkerOptions()
                             .position(new LatLng(model.getLat(), model.getLng()))
                             .title(model.getName())
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                            .icon(bitmapDescriptorFromVector(model.getIcon()))
                             .snippet(model.getPlaceId())
             );
 
@@ -144,8 +148,8 @@ public class MapFragment extends Fragment {
             longitude = longitude + model.getLng();
         }
         //TODO : J'ai fait la moyenne de la latitude et de la longitude
-        map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latitude/models.size(), longitude/models.size())));
-        map.animateCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM));
+        //map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latitude / models.size(), longitude / models.size())));
+        //map.animateCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM));
     }
 
     private boolean checkPermissions() {
@@ -237,5 +241,39 @@ public class MapFragment extends Fragment {
                 getString(mainTextStringId),
                 Snackbar.LENGTH_INDEFINITE)
                 .setAction(getString(actionStringId), listener).show();
+    }
+
+    private BitmapDescriptor bitmapDescriptorFromVector(@DrawableRes int drawableRes) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(requireContext(), drawableRes);
+        assert vectorDrawable != null;
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_search:
+                Toast.makeText(getContext(), "HERRRRE", Toast.LENGTH_SHORT).show();
+                SearchView searchView = (SearchView) item.getActionView();
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        return false;
+                    }
+                });
+                //onSearchCalled();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

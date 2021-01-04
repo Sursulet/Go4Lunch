@@ -5,7 +5,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -55,17 +54,12 @@ public class WorkmatesAdapter extends ListAdapter<WorkmatesUiModel, WorkmatesAda
             photo = itemView.findViewById(R.id.workmate_photo);
             txt = itemView.findViewById(R.id.workmate_txt);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    onItemClickListener.onItemClick(getAdapterPosition());
-                }
-            });
+            itemView.setOnClickListener(v -> onItemClickListener.onItemClick(getAdapterPosition()));
         }
 
         public void bind(WorkmatesUiModel workmatesUiModel) {
-            String b = workmatesUiModel.getTxt();
-            txt.setText(b);
+            txt.setText(workmatesUiModel.getTxt());
+            txt.setTypeface(null, workmatesUiModel.getTxtStyle());
             Glide.with(photo)
                     .load(workmatesUiModel.photo)
                     .circleCrop()

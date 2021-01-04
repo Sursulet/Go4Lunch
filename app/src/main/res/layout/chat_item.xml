@@ -24,7 +24,7 @@
 
         <!-- IMAGE IS MENTOR -->
         <ImageView
-            android:id="@+id/chat_item_profile_container_is_mentor_image"
+            android:id="@+id/chat_item_profile_container_is_image"
             android:layout_width="15dip"
             android:layout_height="15dip"/>
 

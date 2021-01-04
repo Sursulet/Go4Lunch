@@ -3,24 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/action_map">
+    app:startDestination="@+id/action_list">
 
     <fragment
         android:id="@+id/action_map"
         android:name="com.sursulet.go4lunch.ui.map.MapFragment"
-        android:label="@string/title_map"
+        android:label="@string/toolbar_title"
         tools:layout="@layout/fragment_map" />
 
     <fragment
         android:id="@+id/action_list"
         android:name="com.sursulet.go4lunch.ui.list.ListFragment"
-        android:label="@string/title_list"
+        android:label="@string/toolbar_title"
         tools:layout="@layout/fragment_list" />
 
     <fragment
         android:id="@+id/action_workmates"
         android:name="com.sursulet.go4lunch.ui.workmates.WorkmatesFragment"
-        android:label="@string/title_workmates"
+        android:label="@string/toolbar_title_workmates"
         tools:layout="@layout/fragment_workmates" />
 
 </navigation>

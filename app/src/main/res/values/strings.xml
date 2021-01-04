@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Go4Lunch</string>
     <string name="toolbar_title">I\'m Hungry</string>
+    <string name="toolbar_title_workmates">Available workmates</string>
     <string name="title_search">SEARCH</string>
 
     <!-- NOTIFICATION SERVICE -->
@@ -38,10 +39,10 @@
     <string name="info_no_username_found">Info no username found</string>
 
     <!-- MENTOR_CHAT ACTIVITY -->
-    <string name="toolbar_title_mentor_chat_activity">Chats de discussions</string>
-    <string name="text_input_title_mentor_chat_activity">Composer votre message</string>
-    <string name="button_title_mentor_chat_activity">ENVOYER</string>
-    <string name="text_view_mentor_chat_error">Ce fil de discussion ne contient pour le moment aucun message&#8230;</string>
+    <string name="toolbar_title_chat_activity">Chats de discussions</string>
+    <string name="text_input_title_chat_activity">Composer votre message</string>
+    <string name="button_title_chat_activity">ENVOYER</string>
+    <string name="text_view_chat_error">Ce fil de discussion ne contient pour le moment aucun message&#8230;</string>
     <string name="popup_title_permission_files_access">Cette application a besoin de permission pour fonctionner.</string>
     <string name="toast_title_no_image_chosen">Aucune image choisie&#8230;</string>
 
@@ -50,4 +51,5 @@
     <string name="permission_denied_explanation">Permission was denied, but is needed for core
         functionality.</string>
     <string name="settings">Settings</string>
+    <string name="no_location_detected">No location detected</string>
 </resources>

@@ -3,7 +3,6 @@ package com.sursulet.go4lunch.ui.list;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,10 +15,11 @@ import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
 import com.sursulet.go4lunch.ui.DetailPlaceActivity;
 import com.sursulet.go4lunch.ui.OnItemClickListener;
-
-import java.util.List;
+import com.sursulet.go4lunch.ui.map.MapFragment;
 
 public class ListFragment extends Fragment implements OnItemClickListener {
+
+    private static final String TAG = MapFragment.class.getSimpleName();
 
     ListViewModel listViewModel;
     RestaurantAdapter adapter;
@@ -36,19 +36,12 @@ public class ListFragment extends Fragment implements OnItemClickListener {
         adapter = new RestaurantAdapter(ListUiModel.DIFF_CALLBACK, this);
         recyclerView.setAdapter(adapter);
 
-        listViewModel.getListUiModelLiveData().observe(getViewLifecycleOwner(), new Observer<List<ListUiModel>>() {
-            @Override
-            public void onChanged(List<ListUiModel> listUiModels) {
-                adapter.submitList(listUiModels);
-            }
-        });
+        listViewModel.getUiModelMediator().observe(
+                getViewLifecycleOwner(),
+                listUiModels -> adapter.submitList(listUiModels));
 
-        listViewModel.getSingleLiveEventOpenDetailActivity().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(String id) {
-                requireActivity().startActivity(DetailPlaceActivity.getStartIntent(requireActivity(), id));
-            }
-        });
+        listViewModel.getSingleLiveEventOpenDetailActivity().observe(this,
+                id -> requireActivity().startActivity(DetailPlaceActivity.getStartIntent(requireActivity(), id)));
 
         return v;
     }

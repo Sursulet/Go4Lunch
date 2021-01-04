@@ -29,6 +29,8 @@ import com.sursulet.go4lunch.ui.workmates.WorkmatesUiModel;
 
 public class DetailPlaceActivity extends AppCompatActivity implements OnItemClickListener {
 
+    private static final String TAG = DetailPlaceActivity.class.getSimpleName();
+
     private static final int REQUEST_CALL = 1;
     ImageView photo;
     TextView name;
@@ -78,8 +80,11 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
                     .load(detailPlaceUiModel.getUrlPhoto())
                     .into(photo);
 
-            address.setText(detailPlaceUiModel.getTxt());
+            address.setText(detailPlaceUiModel.getOpeningHours());
             //rating.setRating(Float.parseFloat(detailPlaceUiModel.getRatingBar()));
+            //Toast.makeText(DetailPlaceActivity.this, "detail " + detailPlaceUiModel.getRatingBar(),Toast.LENGTH_SHORT).show();
+            String s = String.valueOf(detailPlaceUiModel.getIsGoing());
+            Toast.makeText(DetailPlaceActivity.this, "detail " + s,Toast.LENGTH_SHORT).show();
             fab.setImageTintList(ColorStateList.valueOf(detailPlaceUiModel.getIsGoing()));
             likeBtn.setBackgroundTintList(ColorStateList.valueOf(detailPlaceUiModel.getIsLike()));
 

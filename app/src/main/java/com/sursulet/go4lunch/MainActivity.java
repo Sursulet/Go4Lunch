@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -32,7 +31,6 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
@@ -52,7 +50,7 @@ public class MainActivity extends AppCompatActivity
     private static final int RC_SIGN_IN = 123;
     private static final int SIGN_OUT_TASK = 10;
     private static final String TAG = "MAIN ACTIVITY";
-    private static int AUTOCOMPLETE_REQUEST_CODE = 1;
+    private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
 
     MainViewModel mainViewModel;
 
@@ -110,11 +108,11 @@ public class MainActivity extends AppCompatActivity
          * environment we recommend using a secure mechanism to manage API keys.
          */
         if (!Places.isInitialized()) {
-            Places.initialize(getApplicationContext(), apiKey);
+            //Places.initialize(getApplicationContext(), apiKey);
         }
 
         // Create a new Places client instance.
-        PlacesClient placesClient = Places.createClient(this);
+        //PlacesClient placesClient = Places.createClient(this);
     }
 
     @Override
@@ -142,18 +140,20 @@ public class MainActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
-
+/*
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_search:
                 Toast.makeText(this, "HERRRRE", Toast.LENGTH_SHORT).show();
-                onSearchCalled();
+                //onSearchCalled();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
+ */
 
     public void onSearchCalled() {
         // Set the fields to specify which types of place data to
@@ -171,18 +171,15 @@ public class MainActivity extends AppCompatActivity
 
     public void getUserProfile() {
         mainViewModel.getUiModelLiveData()
-                .observe(this, new Observer<MainUiModel>() {
-            @Override
-            public void onChanged(MainUiModel mainUiModel) {
-                userName.setText(mainUiModel.getUsername());
-                userEmail.setText(mainUiModel.getEmail());
+                .observe(this, mainUiModel -> {
+                    userName.setText(mainUiModel.getUsername());
+                    userEmail.setText(mainUiModel.getEmail());
 
-                Glide.with(userPhoto)
-                        .load(mainUiModel.getPhotoUrl())
-                        .apply(RequestOptions.circleCropTransform())
-                        .into(userPhoto);
-            }
-        });
+                    Glide.with(userPhoto)
+                            .load(mainUiModel.getPhotoUrl())
+                            .apply(RequestOptions.circleCropTransform())
+                            .into(userPhoto);
+                });
     }
 
     public void signOutUserFromFirebase() {
@@ -192,12 +189,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted(final int origin) {
-        return new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                if (origin == SIGN_OUT_TASK) {
-                    finish();
-                }
+        return aVoid -> {
+            if (origin == SIGN_OUT_TASK) {
+                finish();
             }
         };
     }

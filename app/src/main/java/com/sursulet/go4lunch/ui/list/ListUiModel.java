@@ -3,8 +3,6 @@ package com.sursulet.go4lunch.ui.list;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 
-import com.sursulet.go4lunch.ui.workmates.WorkmatesUiModel;
-
 public class ListUiModel {
 
     String id;

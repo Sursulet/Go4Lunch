@@ -49,14 +49,17 @@
             <RatingBar
                 android:id="@+id/detail_rating_bar"
                 style="?android:attr/ratingBarStyleSmall"
+                android:theme="@style/RatingBar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:max="5"
+                android:numStars="3"
                 android:stepSize="0.5"
                 app:layout_constraintBottom_toBottomOf="@+id/detail_name"
                 app:layout_constraintStart_toEndOf="@+id/detail_name"
-                app:layout_constraintTop_toTopOf="@+id/detail_name" />
+                app:layout_constraintTop_toTopOf="@+id/detail_name"
+                tools:numStars="3"
+                tools:rating="1" />
 
             <TextView
                 android:id="@+id/detail_address"
