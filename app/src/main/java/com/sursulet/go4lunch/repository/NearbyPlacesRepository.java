@@ -25,7 +25,7 @@ public class NearbyPlacesRepository {
 
         MutableLiveData<List<Result>> places = new MutableLiveData<>();
         mService.getNearByPlaces(
-                "", //TODO : KEY
+                "AIzaSyB8eGXF61T52BsOhZ8Ale23Z_6Pmwyqp8I", //TODO : KEY
                 latitude + "," + longitude,
                 "restaurant",
                 "500"

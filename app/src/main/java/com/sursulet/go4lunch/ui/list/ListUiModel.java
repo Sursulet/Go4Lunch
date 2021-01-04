@@ -69,7 +69,7 @@ public class ListUiModel {
                 photoUrl.equals(listUiModel.photoUrl) &&
                 txt.equals(listUiModel.txt) &&
                 opening.equals(listUiModel.opening) &&
-                distance.equals(listUiModel.distance) &&
+                //distance.equals(listUiModel.distance) &&
                 rating.equals(listUiModel.rating) &&
                 nbWorkmates.equals(listUiModel.nbWorkmates);
     }

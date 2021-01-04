@@ -66,20 +66,25 @@ public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapte
             photo = itemView.findViewById(R.id.restaurant_photo);
             name = itemView.findViewById(R.id.restaurant_name);
             txt = itemView.findViewById(R.id.restaurant_txt);
+            opening = itemView.findViewById(R.id.restaurant_opening);
             distance = itemView.findViewById(R.id.restaurant_distance);
+            nbWorkmates = itemView.findViewById(R.id.restaurant_nbWorkmates);
             ratingBar = itemView.findViewById(R.id.restaurant_rating_bar);
         }
 
         public void bind(ListUiModel listUiModel) {
             name.setText(listUiModel.name);
             txt.setText(listUiModel.getTxt());
-            distance.setText(listUiModel.getDistance());
+            opening.setText(listUiModel.getOpening());
+            //distance.setText(listUiModel.getDistance());
             int numStars = 0;
             try{
                 numStars = Integer.parseInt(listUiModel.getRating());
             } catch(NumberFormatException nfe) {
                 System.out.println("Could not parse " + nfe);
             }
+
+            nbWorkmates.setText(listUiModel.getNbWorkmates());
             ratingBar.setNumStars(numStars);
             //ratingBar.setRating(Float.parseFloat(listUiModel.getRating()));
 

@@ -1,19 +1,8 @@
 package com.sursulet.go4lunch.repository;
 
-import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.sursulet.go4lunch.api.UserHelper;
-import com.sursulet.go4lunch.model.Restaurant;
-import com.sursulet.go4lunch.model.User;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
 import com.sursulet.go4lunch.remote.RetrofitClient;
@@ -34,7 +23,7 @@ public class DetailPlaceRepository {
 
         mService.getDetailPlace(
                 place_id,
-                "null //TODO : KEY"
+                "AIzaSyB8eGXF61T52BsOhZ8Ale23Z_6Pmwyqp8I"
         ).enqueue(new Callback<GooglePlacesDetailResult>() {
             @Override
             public void onResponse(
@@ -55,40 +44,5 @@ public class DetailPlaceRepository {
         });
 
         return placeMutableLiveData;
-    }
-
-    public void addRestaurantToUser(String restaurantId, String restaurantName, String userId) {
-        Restaurant restaurant = new Restaurant(restaurantId, restaurantName);
-        UserHelper.updateRestaurant(restaurant, userId); //TODO: rajouter onsucceslistener
-        /*FirebaseFirestore.getInstance()
-                .collection("users")
-                .document(userId)
-                .update("placeId", restaurantId);*/
-    }
-
-    public void addRestaurantToFavorite(String restaurantId, String userId) {
-        FirebaseFirestore.getInstance()
-                .collection("users")
-                .document(userId).get().continueWithTask(new Continuation<DocumentSnapshot, Task<Void>>() {
-                    @Override
-                    public Task<Void> then(@NonNull Task<DocumentSnapshot> task) throws Exception {
-                        return FirebaseFirestore.getInstance()
-                                .collection("users")
-                                .document(userId)
-                                .update("likeRestaurant", FieldValue.arrayUnion(restaurantId));
-                    }
-                });
-    }
-
-    public void addLikeToRestaurant(String userId, String restaurantId) {
-        UserHelper.getUsersCollection()
-                .document(userId)
-                .collection("Likes")
-                .add(new Restaurant(restaurantId, userId));
-    }
-
-    // --- DELETE ---
-    public static Task<Void> deleteUser(String uid) {
-        return UserHelper.getUsersCollection().document(uid).delete();
     }
 }

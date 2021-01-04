@@ -83,8 +83,8 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
                     currentLocationRepository,
                     nearbyPlacesRepository,
                     detailPlaceRepository,
-                    userRepository
-            );
+                    userRepository,
+                    restaurantRepository);
         } else if (modelClass.isAssignableFrom(WorkmatesViewModel.class)) {
             return (T) new WorkmatesViewModel(
                     userRepository

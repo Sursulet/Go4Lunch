@@ -2,24 +2,20 @@ package com.sursulet.go4lunch;
 
 import android.location.Location;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.sursulet.go4lunch.model.details.Close;
 import com.sursulet.go4lunch.model.details.Open;
 import com.sursulet.go4lunch.model.details.OpeningHours;
 import com.sursulet.go4lunch.model.details.Period;
 
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 
 public class Utils {
 
@@ -34,7 +30,7 @@ public class Utils {
         return String.valueOf((3 * rating / 5));
     }
 
-    private String getDistance(double lat1, double lng1, double lat2, double lng2) {
+    public static String getDistance(double lat1, double lng1, double lat2, double lng2) {
         /*double theta = lng1 - lng2;
         double dist = Math.sin(Math.toRadians(lat1)) * Math.sin(Math.toRadians(lat2)) + Math.cos(Math.toRadians(lat1));
         dist = Math.acos(dist);
@@ -52,28 +48,30 @@ public class Utils {
     }
 
     //TODO : Opening Hours
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public static String getOpeningHours(OpeningHours openingHours) {
         if (openingHours == null) {
             return "unknow";
         } else {
             if (openingHours.getOpenNow()) {
-                int day = getDayNumberOld(Calendar.getInstance().getTime());
-                Date hour = Calendar.getInstance().getTime();
-                Log.d("PEACH", "getOpeningHours: " + hour.toString()); //Mon Dec 28 17:25:55 GMT+00:00 2020
-                int minHour = 30;
+                LocalDate date = LocalDate.now();
+                LocalTime time = LocalTime.now();
 
+                int day = getDayNumberNew(date);
                 List<Period> periods = openingHours.getPeriods();
-                Open openDay = periods.get(day).getOpen();
-                Log.d("PEACH", "getOpeningHours: " + periods.get(day));
-                Date openTime = getStringToHourOld(periods.get(day).getOpen().getTime());
-                Date closeTime = getStringToHourOld(periods.get(day).getClose().getTime());
+                Period period = periods.get(day);
 
-                // Open 24/7
-                if (openDay.getDay() == 0 && openDay.getTime().equals("0000")) {
-                    //openingHours.getPeriods().get(day).getClose() == null
+                Open open = periods.get(day).getOpen();
+                Close close = periods.get(day).getClose();
+
+                LocalTime openTime = getStringDayNew(open.getTime());
+                LocalTime closeTime = getStringDayNew(close.getTime());
+
+                if(open.getDay() == 0 && open.getTime().equals("0000")) {
                     return "Open 24/7";
-                } else if (openTime.after(hour) && closeTime.before(hour)) {
-                    if(closeTime.compareTo(hour) < minHour) { return "Closing soon"; }
+                } else if(time.isBefore(closeTime.minusMinutes(30))) {
+                    return "Closing soon ";
+                } else if(time.isAfter(openTime) && time.isBefore(closeTime)) {
                     return "Open until " + closeTime.toString();
                 }
             } else {
@@ -85,32 +83,21 @@ public class Utils {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static int getDayNumberNew(LocalDate date) {
+    private static int getDayNumberNew(LocalDate date) {
         DayOfWeek day = date.getDayOfWeek();
         return day.getValue() - 1;
     }
 
-    public static int getDayNumberOld(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        return cal.get(Calendar.DAY_OF_WEEK) - 1;
+    private static LocalTime getStringDayNew(String str) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
+        return LocalTime.parse(str, formatter);
     }
 
-    public static int getHourNumberOld(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        return cal.get(Calendar.HOUR_OF_DAY);
+    /*
+    public static String getDayStringNew(LocalDate date, Locale locale) {
+        DayOfWeek day = date.getDayOfWeek();
+        return day.getDisplayName(TextStyle.FULL, locale);
     }
 
-    public static Date getStringToHourOld(String strTime) {
-        DateFormat dateFormat = new SimpleDateFormat("EEEE", Locale.FRANCE);
-        Date d = null;
-        try {
-            d = dateFormat.parse(strTime);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        return d;
-    }
+     */
 }
