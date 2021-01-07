@@ -23,7 +23,7 @@ public class DetailPlaceRepository {
 
         mService.getDetailPlace(
                 place_id,
-                "AIzaSyB8eGXF61T52BsOhZ8Ale23Z_6Pmwyqp8I"
+                ""
         ).enqueue(new Callback<GooglePlacesDetailResult>() {
             @Override
             public void onResponse(

@@ -10,21 +10,29 @@ public class MessageHelper {
     private static final String COLLECTION_NAME = "messages";
 
     // --- CREATE --
-    public static Task<DocumentReference> createMessageForChat(String textMessage, String chat, User userSender){
+    public static Task<DocumentReference> createMessageForChat(String textMessage, User userSender, String uidReceiver){
 
-        // 1 - Create the Message object
+        String chat = createChatName(userSender.getUid(), uidReceiver);
         Message message = new Message(textMessage, userSender);
 
-        // 2 - Store Message to Firestore
         return ChatHelper.getChatCollection()
                 .document(chat)
                 .collection(COLLECTION_NAME)
                 .add(message);
     }
 
+    private static String createChatName(String uidSender, String uidReceiver) {
+        String name;
+        if(uidSender.compareTo(uidReceiver) > 0) name = uidSender+"_"+uidReceiver;
+        else name = uidReceiver+"_"+uidSender;
+        return name;
+        //return (uidSender.compareTo(uidReceiver) > 0) ? uidSender+"_"+uidReceiver : uidReceiver+"_"+uidSender;
+    }
+
     // --- GET ---
 
-    public static Query getAllMessageForChat(String chat){
+    public static Query getAllMessageForChat(String userSender, String uidReceiver){
+        String chat = createChatName(userSender, uidReceiver);
         return ChatHelper.getChatCollection()
                 .document(chat)
                 .collection(COLLECTION_NAME)

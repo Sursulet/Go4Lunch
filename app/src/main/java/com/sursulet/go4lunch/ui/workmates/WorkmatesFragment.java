@@ -49,7 +49,6 @@ public class WorkmatesFragment extends Fragment implements OnItemClickListener {
 
     @Override
     public void onItemClick(int position) {
-        //TODO : Faut-il récupérer l'id dans le ViewModel ?
         String workmateId = adapter.getCurrentList().get(position).getUid();
         workmatesViewModel.openChatActivity(workmateId);
     }

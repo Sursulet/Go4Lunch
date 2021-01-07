@@ -1,70 +1,91 @@
 package com.sursulet.go4lunch.ui.chat;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.RequestManager;
 import com.sursulet.go4lunch.R;
-import com.sursulet.go4lunch.model.Message;
 
-//TODO :
-public class ChatAdapter extends ListAdapter<Message, MessageViewHolder> {
-
-    public interface Listener {
-        void onDataChanged();
-    }
+//TODO : Faut-il utiliser ListAdapter ?
+public class ChatAdapter extends ListAdapter<MessageUiModel, ChatAdapter.MessageViewHolder> {
 
     //FOR DATA
-    private final RequestManager glide;
+    public static final int MSG_TYPE_LEFT = 0;
+    public static final int MSG_TYPE_RIGHT = 1;
+
     private final String idCurrentUser;
 
     //FOR COMMUNICATION
-    private final Listener callback;
 
     public ChatAdapter(
-            @NonNull DiffUtil.ItemCallback<Message> diffCallback,
-            RequestManager glide,
-            Listener callback,
+            @NonNull DiffUtil.ItemCallback<MessageUiModel> diffCallback,
             String idCurrentUser
     ) {
         super(diffCallback);
-        this.glide = glide;
-        this.callback = callback;
         this.idCurrentUser = idCurrentUser;
     }
 
     @NonNull
     @Override
     public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new MessageViewHolder(LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.chat_item, parent, false));
+        if(viewType == MSG_TYPE_RIGHT){
+            return new MessageViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.chat_item_right, parent, false));
+        } else {
+            return new MessageViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.chat_item_left, parent, false));
+        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
-        Message model = getItem(position);
-        holder.updateWithMessage(model, this.idCurrentUser, this.glide);
+        MessageUiModel messageUiModel = getItem(position);
+        holder.bind(messageUiModel);
     }
 
-    public void onDataChanged() {
-        //super.onDataChanged();
-        this.callback.onDataChanged();
+    @Override
+    public int getItemViewType(int position) {
+        if(getItem(position).getUserSender().getUid().equals(idCurrentUser)){
+            return MSG_TYPE_RIGHT;
+        } else {
+            return MSG_TYPE_LEFT;
+        }
     }
 
-    public static final DiffUtil.ItemCallback<Message> DIFF_CALLBACK =
-            new DiffUtil.ItemCallback<Message>() {
+    public static class MessageViewHolder extends RecyclerView.ViewHolder {
+
+        RelativeLayout item;
+        TextView message;
+
+        public MessageViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            item = itemView.findViewById(R.id.chat_item_root_view);
+            message = itemView.findViewById(R.id.chat_item_message);
+        }
+
+        public void bind(MessageUiModel messageUiModel) {
+            message.setText(messageUiModel.getMessage());
+        }
+    }
+
+    public static final DiffUtil.ItemCallback<MessageUiModel> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<MessageUiModel>() {
                 @Override
                 public boolean areItemsTheSame(
-                        @NonNull Message oldMessage, @NonNull Message newMessage) {
+                        @NonNull MessageUiModel oldMessage, @NonNull MessageUiModel newMessage) {
                     return oldMessage.getMessage().equals(newMessage.getMessage());
                 }
                 @Override
                 public boolean areContentsTheSame(
-                        @NonNull Message oldMessage, @NonNull Message newMessage) {
+                        @NonNull MessageUiModel oldMessage, @NonNull MessageUiModel newMessage) {
                     return oldMessage.getMessage().equals(newMessage.getMessage());
                 }
             };

@@ -11,13 +11,13 @@ public class ListUiModel {
     String txt;
     String opening;
     String distance;
-    String rating;
-    String nbWorkmates; //List Workmates
+    float rating;
+    String nbWorkmates;
 
     public ListUiModel(
             String id, String name, String photoUrl,
             String txt, String opening, String distance,
-            String rating, String nbWorkmates
+            float rating, String nbWorkmates
     ) {
         this.id = id;
         this.name = name;
@@ -51,7 +51,7 @@ public class ListUiModel {
         return distance;
     }
 
-    public String getRating() {
+    public float getRating() {
         return rating;
     }
 
@@ -69,8 +69,8 @@ public class ListUiModel {
                 photoUrl.equals(listUiModel.photoUrl) &&
                 txt.equals(listUiModel.txt) &&
                 opening.equals(listUiModel.opening) &&
-                //distance.equals(listUiModel.distance) &&
-                rating.equals(listUiModel.rating) &&
+                distance.equals(listUiModel.distance) &&
+                rating == listUiModel.rating &&
                 nbWorkmates.equals(listUiModel.nbWorkmates);
     }
 

@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
-import com.sursulet.go4lunch.ui.DetailPlaceActivity;
+import com.sursulet.go4lunch.ui.detail.DetailPlaceActivity;
 import com.sursulet.go4lunch.ui.OnItemClickListener;
 import com.sursulet.go4lunch.ui.map.MapFragment;
 

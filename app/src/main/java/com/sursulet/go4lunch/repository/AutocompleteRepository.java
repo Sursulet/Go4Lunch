@@ -12,6 +12,7 @@ import com.sursulet.go4lunch.model.autocomplete.Prediction;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
 import com.sursulet.go4lunch.remote.RetrofitClient;
 
+import java.io.IOException;
 import java.util.List;
 
 import retrofit2.Call;
@@ -23,33 +24,24 @@ public class AutocompleteRepository {
     IGoogleAPIService mService = RetrofitClient.getClient("https://maps.googleapis.com/")
             .create(IGoogleAPIService.class);
 
-    public LiveData<List<Prediction>> getAutocompleteByLocation(String input, Location location) {
+    public List<Prediction> getAutocompleteByLocation(String input, Location location) {
 
-        MutableLiveData<List<Prediction>> places = new MutableLiveData<>();
-
-        mService.getAutocompletePlaces(
-                null, //TODO : KEY
-                input,
-                location.getLatitude() + "," + location.getLongitude(),
-                "500",
-                "establishment"
-        ).enqueue(new Callback<GooglePlacesAutocompleteResult>() {
-            @Override
-            public void onResponse(Call<GooglePlacesAutocompleteResult> call, Response<GooglePlacesAutocompleteResult> response) {
-
-                if (response.isSuccessful()) {
-                    if (response.body() != null && response.body().getPredictions() != null) {
-                        places.setValue(response.body().getPredictions());
-                    }
-                }
+        List<Prediction> predictions = null;
+        try {
+            Response<GooglePlacesAutocompleteResult> response = mService.getAutocompletePlaces(
+                    null, //TODO : KEY
+                    input,
+                    location.getLatitude() + "," + location.getLongitude(),
+                    "500",
+                    "establishment"
+            ).execute();
+            if(response.isSuccessful()) {
+                predictions = response.body().getPredictions();
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-            @Override
-            public void onFailure(Call<GooglePlacesAutocompleteResult> call, Throwable t) {
-                t.printStackTrace();
-            }
-        });
-
-        return places;
+        return predictions;
     }
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.sursulet.go4lunch.SingleLiveEvent;
 import com.sursulet.go4lunch.model.Restaurant;
 import com.sursulet.go4lunch.model.User;
@@ -29,27 +30,30 @@ public class WorkmatesViewModel extends ViewModel {
             List<WorkmatesUiModel> results = new ArrayList<>();
 
             for (User user : users) {
-                Restaurant place = user.getRestaurant();
+                if(!(user.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()))){
+                    Restaurant place = user.getRestaurant();
 
-                String txt; int style;
-                if (place != null) {
-                    txt = " is eating (" + place.getName() + ")";
-                    style = Typeface.BOLD;
-                } else {
-                    txt = " hasn't decided yet ";
-                    style = Typeface.ITALIC;
+                    String txt;
+                    int style;
+                    if (place != null) {
+                        txt = " is eating (" + place.getName() + ")";
+                        style = Typeface.BOLD;
+                    } else {
+                        txt = " hasn't decided yet ";
+                        style = Typeface.ITALIC;
+                    }
+
+                    String sentence = user.getUsername() + txt;
+
+                    WorkmatesUiModel workmatesUiModel = new WorkmatesUiModel(
+                            user.getUid(),
+                            sentence,
+                            user.getAvatarUrl(),
+                            style
+                    );
+
+                    results.add(workmatesUiModel);
                 }
-
-                String sentence = user.getUsername() + txt;
-
-                WorkmatesUiModel workmatesUiModel = new WorkmatesUiModel(
-                        user.getUid(),
-                        sentence,
-                        user.getAvatarUrl(),
-                        style
-                );
-
-                results.add(workmatesUiModel);
             }
 
             return results;

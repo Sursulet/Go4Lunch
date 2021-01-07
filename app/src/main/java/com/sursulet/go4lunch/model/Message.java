@@ -1,13 +1,17 @@
 package com.sursulet.go4lunch.model;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Message {
 
     private String message;
-    private Date dateCreated;
+    private LocalDate dateCreated;
     private User userSender;
+    private User userReceiver;
     private String urlImage;
+
+    public Message() {}
 
     public Message(String message, User userSender) {
         this.message = message;
@@ -25,13 +29,13 @@ public class Message {
 
     // --- GETTERS ---
     public String getMessage() { return message; }
-    public Date getDateCreated() { return dateCreated; }
+    public LocalDate getDateCreated() { return dateCreated; }
     public User getUserSender() { return userSender; }
     public String getUrlImage() { return urlImage; }
 
     // --- SETTERS ---
     public void setMessage(String message) { this.message = message; }
-    public void setDateCreated(Date dateCreated) { this.dateCreated = dateCreated; }
+    public void setDateCreated(LocalDate dateCreated) { this.dateCreated = dateCreated; }
     public void setUserSender(User userSender) { this.userSender = userSender; }
     public void setUrlImage(String urlImage) { this.urlImage = urlImage; }
 }

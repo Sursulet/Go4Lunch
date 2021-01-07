@@ -15,7 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Go4Lunch">
-        <activity android:name=".ui.chat.ChatActivity"></activity>
+        <activity android:name=".ui.chat.ChatActivity"
+            android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
+            />
         <activity
             android:name=".SignInActivity"
             android:theme="@style/Theme.Go4Lunch.NoActionBar" />
@@ -25,7 +27,8 @@
             android:value="@string/google_maps_key" />
 
         <activity android:name=".ui.SettingsActivity" />
-        <activity android:name=".ui.DetailPlaceActivity" />
+        <activity android:name=".ui.detail.DetailPlaceActivity"
+            android:theme="@style/Theme.App"/>
         <activity
             android:name=".MainActivity"
             android:theme="@style/Theme.Go4Lunch.NoActionBar">

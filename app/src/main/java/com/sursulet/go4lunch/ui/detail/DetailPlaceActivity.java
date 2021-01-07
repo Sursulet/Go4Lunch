@@ -1,7 +1,8 @@
-package com.sursulet.go4lunch.ui;
+package com.sursulet.go4lunch.ui.detail;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
@@ -24,14 +25,19 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
+import com.sursulet.go4lunch.ui.OnItemClickListener;
+import com.sursulet.go4lunch.ui.chat.ChatActivity;
 import com.sursulet.go4lunch.ui.workmates.WorkmatesAdapter;
 import com.sursulet.go4lunch.ui.workmates.WorkmatesUiModel;
 
 public class DetailPlaceActivity extends AppCompatActivity implements OnItemClickListener {
 
-    private static final String TAG = DetailPlaceActivity.class.getSimpleName();
+    //private static final String TAG = DetailPlaceActivity.class.getSimpleName();
 
     private static final int REQUEST_CALL = 1;
+
+    DetailPlaceViewModel placeViewModel;
+
     ImageView photo;
     TextView name;
     TextView address;
@@ -40,6 +46,10 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
     TextView likeBtn;
     TextView websiteBtn;
     FloatingActionButton fab;
+
+    WorkmatesAdapter adapter;
+    private String websiteUrl;
+    private String phoneNumber;
 
     public static Intent getStartIntent(Context context, String id) {
         Intent intent = new Intent(context, DetailPlaceActivity.class);
@@ -55,9 +65,12 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
         Intent i = getIntent();
         String id = i.getStringExtra("id");
 
+        this.configureToolbar();
+
         photo = findViewById(R.id.detail_photo);
         name = findViewById(R.id.detail_name);
         address = findViewById(R.id.detail_address);
+        rating = findViewById(R.id.detail_rating_bar);
         callBtn = findViewById(R.id.detail_call_btn);
         likeBtn = findViewById(R.id.detail_like_btn);
         websiteBtn = findViewById(R.id.detail_website_btn);
@@ -65,11 +78,10 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
 
         RecyclerView recyclerView = findViewById(R.id.detail_workmates);
         recyclerView.addItemDecoration(new DividerItemDecoration(DetailPlaceActivity.this, DividerItemDecoration.VERTICAL));
-        WorkmatesAdapter adapter = new WorkmatesAdapter(WorkmatesUiModel.DIFF_CALLBACK, this);
+        adapter = new WorkmatesAdapter(WorkmatesUiModel.DIFF_CALLBACK, this);
         recyclerView.setAdapter(adapter);
 
-        final DetailPlaceViewModel placeViewModel =
-                new ViewModelProvider(this, ViewModelFactory.getInstance())
+        placeViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance())
                         .get(DetailPlaceViewModel.class);
 
         placeViewModel.startDetailPlace(id);
@@ -80,17 +92,18 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
                     .load(detailPlaceUiModel.getUrlPhoto())
                     .into(photo);
 
-            address.setText(detailPlaceUiModel.getOpeningHours());
-            //rating.setRating(Float.parseFloat(detailPlaceUiModel.getRatingBar()));
-            //Toast.makeText(DetailPlaceActivity.this, "detail " + detailPlaceUiModel.getRatingBar(),Toast.LENGTH_SHORT).show();
-            String s = String.valueOf(detailPlaceUiModel.getIsGoing());
-            Toast.makeText(DetailPlaceActivity.this, "detail " + s,Toast.LENGTH_SHORT).show();
+            address.setText(detailPlaceUiModel.getSentence());
+            rating.setRating(detailPlaceUiModel.getRating());
             fab.setImageTintList(ColorStateList.valueOf(detailPlaceUiModel.getIsGoing()));
             likeBtn.setBackgroundTintList(ColorStateList.valueOf(detailPlaceUiModel.getIsLike()));
 
+            phoneNumber = detailPlaceUiModel.getPhoneNumber();
+            websiteUrl = detailPlaceUiModel.getUrlWebsite();
 
             adapter.submitList(detailPlaceUiModel.getWorkmates());
         });
+
+        placeViewModel.getEventOpenChatActivity().observe(this, idWorkmates -> startActivity(ChatActivity.getStartIntent(DetailPlaceActivity.this, idWorkmates)));
 
         fab.setOnClickListener(v -> placeViewModel.onGoingButtonClick());
 
@@ -102,9 +115,17 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
 
     }
 
+    private void configureToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
+        toolbar.setTitle("");
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> finish());
+    }
+
     //TODO : Phone call
     private void onMakePhoneCall() {
-        String number = callBtn.getText().toString();
+        String number = phoneNumber;
         if(number.trim().length() > 0) {
             if(ContextCompat.checkSelfPermission(DetailPlaceActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(DetailPlaceActivity.this, new String[] {Manifest.permission.CALL_PHONE}, REQUEST_CALL);
@@ -118,7 +139,7 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
     }
 
     private void onGoToUrl() {
-        String url = websiteBtn.getText().toString();
+        String url = websiteUrl;
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
     }
 
@@ -135,6 +156,7 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
 
     @Override
     public void onItemClick(int position) {
-
+        String workmateId = adapter.getCurrentList().get(position).getUid();
+        placeViewModel.openChatActivity(workmateId);
     }
 }

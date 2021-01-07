@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.sursulet.go4lunch.api.UserHelper;
+import com.sursulet.go4lunch.model.Restaurant;
 import com.sursulet.go4lunch.model.User;
 
 import java.util.ArrayList;
@@ -15,9 +16,9 @@ import java.util.Set;
 
 public class UserRepository {
 
-    private static final String TAG = UserRepository.class.getSimpleName();
+    //private static final String TAG = UserRepository.class.getSimpleName();
 
-    public User getUser(String uid) {
+    public LiveData<User> getUser(String uid) {
         MutableLiveData<User> mutableLiveData = new MutableLiveData<>();
         UserHelper.getUser(uid).addOnCompleteListener(
                 task -> {
@@ -27,7 +28,7 @@ public class UserRepository {
                         mutableLiveData.postValue(user);
                     }
                 });
-        return mutableLiveData.getValue();
+        return mutableLiveData;
     }
 
     public LiveData<List<User>> getUsers() {
@@ -47,6 +48,8 @@ public class UserRepository {
 
         return mutableLiveData;
     }
+
+
 
     //TODO: A modifier
     public LiveData<Set<String>> getActiveRestaurants() {
@@ -69,5 +72,14 @@ public class UserRepository {
                 });
 
         return mutableLiveData;
+    }
+
+    public void addRestaurant(String restaurantId, String restaurantName, String uid) {
+        Restaurant restaurant = new Restaurant(restaurantId, restaurantName);
+        UserHelper.updateRestaurant(restaurant, uid);
+    }
+
+    public void removeRestaurant(String uid) {
+        UserHelper.deleteRestaurant(uid);
     }
 }

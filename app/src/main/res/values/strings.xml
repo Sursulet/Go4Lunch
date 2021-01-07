@@ -52,4 +52,9 @@
         functionality.</string>
     <string name="settings">Settings</string>
     <string name="no_location_detected">No location detected</string>
+    <string name="activity_chat_image_chosen_preview">Image chosen preview</string>
+    <string name="add_file_button">Add file button</string>
+    <string name="send_btn">Send btn</string>
+    <string name="placeholder_message">Placeholder message</string>
+    <string name="user_avatar">User Avatar</string>
 </resources>

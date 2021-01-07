@@ -37,7 +37,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.sursulet.go4lunch.BuildConfig;
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
-import com.sursulet.go4lunch.ui.DetailPlaceActivity;
+import com.sursulet.go4lunch.ui.detail.DetailPlaceActivity;
 
 import java.util.List;
 

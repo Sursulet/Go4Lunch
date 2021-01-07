@@ -20,7 +20,6 @@ import com.sursulet.go4lunch.ui.OnItemClickListener;
 
 public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapter.RestaurantViewHolder> {
 
-    //private final ListViewModel listViewModel;
     private final OnItemClickListener onItemClickListener;
 
     protected RestaurantAdapter(
@@ -76,17 +75,9 @@ public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapte
             name.setText(listUiModel.name);
             txt.setText(listUiModel.getTxt());
             opening.setText(listUiModel.getOpening());
-            //distance.setText(listUiModel.getDistance());
-            int numStars = 0;
-            try{
-                numStars = Integer.parseInt(listUiModel.getRating());
-            } catch(NumberFormatException nfe) {
-                System.out.println("Could not parse " + nfe);
-            }
-
+            distance.setText(listUiModel.getDistance());
             nbWorkmates.setText(listUiModel.getNbWorkmates());
-            ratingBar.setNumStars(numStars);
-            //ratingBar.setRating(Float.parseFloat(listUiModel.getRating()));
+            ratingBar.setRating(listUiModel.getRating());
 
             Glide.with(photo)
                     .load(listUiModel.photoUrl)

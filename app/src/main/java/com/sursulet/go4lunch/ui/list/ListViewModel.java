@@ -1,23 +1,16 @@
 package com.sursulet.go4lunch.ui.list;
 
 import android.location.Location;
-import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.arch.core.util.Function;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.sursulet.go4lunch.SingleLiveEvent;
 import com.sursulet.go4lunch.Utils;
-import com.sursulet.go4lunch.model.Geometry;
-import com.sursulet.go4lunch.model.OpeningHours;
 import com.sursulet.go4lunch.model.Result;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
@@ -115,7 +108,6 @@ public class ListViewModel extends ViewModel {
 
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     private void combine(
             @Nullable Location location,
             @Nullable List<Result> nearbyPlaces,
@@ -135,7 +127,6 @@ public class ListViewModel extends ViewModel {
                     detailPlaceMediator.addSource(
                             detailPlaceRepository.getDetailPlace(nearbyPlace.getPlaceId()),
                             detailPlace -> {
-                                Log.d("PEACH", "combine: " + detailPlace.getResult().getName());
                                 Map<String, GooglePlacesDetailResult> existingMap = detailPlaceMediator.getValue();
                                 assert existingMap != null;
                                 existingMap.put(nearbyPlace.getPlaceId(), detailPlace);
@@ -156,25 +147,24 @@ public class ListViewModel extends ViewModel {
                             });
                 }
             } else {
-                //String url = Utils.getPhotoOfPlace(nearbyPlace.getPhotos().get(0).getPhotoReference(), 500);
+                String url = Utils.getPhotoOfPlace(nearbyPlace.getPhotos().get(0).getPhotoReference(), 500);
                 String sentence = nearbyPlace.getVicinity();
                 String opening = Utils.getOpeningHours(existingPlaceDetail.getResult().getOpeningHours());
-                String rating = Utils.getRating(nearbyPlace.getRating());
-                /*String distance = Utils.getDistance(
+                float rating = Utils.getRating(nearbyPlace.getRating());
+                String distance = Utils.getDistance(
                         location.getLatitude(), location.getLongitude(),
                         nearbyPlace.getGeometry().getLocation().getLat(), nearbyPlace.getGeometry().getLocation().getLng()
-                        );*/
-                String numberWorkmates = "(" + String.valueOf(numberWorkmatesMap.get(placeId)) + ")";
-                String o = existingPlaceDetail.getResult().getName();
+                        );
+                String numberWorkmates = "(" + numberWorkmatesMap.get(placeId) + ")";
 
                 ListUiModel listUiModel = new ListUiModel(
                         nearbyPlace.getPlaceId(),
                         nearbyPlace.getName(),
-                        nearbyPlace.getIcon(),
+                        url,
                         sentence,
                         opening,
-                        null,
-                        null,
+                        distance,
+                        rating,
                         numberWorkmates
                 );
 

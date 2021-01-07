@@ -1,4 +1,4 @@
-package com.sursulet.go4lunch.ui;
+package com.sursulet.go4lunch.ui.detail;
 
 import com.sursulet.go4lunch.ui.workmates.WorkmatesUiModel;
 
@@ -9,8 +9,8 @@ public class DetailPlaceUiModel {
     String name;
     String urlPhoto;
     int isGoing;
-    String txt;
-    String ratingBar;
+    String sentence;
+    float rating;
     String phoneNumber;
     int isLike;
     String urlWebsite;
@@ -22,8 +22,8 @@ public class DetailPlaceUiModel {
             String name,
             String urlPhoto,
             int isGoing,
-            String txt,
-            String ratingBar,
+            String sentence,
+            float rating,
             String phoneNumber,
             int isLike,
             String urlWebsite,
@@ -33,8 +33,8 @@ public class DetailPlaceUiModel {
         this.name = name;
         this.urlPhoto = urlPhoto;
         this.isGoing = isGoing;
-        this.txt = txt;
-        this.ratingBar = ratingBar;
+        this.sentence = sentence;
+        this.rating = rating;
         this.phoneNumber = phoneNumber;
         this.isLike = isLike;
         this.urlWebsite = urlWebsite;
@@ -47,11 +47,11 @@ public class DetailPlaceUiModel {
     }
     public String getUrlPhoto() { return urlPhoto; }
     public int getIsGoing() { return isGoing; }
-    public String getTxt() {
-        return txt;
+    public String getSentence() {
+        return sentence;
     }
-    public String getRatingBar() {
-        return ratingBar;
+    public float getRating() {
+        return rating;
     }
     public String getPhoneNumber() {
         return phoneNumber;

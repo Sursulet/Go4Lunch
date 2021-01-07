@@ -4,7 +4,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ChatHelper {
-    private static final String COLLECTION_NAME = "chats";
+    private static final String COLLECTION_NAME = "chat";
 
     // --- COLLECTION REFERENCE ---
 

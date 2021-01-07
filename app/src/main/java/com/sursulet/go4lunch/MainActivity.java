@@ -38,7 +38,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
-import com.sursulet.go4lunch.ui.DetailPlaceActivity;
+import com.sursulet.go4lunch.ui.detail.DetailPlaceActivity;
 import com.sursulet.go4lunch.ui.SettingsActivity;
 
 import java.util.Arrays;
@@ -138,22 +138,25 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
+
+        MenuItem menuItem = menu.findItem(R.id.action_search);
+        /*
+        ((SearchView) menuItem.getActionView()).setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                mainViewModel.onQueryTextChange(newText);
+                return false;
+            }
+        });
+
+         */
         return true;
     }
-/*
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_search:
-                Toast.makeText(this, "HERRRRE", Toast.LENGTH_SHORT).show();
-                //onSearchCalled();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
- */
 
     public void onSearchCalled() {
         // Set the fields to specify which types of place data to
