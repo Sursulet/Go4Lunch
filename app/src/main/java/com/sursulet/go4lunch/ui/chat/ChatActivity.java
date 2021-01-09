@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -69,12 +70,15 @@ public class ChatActivity extends AppCompatActivity {
 
         this.configureToolbar();
         this.configureRecyclerView();
-        chatViewModel.getUiModelMutableLiveData().observe(this, messages -> chatAdapter.submitList(messages));
+        chatViewModel.getUiModelMutableLiveData().observe(this, messages -> {
+            Log.d("PEACH", "onCreate: ACTIVITY " + messages.get(1).getMessage());
+            chatAdapter.submitList(messages);
+        });
 
         sendBtn.setOnClickListener(v -> {
             assert editTextMessage.getText() != null;
             String msg = editTextMessage.getText().toString();
-
+            Log.d("PEACH", "onClick: " + id + " msg : " + msg);
             if(!msg.equals("")) {
                 chatViewModel.onSendMessage(msg, FirebaseAuth.getInstance().getCurrentUser().getUid(), id);
             } else {
@@ -101,6 +105,5 @@ public class ChatActivity extends AppCompatActivity {
 
 
     }
-
 
 }

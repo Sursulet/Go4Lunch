@@ -125,7 +125,7 @@ public class ListViewModel extends ViewModel {
                 if (!alreadyRequiredUIds.contains(nearbyPlace.getPlaceId())) {
                     alreadyRequiredUIds.add(nearbyPlace.getPlaceId());
                     detailPlaceMediator.addSource(
-                            detailPlaceRepository.getDetailPlace(nearbyPlace.getPlaceId()),
+                            detailPlaceRepository.init(),
                             detailPlace -> {
                                 Map<String, GooglePlacesDetailResult> existingMap = detailPlaceMediator.getValue();
                                 assert existingMap != null;
@@ -187,4 +187,9 @@ public class ListViewModel extends ViewModel {
     public void openDetailPlaceActivity(String id) {
         singleLiveEventOpenDetailActivity.setValue(id);
     }
+
+    public LiveData<String> getSelectedQuery() {
+        return userRepository.getSelectedQuery();
+    }
+
 }

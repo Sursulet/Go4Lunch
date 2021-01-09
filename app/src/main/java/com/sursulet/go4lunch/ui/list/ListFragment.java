@@ -3,6 +3,7 @@ package com.sursulet.go4lunch.ui.list;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
@@ -23,6 +25,7 @@ public class ListFragment extends Fragment implements OnItemClickListener {
 
     ListViewModel listViewModel;
     RestaurantAdapter adapter;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -42,6 +45,13 @@ public class ListFragment extends Fragment implements OnItemClickListener {
 
         listViewModel.getSingleLiveEventOpenDetailActivity().observe(this,
                 id -> requireActivity().startActivity(DetailPlaceActivity.getStartIntent(requireActivity(), id)));
+
+        listViewModel.getSelectedQuery().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                Toast.makeText(requireActivity(), "Search Query : " + s, Toast.LENGTH_SHORT).show();
+            }
+        });
 
         return v;
     }

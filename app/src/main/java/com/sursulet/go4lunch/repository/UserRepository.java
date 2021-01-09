@@ -17,6 +17,7 @@ import java.util.Set;
 public class UserRepository {
 
     //private static final String TAG = UserRepository.class.getSimpleName();
+    MutableLiveData<String> selectedQuery = new MutableLiveData<>();
 
     public LiveData<User> getUser(String uid) {
         MutableLiveData<User> mutableLiveData = new MutableLiveData<>();
@@ -50,7 +51,6 @@ public class UserRepository {
     }
 
 
-
     //TODO: A modifier
     public LiveData<Set<String>> getActiveRestaurants() {
         MutableLiveData<Set<String>> mutableLiveData = new MutableLiveData<>();
@@ -81,5 +81,13 @@ public class UserRepository {
 
     public void removeRestaurant(String uid) {
         UserHelper.deleteRestaurant(uid);
+    }
+
+    public void setSelectedQuery(String text) {
+        selectedQuery.setValue(text);
+    }
+
+    public LiveData<String> getSelectedQuery() {
+        return selectedQuery;
     }
 }

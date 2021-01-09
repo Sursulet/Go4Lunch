@@ -11,14 +11,16 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,17 +29,13 @@ import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.widget.Autocomplete;
-import com.google.android.libraries.places.widget.AutocompleteActivity;
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
+import com.sursulet.go4lunch.ui.OnItemClickListener;
+import com.sursulet.go4lunch.ui.autocomplete.PlaceAutocompleteAdapter;
 import com.sursulet.go4lunch.ui.detail.DetailPlaceActivity;
 import com.sursulet.go4lunch.ui.SettingsActivity;
 
@@ -45,12 +43,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, OnItemClickListener {
+
+    //private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int RC_SIGN_IN = 123;
     private static final int SIGN_OUT_TASK = 10;
-    private static final String TAG = "MAIN ACTIVITY";
-    private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
 
     MainViewModel mainViewModel;
 
@@ -58,6 +56,9 @@ public class MainActivity extends AppCompatActivity
     private TextView userName;
     private TextView userEmail;
     private ImageView userPhoto;
+    private RecyclerView recyclerView;
+    private PlaceAutocompleteAdapter adapter;
+    private SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +77,8 @@ public class MainActivity extends AppCompatActivity
         userPhoto = headerView.findViewById(R.id.drawer_photo);
 
         BottomNavigationView bottom = findViewById(R.id.bottom_nav);
+
+        recyclerView = findViewById(R.id.autocomplete_recyclerview);
 
         mainViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance()).get(MainViewModel.class);
 
@@ -101,18 +104,17 @@ public class MainActivity extends AppCompatActivity
         NavigationUI.setupActionBarWithNavController(this, navCtrl, mAppBarConfig);
         NavigationUI.setupWithNavController(bottom, navCtrl);
 
-        String apiKey = getString(R.string.google_api_key);
+        configureRecyclerView();
 
-        /**
-         * Initialize Places. For simplicity, the API key is hard-coded. In a production
-         * environment we recommend using a secure mechanism to manage API keys.
-         */
-        if (!Places.isInitialized()) {
-            //Places.initialize(getApplicationContext(), apiKey);
-        }
+        mainViewModel.getPredictionsLiveData().observe(this, strings -> adapter.submitList(strings));
+    }
 
-        // Create a new Places client instance.
-        //PlacesClient placesClient = Places.createClient(this);
+    private void configureRecyclerView(){
+        recyclerView.addItemDecoration(new DividerItemDecoration(MainActivity.this, DividerItemDecoration.VERTICAL));
+        this.adapter = new PlaceAutocompleteAdapter(
+                PlaceAutocompleteAdapter.DIFF_CALLBACK,
+                this);
+        recyclerView.setAdapter(this.adapter);
     }
 
     @Override
@@ -140,8 +142,9 @@ public class MainActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.main_menu, menu);
 
         MenuItem menuItem = menu.findItem(R.id.action_search);
-        /*
-        ((SearchView) menuItem.getActionView()).setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+        searchView = ((SearchView) menuItem.getActionView());
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -154,22 +157,18 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        /*
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                mainViewModel.onQueryTextChange("");
+                return false;
+            }
+        });
+
          */
+
         return true;
-    }
-
-    public void onSearchCalled() {
-        // Set the fields to specify which types of place data to
-        // return after the user has made a selection.
-        List<Place.Field> fields = Arrays.asList(
-                Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME
-        );
-
-        // Start the autocomplete intent.
-        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
-                .build(MainActivity.this);
-        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
-
     }
 
     public void getUserProfile() {
@@ -211,7 +210,7 @@ public class MainActivity extends AppCompatActivity
                         .setAvailableProviders(providers)
                         .setIsSmartLockEnabled(false, true)
                         .setTheme(R.style.LoginTheme)
-                        .setLogo(R.drawable.ic_hot_food_in_a_bowl)
+                        .setLogo(R.drawable.g22)
                         .build(),
                 RC_SIGN_IN);
     }
@@ -237,27 +236,16 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         }
-
-        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                Place place = Autocomplete.getPlaceFromIntent(data);
-                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId() + ", " + place.getAddress());
-                Toast.makeText(MainActivity.this, "ID: " + place.getId() + "address:" + place.getAddress() + "Name:" + place.getName() + " latlong: " + place.getLatLng(), Toast.LENGTH_LONG).show();
-                String address = place.getAddress();
-                // do query with address
-
-            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-                // TODO: Handle the error.
-                Status status = Autocomplete.getStatusFromIntent(data);
-                Toast.makeText(MainActivity.this, "Error: " + status.getStatusMessage(), Toast.LENGTH_LONG).show();
-                Log.i(TAG, status.getStatusMessage());
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
-            }
-        }
     }
 
     private void showSnackBar(DrawerLayout drawer, String message){
         Snackbar.make(drawer, message, Snackbar.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        String text = adapter.getCurrentList().get(position);
+        searchView.setQuery(text, false);
+        mainViewModel.onQuerySelected(text);
     }
 }

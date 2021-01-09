@@ -1,13 +1,16 @@
 package com.sursulet.go4lunch;
 
 import android.app.Application;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -16,42 +19,75 @@ import com.google.firebase.auth.FirebaseUser;
 import com.sursulet.go4lunch.api.UserHelper;
 import com.sursulet.go4lunch.model.autocomplete.Prediction;
 import com.sursulet.go4lunch.repository.AutocompleteRepository;
+import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.UserRepository;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainViewModel extends ViewModel {
 
     private final Application application;
-    private final UserRepository userRepository;
-    private final AutocompleteRepository autocompleteRepository;
     private final FirebaseAuth firebaseAuth;
+    private final CurrentLocationRepository currentLocationRepository;
+    private final AutocompleteRepository autocompleteRepository;
+    private final UserRepository userRepository;
+
+    private AutocompleteAsyncTask myCurrentAutocompleteAsyncTask;
 
     private final MutableLiveData<MainUiModel> uiModelMutableLiveData = new MutableLiveData<>();
-    private AutocompleteAsyncTask myCurrentAutocompleteAsyncTask;
+    private final MutableLiveData<List<Prediction>> predictionsLiveData = new MutableLiveData<>();
+    private final MutableLiveData<String> selectedQueryLiveData = new MutableLiveData<>();
+    MediatorLiveData<List<String>> queriesMediatorLiveData = new MediatorLiveData<>();
+    LiveData<Location> currentLocationLiveData;
 
     public MainViewModel(
             Application application,
-            UserRepository userRepository,
+            FirebaseAuth firebaseAuth,
+            CurrentLocationRepository currentLocationRepository,
             AutocompleteRepository autocompleteRepository,
-            FirebaseAuth firebaseAuth
-    ) {
-        this.application = application;
-        this.userRepository = userRepository;
-        this.autocompleteRepository = autocompleteRepository;
+            UserRepository userRepository) {
         this.firebaseAuth = firebaseAuth;
+        this.application = application;
+        this.currentLocationRepository = currentLocationRepository;
+        this.autocompleteRepository = autocompleteRepository;
+        this.userRepository = userRepository;
 
         if (firebaseAuth.getCurrentUser() != null) {
             uiModelMutableLiveData.setValue(
-                new MainUiModel(
-                    getCurrentUserName(firebaseAuth.getCurrentUser().getDisplayName()),
-                    getCurrentUserEmail(firebaseAuth.getCurrentUser().getEmail()),
-                    getCurrentUserPhoto(firebaseAuth.getCurrentUser().getPhotoUrl())
-                )
+                    new MainUiModel(
+                            getCurrentUserName(firebaseAuth.getCurrentUser().getDisplayName()),
+                            getCurrentUserEmail(firebaseAuth.getCurrentUser().getEmail()),
+                            getCurrentUserPhoto(firebaseAuth.getCurrentUser().getPhotoUrl())
+                    )
             );
         }
+
+        currentLocationLiveData = currentLocationRepository.getLocationLiveData();
+
+        /*
+        queriesMediatorLiveData.addSource(selectedQueryLiveData, s -> combine(s, predictionsLiveData.getValue()));
+        queriesMediatorLiveData.addSource(predictionsLiveData, predictions -> combine(selectedQueryLiveData.getValue(), predictions));
+
+         */
     }
+
+    /*
+    private void combine(String query, List<Prediction> predictions) {
+        if (query == null || predictions == null) return;
+
+        List<String> results = new ArrayList<>();
+        for (Prediction prediction : predictions) {
+            results.add(prediction.getStructuredFormatting().getMainText());
+        }
+
+        queriesMediatorLiveData.setValue(results);
+    }
+
+    public LiveData<List<String>> getQueriesMediatorLiveData() { return queriesMediatorLiveData; }
+
+     */
 
     public Boolean isCurrentUserLogged() {
         return firebaseAuth.getCurrentUser() != null;
@@ -71,14 +107,14 @@ public class MainViewModel extends ViewModel {
 
     private Uri getCurrentUserPhoto(Uri photo) {
         Uri url = null;
-        if(photo != null) url = photo;
+        if (photo != null) url = photo;
         return url;
     }
 
     public void createUser() {
         FirebaseUser userValue = firebaseAuth.getCurrentUser();
 
-        if(userValue != null) {
+        if (userValue != null) {
             String urlPicture = (userValue.getPhotoUrl() != null) ? userValue.getPhotoUrl().toString() : null;
             String username = userValue.getDisplayName();
             String uid = userValue.getUid();
@@ -86,10 +122,6 @@ public class MainViewModel extends ViewModel {
             UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
         }
     }
-
-    // --------------------
-    // ERROR HANDLER
-    // --------------------
 
     protected OnFailureListener onFailureListener() {
         return e -> Toast.makeText(
@@ -100,11 +132,22 @@ public class MainViewModel extends ViewModel {
     }
 
     public void onQueryTextChange(String newText) {
-        if(myCurrentAutocompleteAsyncTask != null && !myCurrentAutocompleteAsyncTask.isCancelled()) {
+        if (myCurrentAutocompleteAsyncTask != null && !myCurrentAutocompleteAsyncTask.isCancelled()) {
             myCurrentAutocompleteAsyncTask.cancel(true);
         }
-        myCurrentAutocompleteAsyncTask = new AutocompleteAsyncTask(newText, autocompleteRepository, new WeakReference<>(this));
+
+        myCurrentAutocompleteAsyncTask = new AutocompleteAsyncTask(
+                newText,
+                currentLocationLiveData.getValue(),
+                autocompleteRepository,
+                new WeakReference<>(this)
+        );
         myCurrentAutocompleteAsyncTask.execute();
+    }
+
+    public void onQuerySelected(String text) {
+        selectedQueryLiveData.setValue(text);
+        userRepository.setSelectedQuery(text);
     }
 
     private static class AutocompleteAsyncTask extends AsyncTask<Void, Void, List<Prediction>> {
@@ -112,30 +155,45 @@ public class MainViewModel extends ViewModel {
         private final String query;
         private final AutocompleteRepository autocompleteRepository;
         private final WeakReference<MainViewModel> mainViewModelWeakReference;
+        private final Location location;
 
-        private AutocompleteAsyncTask(String query,
-                                      AutocompleteRepository autocompleteRepository,
-                                      WeakReference<MainViewModel> mainViewModelWeakReference) {
+        private AutocompleteAsyncTask(
+                String query,
+                Location location,
+                AutocompleteRepository autocompleteRepository,
+                WeakReference<MainViewModel> mainViewModelWeakReference
+        ) {
             this.query = query;
+            this.location = location;
             this.autocompleteRepository = autocompleteRepository;
             this.mainViewModelWeakReference = mainViewModelWeakReference;
         }
 
         @Override
         protected List<Prediction> doInBackground(Void... voids) {
-            //TODO Rajouter currentLocation
-            return null; //autocompleteRepository.getAutocompleteByLocation(query);
+            return autocompleteRepository.getAutocompleteByLocation(query, location);
         }
 
         @Override
         protected void onPostExecute(List<Prediction> predictions) {
-            if(mainViewModelWeakReference.get() != null) {
+            if (mainViewModelWeakReference.get() != null) {
                 mainViewModelWeakReference.get().onPredictionsChange(predictions);
             }
         }
     }
 
     private void onPredictionsChange(List<Prediction> predictions) {
+        predictionsLiveData.setValue(predictions);
+    }
 
+    public LiveData<List<String>> getPredictionsLiveData() {
+        return Transformations.map(predictionsLiveData, predictions -> {
+            List<String> results = new ArrayList<>();
+            for (Prediction prediction : predictions) {
+                String text = prediction.getStructuredFormatting().getMainText();
+                results.add(text);
+            }
+            return results;
+        });
     }
 }

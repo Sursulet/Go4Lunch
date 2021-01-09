@@ -2,21 +2,16 @@ package com.sursulet.go4lunch.repository;
 
 import android.location.Location;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-
-import com.sursulet.go4lunch.model.GooglePlacesNearbySearchResult;
-import com.sursulet.go4lunch.model.Result;
 import com.sursulet.go4lunch.model.autocomplete.GooglePlacesAutocompleteResult;
 import com.sursulet.go4lunch.model.autocomplete.Prediction;
+import com.sursulet.go4lunch.model.autocomplete.StructuredFormatting;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
 import com.sursulet.go4lunch.remote.RetrofitClient;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 public class AutocompleteRepository {
@@ -29,7 +24,7 @@ public class AutocompleteRepository {
         List<Prediction> predictions = null;
         try {
             Response<GooglePlacesAutocompleteResult> response = mService.getAutocompletePlaces(
-                    null, //TODO : KEY
+                    "", //TODO : KEY
                     input,
                     location.getLatitude() + "," + location.getLongitude(),
                     "500",
@@ -44,4 +39,5 @@ public class AutocompleteRepository {
 
         return predictions;
     }
+
 }

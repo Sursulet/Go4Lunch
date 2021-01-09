@@ -5,14 +5,11 @@ import com.sursulet.go4lunch.model.details.Open;
 import com.sursulet.go4lunch.model.details.OpeningHours;
 import com.sursulet.go4lunch.model.details.Period;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 
 public class Utils {
@@ -48,8 +45,7 @@ public class Utils {
         //Distance arroundi
         long way = Math.round(distance);
 
-        String str = String.valueOf(way) + "m";
-        return str;
+        return way + "m";
     }
 
     private static double rad2deg(double distance) {
@@ -61,7 +57,6 @@ public class Utils {
         return (lat1*Math.PI/180.0);
     }
 
-    //TODO : Opening Hours
     public static String getOpeningHours(OpeningHours openingHours) {
         if (openingHours == null) {
             return "unknow";
@@ -97,11 +92,6 @@ public class Utils {
         }
 
         return "Close";
-    }
-
-    public static String convertDateToHour(LocalDate date){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-        return formatter.format(date);
     }
 
     //Days 0-6. 0 is Sunday

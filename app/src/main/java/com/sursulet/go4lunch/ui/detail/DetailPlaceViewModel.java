@@ -1,6 +1,7 @@
 package com.sursulet.go4lunch.ui.detail;
 
 import android.graphics.Typeface;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -162,6 +163,8 @@ public class DetailPlaceViewModel extends ViewModel {
     }
 
     public void onGoingButtonClick() {
+        String s = String.valueOf(isGoingToRestaurant);
+        Log.d("PEACH", "onGoingButtonClick: is? : " + s + " / ");
 
         if (!isGoingToRestaurant) {
             FirebaseUser userValue = FirebaseAuth.getInstance().getCurrentUser();
@@ -170,6 +173,7 @@ public class DetailPlaceViewModel extends ViewModel {
                 String username = userValue.getDisplayName();
                 String uid = userValue.getUid();
 
+                Log.d("PEACH", "onGoingButtonClick not true: " + restaurantId);
                 restaurantRepository.createActiveRestaurant(
                         restaurantId,
                         restaurantName,
@@ -195,6 +199,7 @@ public class DetailPlaceViewModel extends ViewModel {
                 String username = userValue.getDisplayName();
                 String uid = userValue.getUid();
 
+                Log.d("PEACH", "onLikeButtonClick: Not true" + restaurantId);
                 restaurantRepository.createLikeRestaurant(
                         restaurantId,
                         restaurantName,

@@ -8,7 +8,7 @@ public class WorkmatesUiModel {
     String uid;
     String txt;
     String photo;
-    int txtStyle; //TODO : Qui décide du style du texte ? le ViewModel ou le fragment ?
+    int txtStyle;
 
     public WorkmatesUiModel(String id, String txt, String photo, int txtStyle) {
         this.uid = id;

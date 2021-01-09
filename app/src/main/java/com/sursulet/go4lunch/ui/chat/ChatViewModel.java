@@ -1,6 +1,7 @@
 package com.sursulet.go4lunch.ui.chat;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -25,6 +26,8 @@ public class ChatViewModel extends ViewModel {
     MutableLiveData<List<MessageUiModel>> uiModelMutableLiveData = new MutableLiveData<>();
     LiveData<List<MessageUiModel>> allMessagesLiveData;
 
+    LiveData<User> userReceiver;
+    LiveData<User> currentUser;
     private User modelCurrentUser;
 
     public ChatViewModel(ChatRepository chatRepository, UserRepository userRepository) {
@@ -38,7 +41,7 @@ public class ChatViewModel extends ViewModel {
                 messages -> {
                     List<MessageUiModel> results = new ArrayList<>();
                     for (Message message : messages) {
-
+                        Log.d("PEACH", "init: " + message.getMessage());
                         MessageUiModel messageUiModel = new MessageUiModel(
                                 message.getMessage(),
                                 message.getDateCreated(),
@@ -48,7 +51,7 @@ public class ChatViewModel extends ViewModel {
 
                         results.add(messageUiModel);
                     }
-
+                    Log.d("PEACH", "init: results " + results.get(0).getMessage());
                     return results;
                 });
     }
@@ -58,13 +61,21 @@ public class ChatViewModel extends ViewModel {
     }
 
     public void onSendMessage(String message, String uidSender, String uidReceiver) {
+        //currentUser = userRepository.getUser(uidSender);
+        //userReceiver = userRepository.getUser(uidReceiver);
         assert FirebaseAuth.getInstance().getCurrentUser() != null;
         getCurrentUser();
+        String s = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Log.d("PEACH", "onSendMessage: " + s + " / " + modelCurrentUser.getUid());
         if (!TextUtils.isEmpty(message) && uidSender != null && uidReceiver != null) {
             chatRepository.createMessage(message, modelCurrentUser, uidReceiver);
         }
     }
 
+    // --------------------
+    // REST REQUESTS
+    // --------------------
+    // 4 - Get Current User from FireStore
     private void getCurrentUser() {
         FirebaseUser userValue = FirebaseAuth.getInstance().getCurrentUser();
 

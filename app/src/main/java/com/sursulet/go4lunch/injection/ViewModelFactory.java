@@ -37,8 +37,11 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
             UserRepository userRepository,
             CurrentLocationRepository currentLocationRepository,
             NearbyPlacesRepository nearByPlacesRepository,
-            DetailPlaceRepository detailPlaceRepository, WorkmatesRepository workmatesRepository,
-            RestaurantRepository restaurantRepository, AutocompleteRepository autocompleteRepository, ChatRepository chatRepository) {
+            DetailPlaceRepository detailPlaceRepository,
+            WorkmatesRepository workmatesRepository,
+            RestaurantRepository restaurantRepository,
+            AutocompleteRepository autocompleteRepository,
+            ChatRepository chatRepository) {
         this.userRepository = userRepository;
         this.currentLocationRepository = currentLocationRepository;
         this.nearbyPlacesRepository = nearByPlacesRepository;
@@ -102,10 +105,10 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         } else if (modelClass.isAssignableFrom(MainViewModel.class)) {
             return (T) new MainViewModel(
                     MainApplication.getApplication(),
-                    userRepository,
+                    FirebaseAuth.getInstance(),
+                    currentLocationRepository,
                     autocompleteRepository,
-                    FirebaseAuth.getInstance()
-            );
+                    userRepository);
         }
         throw new IllegalArgumentException("Unknown ViewModel class");
     }

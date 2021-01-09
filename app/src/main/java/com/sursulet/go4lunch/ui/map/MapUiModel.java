@@ -14,7 +14,7 @@ public class MapUiModel {
 
     public MapUiModel(String name, String placeId, @DrawableRes int icon, Double lat, Double lng) {
         this.name = name;
-        this.placeId = placeId;;
+        this.placeId = placeId;
         this.icon = icon;
         this.lat = lat;
         this.lng = lng;

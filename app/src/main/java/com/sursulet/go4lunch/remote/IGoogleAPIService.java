@@ -25,7 +25,7 @@ public interface IGoogleAPIService {
             @Query("key") String key
     );
 
-    @GET("maps/api/place/autocomplete")
+    @GET("maps/api/place/autocomplete/json")
     Call<GooglePlacesAutocompleteResult> getAutocompletePlaces(
             @Query("key") String key,
             @Query("input") String input,

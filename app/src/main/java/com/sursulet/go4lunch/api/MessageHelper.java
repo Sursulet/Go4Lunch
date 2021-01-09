@@ -1,5 +1,7 @@
 package com.sursulet.go4lunch.api;
 
+import android.util.Log;
+
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Query;
@@ -11,6 +13,7 @@ public class MessageHelper {
 
     // --- CREATE --
     public static Task<DocumentReference> createMessageForChat(String textMessage, User userSender, String uidReceiver){
+        Log.d("PEACH", "createMessageForChat: " + textMessage + "/" + userSender.getUid() + "/" + uidReceiver);
 
         String chat = createChatName(userSender.getUid(), uidReceiver);
         Message message = new Message(textMessage, userSender);

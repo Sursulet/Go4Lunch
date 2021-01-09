@@ -20,9 +20,11 @@
         app:navGraph="@navigation/mobile_navigation" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/autoCompleteRecyclerview"
+        android:id="@+id/autocomplete_recyclerview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
