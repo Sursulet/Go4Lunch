@@ -16,5 +16,18 @@
         android:padding="10dp"
         android:textColor="#fff"
         android:textSize="18sp"
-        tools:text="@string/placeholder_message" />
+        tools:text="@string/placeholder_message"
+        />
+
+    <TextView
+        android:id="@+id/chat_item_message_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:layout_alignParentBottom="true"
+        android:layout_alignEnd="@id/chat_item_message"
+        android:layout_below="@id/chat_item_message"
+        tools:text="2021"
+        />
 </RelativeLayout>

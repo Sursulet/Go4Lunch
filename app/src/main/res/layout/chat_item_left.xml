@@ -14,6 +14,19 @@
         android:elevation="2dp"
         android:padding="10dp"
         android:textSize="18sp"
-        tools:text="How are you doing? This is a long message that should probably wrap." />
+        tools:text="How are you doing? This is a long message that should probably wrap."
+        />
+
+    <TextView
+        android:id="@+id/chat_item_message_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@id/chat_item_message"
+        android:layout_below="@id/chat_item_message"
+        tools:text="2021"
+        />
 
 </RelativeLayout>

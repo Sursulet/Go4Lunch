@@ -3,8 +3,8 @@ package com.sursulet.go4lunch.ui.chat;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.sursulet.go4lunch.R;
@@ -27,16 +28,14 @@ public class ChatActivity extends AppCompatActivity {
     //private static final String TAG = ChatActivity.class.getSimpleName();
 
     // FOR DESIGN
-    ImageView imgUser;
-    TextView nameUser;
+    ImageView userAvatar;
+    TextView username;
 
     RecyclerView recyclerView;
     //@BindView(R.id.activity_chat_text_view_recycler_view_empty) TextView textViewRecyclerViewEmpty;
     TextInputEditText editTextMessage;
     //@BindView(R.id.activity_chat_image_chosen_preview) ImageView imageViewPreview;
 
-    ImageView profileImage;
-    TextView profileUsername;
     ImageButton sendBtn;
 
     // FOR DATA
@@ -59,17 +58,28 @@ public class ChatActivity extends AppCompatActivity {
         Intent i = getIntent();
         String id = i.getStringExtra("id");
 
-        imgUser = findViewById(R.id.chat_toolbar_img);
-        nameUser = findViewById(R.id.chat_toolbar_title);
+        userAvatar = findViewById(R.id.chat_toolbar_img);
+        username = findViewById(R.id.chat_toolbar_title);
         recyclerView = findViewById(R.id.activity_chat_recycler_view);
         editTextMessage = findViewById(R.id.activity_chat_message_edit_text);
         sendBtn = findViewById(R.id.activity_chat_send_button);
 
         chatViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance()).get(ChatViewModel.class);
-        chatViewModel.init(FirebaseAuth.getInstance().getCurrentUser().getUid(), id);
+        chatViewModel.init(id);
 
         this.configureToolbar();
         this.configureRecyclerView();
+        chatViewModel.getUserReceiver().observe(this, new Observer<User>() {
+            @Override
+            public void onChanged(User user) {
+                username.setText(user.getUsername());
+                Glide.with(userAvatar)
+                        .load(user.getAvatarUrl())
+                        .circleCrop()
+                        .into(userAvatar);
+            }
+        });
+
         chatViewModel.getUiModelMutableLiveData().observe(this, messages -> {
             Log.d("PEACH", "onCreate: ACTIVITY " + messages.get(1).getMessage());
             chatAdapter.submitList(messages);
@@ -91,19 +101,18 @@ public class ChatActivity extends AppCompatActivity {
     private void configureToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> finish());
     }
 
     private void configureRecyclerView(){
-        recyclerView.addItemDecoration(new DividerItemDecoration(ChatActivity.this, DividerItemDecoration.VERTICAL));
+        //recyclerView.addItemDecoration(new DividerItemDecoration(ChatActivity.this, DividerItemDecoration.VERTICAL));
         this.chatAdapter = new ChatAdapter(
                 ChatAdapter.DIFF_CALLBACK,
                 FirebaseAuth.getInstance().getCurrentUser().getUid()
         );
         recyclerView.setAdapter(this.chatAdapter);
-
-
     }
 
 }

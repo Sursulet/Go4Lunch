@@ -1,5 +1,7 @@
 package com.sursulet.go4lunch.repository;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -26,6 +28,7 @@ public class UserRepository {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         User user = document.toObject(User.class);
+                        Log.d("PEACH", "getUser: " + user.getUid());
                         mutableLiveData.postValue(user);
                     }
                 });

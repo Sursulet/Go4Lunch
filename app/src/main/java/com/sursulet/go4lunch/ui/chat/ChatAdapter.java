@@ -63,16 +63,19 @@ public class ChatAdapter extends ListAdapter<MessageUiModel, ChatAdapter.Message
 
         RelativeLayout item;
         TextView message;
+        TextView date;
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
 
             item = itemView.findViewById(R.id.chat_item_root_view);
             message = itemView.findViewById(R.id.chat_item_message);
+            date = itemView.findViewById(R.id.chat_item_message_date);
         }
 
         public void bind(MessageUiModel messageUiModel) {
             message.setText(messageUiModel.getMessage());
+            date.setText(messageUiModel.getDateCreated());
         }
     }
 

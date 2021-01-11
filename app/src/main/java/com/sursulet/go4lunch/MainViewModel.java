@@ -64,7 +64,7 @@ public class MainViewModel extends ViewModel {
             );
         }
 
-        currentLocationLiveData = currentLocationRepository.getLocationLiveData();
+        currentLocationLiveData = currentLocationRepository.getLastLocationLiveData();
 
         /*
         queriesMediatorLiveData.addSource(selectedQueryLiveData, s -> combine(s, predictionsLiveData.getValue()));

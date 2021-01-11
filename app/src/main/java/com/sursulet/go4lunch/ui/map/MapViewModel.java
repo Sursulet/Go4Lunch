@@ -48,7 +48,7 @@ public class MapViewModel extends ViewModel {
 
         LiveData<List<Result>> nearbyPlacesDependingOnGps =
                 Transformations.switchMap(
-                        currentLocationRepository.getLocationLiveData(),
+                        currentLocationRepository.getLastLocationLiveData(),
                         location -> nearbyPlacesRepository.getNearByPlaces(
                                 location.getLatitude(),
                                 location.getLongitude()
@@ -121,9 +121,11 @@ public class MapViewModel extends ViewModel {
         uiModelsMediatorLiveData.setValue(results);
     }
 
-    //TODO:
+    public void buildLocationRequest() { currentLocationRepository.buildLocationRequest(); }
+    public void buildLocationCallback() { currentLocationRepository.buildLocationCallback(); }
+
     public LiveData<Location> getLastLocation() {
-        return currentLocationRepository.getLocationLiveData();
+        return currentLocationRepository.getLastLocationLiveData();
     }
 
     public LiveData<List<MapUiModel>> getMapUiModelLiveData() {

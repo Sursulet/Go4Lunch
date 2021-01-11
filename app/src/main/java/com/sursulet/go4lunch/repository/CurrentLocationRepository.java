@@ -21,10 +21,11 @@ public class CurrentLocationRepository {
 
     private final Application application;
 
-    private final MutableLiveData<Location> locationMutableLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Location> lastLocationMutableLiveData = new MutableLiveData<>();
 
     private boolean initialized;
     FusedLocationProviderClient client;
+    LocationRequest locationRequest;
     LocationCallback locationCallback;
 
     // Inject application
@@ -32,23 +33,28 @@ public class CurrentLocationRepository {
         this.application = application;
     }
 
+    public void buildLocationRequest(){
+        locationRequest = new LocationRequest()
+                .setInterval(10_000)
+                .setFastestInterval(5_000)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    public void buildLocationCallback(){
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                lastLocationMutableLiveData.postValue(locationResult.getLastLocation());
+            }
+        };
+    }
+
     public void startLocationUpdates() {
         if (!initialized) {
             initialized = true;
 
             client = LocationServices.getFusedLocationProviderClient(application);
-
-            LocationRequest locationRequest = new LocationRequest()
-                .setInterval(10_000)
-                .setFastestInterval(5_000)
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-            locationCallback = new LocationCallback() {
-                @Override
-                public void onLocationResult(LocationResult locationResult) {
-                    locationMutableLiveData.postValue(locationResult.getLastLocation());
-                }
-            };
 
             try {
                 client.requestLocationUpdates(
@@ -64,11 +70,10 @@ public class CurrentLocationRepository {
 
     public void stopLocationUpdates() {
         initialized = false;
-
         client.removeLocationUpdates(locationCallback);
     }
 
-    public LiveData<Location> getLocationLiveData() {
-        return locationMutableLiveData;
+    public LiveData<Location> getLastLocationLiveData() {
+        return lastLocationMutableLiveData;
     }
 }

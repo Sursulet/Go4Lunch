@@ -14,7 +14,6 @@ import com.sursulet.go4lunch.repository.DetailPlaceRepository;
 import com.sursulet.go4lunch.repository.NearbyPlacesRepository;
 import com.sursulet.go4lunch.repository.RestaurantRepository;
 import com.sursulet.go4lunch.repository.UserRepository;
-import com.sursulet.go4lunch.repository.WorkmatesRepository;
 import com.sursulet.go4lunch.ui.detail.DetailPlaceViewModel;
 import com.sursulet.go4lunch.ui.chat.ChatViewModel;
 import com.sursulet.go4lunch.ui.list.ListViewModel;
@@ -38,7 +37,6 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
             CurrentLocationRepository currentLocationRepository,
             NearbyPlacesRepository nearByPlacesRepository,
             DetailPlaceRepository detailPlaceRepository,
-            WorkmatesRepository workmatesRepository,
             RestaurantRepository restaurantRepository,
             AutocompleteRepository autocompleteRepository,
             ChatRepository chatRepository) {
@@ -62,7 +60,6 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
                             ),
                             new NearbyPlacesRepository(),
                             new DetailPlaceRepository(),
-                            new WorkmatesRepository(),
                             new RestaurantRepository(),
                             new AutocompleteRepository(),
                             new ChatRepository());
@@ -97,7 +94,8 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         } else if (modelClass.isAssignableFrom(DetailPlaceViewModel.class)) {
             return (T) new DetailPlaceViewModel(
                     detailPlaceRepository,
-                    restaurantRepository, userRepository);
+                    restaurantRepository,
+                    userRepository);
         }else if (modelClass.isAssignableFrom(ChatViewModel.class)) {
             return (T) new ChatViewModel(
                     chatRepository,

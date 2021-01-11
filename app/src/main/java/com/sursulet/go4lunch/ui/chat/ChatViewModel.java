@@ -35,18 +35,19 @@ public class ChatViewModel extends ViewModel {
         this.userRepository = userRepository;
     }
 
-    public void init(String userSender, String userReceiver) {
+    public void init(String uidReceiver) {
+        userReceiver = userRepository.getUser(uidReceiver);
+        Log.d("PEACH", "init: " + uidReceiver + "/");
         allMessagesLiveData = Transformations.map(
-                chatRepository.getAllMessages(userSender, userReceiver),
+                chatRepository.getAllMessages(FirebaseAuth.getInstance().getCurrentUser().getUid(), uidReceiver),
                 messages -> {
                     List<MessageUiModel> results = new ArrayList<>();
                     for (Message message : messages) {
                         Log.d("PEACH", "init: " + message.getMessage());
                         MessageUiModel messageUiModel = new MessageUiModel(
                                 message.getMessage(),
-                                message.getDateCreated(),
-                                message.getUserSender(),
-                                message.getUrlImage()
+                                message.getDateCreated().toString(),
+                                message.getUserSender()
                         );
 
                         results.add(messageUiModel);
@@ -56,6 +57,7 @@ public class ChatViewModel extends ViewModel {
                 });
     }
 
+    LiveData<User> getUserReceiver() { return userReceiver; }
     LiveData<List<MessageUiModel>> getUiModelMutableLiveData() {
         return allMessagesLiveData;
     }

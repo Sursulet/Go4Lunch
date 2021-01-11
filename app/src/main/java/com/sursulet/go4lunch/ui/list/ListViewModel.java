@@ -58,9 +58,9 @@ public class ListViewModel extends ViewModel {
         this.userRepository = userRepository;
         this.restaurantRepository = restaurantRepository;
 
-        LiveData<Location> currentLocationLiveData = currentLocationRepository.getLocationLiveData();
+        LiveData<Location> currentLocationLiveData = currentLocationRepository.getLastLocationLiveData();
         LiveData<List<Result>> nearbyPlacesDependingOnGps = Transformations.switchMap(
-                currentLocationRepository.getLocationLiveData(),
+                currentLocationRepository.getLastLocationLiveData(),
                 location -> nearbyPlacesRepository.getNearByPlaces(
                         location.getLatitude(),
                         location.getLongitude()
