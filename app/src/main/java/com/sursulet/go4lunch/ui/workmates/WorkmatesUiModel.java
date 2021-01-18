@@ -6,23 +6,23 @@ import androidx.recyclerview.widget.DiffUtil;
 public class WorkmatesUiModel {
 
     String uid;
-    String txt;
+    String sentence;
     String photo;
-    int txtStyle;
+    int sentenceStyle;
 
-    public WorkmatesUiModel(String id, String txt, String photo, int txtStyle) {
+    public WorkmatesUiModel(String id, String sentence, String photo, int sentenceStyle) {
         this.uid = id;
-        this.txt = txt;
+        this.sentence = sentence;
         this.photo = photo;
-        this.txtStyle = txtStyle;
+        this.sentenceStyle = sentenceStyle;
     }
 
     public String getUid() { return uid; }
-    public String getTxt() { return txt; }
+    public String getSentence() { return sentence; }
     public String getPhoto() {
         return photo;
     }
-    public int getTxtStyle() { return txtStyle; }
+    public int getTxtStyle() { return sentenceStyle; }
 
     @Override
     public boolean equals(Object o) {
@@ -30,7 +30,7 @@ public class WorkmatesUiModel {
         if (o == null || getClass() != o.getClass()) return false;
         WorkmatesUiModel workmatesUiModel = (WorkmatesUiModel) o;
         return uid.equals(workmatesUiModel.uid) &&
-                txt.equals(workmatesUiModel.txt) &&
+                sentence.equals(workmatesUiModel.sentence) &&
                 photo.equals(workmatesUiModel.photo);
     }
 

@@ -4,11 +4,11 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.sursulet.go4lunch.model.details.Close;
+import com.sursulet.go4lunch.model.details.DetailResult;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.model.details.Open;
 import com.sursulet.go4lunch.model.details.OpeningHours;
 import com.sursulet.go4lunch.model.details.Period;
-import com.sursulet.go4lunch.model.details.Result;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
 import com.sursulet.go4lunch.remote.RetrofitClient;
 
@@ -56,10 +56,10 @@ public class DetailPlaceRepository {
 
     public LiveData<GooglePlacesDetailResult> init() {
         MutableLiveData<GooglePlacesDetailResult> mutableLiveData = new MutableLiveData<>();
-        Result result = new Result();
-        result.setFormattedAddress("20 Rue Saint-Martin, 75004 Paris, France");
-        result.setFormattedPhoneNumber("01 42 72 25 76");
-        result.setName("Benoit Paris");
+        DetailResult detailResult = new DetailResult();
+        detailResult.setFormattedAddress("20 Rue Saint-Martin, 75004 Paris, France");
+        detailResult.setFormattedPhoneNumber("01 42 72 25 76");
+        detailResult.setName("Benoit Paris");
         OpeningHours openingHours = new OpeningHours();
         openingHours.setOpenNow(true);
 
@@ -187,17 +187,17 @@ public class DetailPlaceRepository {
         weekday.add("Sunday: 12:00 – 2:00 PM, 7:00 – 9:30 PM");
 
         openingHours.setWeekdayText(weekday);
-        result.setOpeningHours(openingHours);
+        detailResult.setOpeningHours(openingHours);
 
-        result.setPlaceId("ChIJQ0bNfR5u5kcR9Z0i41-E7sg");
-        result.setPriceLevel(4);
-        result.setRating(4.1);
-        result.setVicinity("20 Rue Saint-Martin, Paris");
-        result.setWebsite("http://www.benoit-paris.com/");
-        result.setReference("ChIJQ0bNfR5u5kcR9Z0i41-E7sg");
+        detailResult.setPlaceId("ChIJQ0bNfR5u5kcR9Z0i41-E7sg");
+        detailResult.setPriceLevel(4);
+        detailResult.setRating(4.1);
+        detailResult.setVicinity("20 Rue Saint-Martin, Paris");
+        detailResult.setWebsite("http://www.benoit-paris.com/");
+        detailResult.setReference("ChIJQ0bNfR5u5kcR9Z0i41-E7sg");
 
         GooglePlacesDetailResult googlePlacesDetailResult = new GooglePlacesDetailResult();
-        googlePlacesDetailResult.setResult(result);
+        googlePlacesDetailResult.setDetailResult(detailResult);
         mutableLiveData.postValue(googlePlacesDetailResult);
         return mutableLiveData;
     }

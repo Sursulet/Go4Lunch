@@ -10,9 +10,9 @@ public class GooglePlacesNearbySearchResult {
     @SerializedName("next_page_token")
     @Expose
     private String nextPageToken;
-    @SerializedName("results")
+    @SerializedName("nearbyResults")
     @Expose
-    private List<Result> results = null;
+    private List<NearbyResult> nearbyResults = null;
     @SerializedName("status")
     @Expose
     private String status;
@@ -25,12 +25,12 @@ public class GooglePlacesNearbySearchResult {
         this.nextPageToken = nextPageToken;
     }
 
-    public List<Result> getResults() {
-        return results;
+    public List<NearbyResult> getNearbyResults() {
+        return nearbyResults;
     }
 
-    public void setResults(List<Result> results) {
-        this.results = results;
+    public void setNearbyResults(List<NearbyResult> nearbyResults) {
+        this.nearbyResults = nearbyResults;
     }
 
     public String getStatus() {

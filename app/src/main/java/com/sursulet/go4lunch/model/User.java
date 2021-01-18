@@ -5,8 +5,6 @@ import androidx.annotation.Nullable;
 public class User {
 
     private String uid;
-    //private String placeId;
-    private Restaurant isGoingToRestaurant;
     private String username;
     @Nullable private String avatarUrl;
 
@@ -28,10 +26,4 @@ public class User {
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(@Nullable String avatarUrl) { this.avatarUrl = avatarUrl; }
 
-    //public String getPlaceId() { return placeId; }
-    //public void setPlaceId(String placeId) { this.placeId = placeId; }
-
-
-    public Restaurant getRestaurant() { return isGoingToRestaurant; }
-    public void setRestaurant(Restaurant isGoingToRestaurant) { this.isGoingToRestaurant = isGoingToRestaurant; }
 }

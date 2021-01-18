@@ -79,27 +79,32 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
                     MainApplication.getApplication(),
                     currentLocationRepository,
                     nearbyPlacesRepository,
-                    userRepository);
+                    userRepository,
+                    restaurantRepository
+            );
         } else if (modelClass.isAssignableFrom(ListViewModel.class)) {
             return (T) new ListViewModel(
                     currentLocationRepository,
                     nearbyPlacesRepository,
                     detailPlaceRepository,
                     userRepository,
-                    restaurantRepository);
+                    restaurantRepository
+            );
         } else if (modelClass.isAssignableFrom(WorkmatesViewModel.class)) {
             return (T) new WorkmatesViewModel(
-                    userRepository
+                    userRepository,
+                    restaurantRepository
             );
         } else if (modelClass.isAssignableFrom(DetailPlaceViewModel.class)) {
             return (T) new DetailPlaceViewModel(
                     detailPlaceRepository,
-                    restaurantRepository,
-                    userRepository);
+                    restaurantRepository
+            );
         }else if (modelClass.isAssignableFrom(ChatViewModel.class)) {
             return (T) new ChatViewModel(
                     chatRepository,
-                    userRepository);
+                    userRepository
+            );
         } else if (modelClass.isAssignableFrom(MainViewModel.class)) {
             return (T) new MainViewModel(
                     MainApplication.getApplication(),

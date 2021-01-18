@@ -73,7 +73,7 @@ public class MapFragment extends Fragment {
             });
         }
 
-        mapViewModel.getLastLocation().observe(getViewLifecycleOwner(), this::updatelastLocation);
+        mapViewModel.getLastLocation().observe(getViewLifecycleOwner(), this::updateLastLocation);
         mapViewModel.getMapUiModelLiveData().observe(getViewLifecycleOwner(), this::updateUi);
         mapViewModel.getSingleLiveEventOpenDetailActivity().observe(getViewLifecycleOwner(), this::openDetailActivity);
 
@@ -101,7 +101,7 @@ public class MapFragment extends Fragment {
         mapViewModel.getStopLocationUpdates();
     }
 
-    private void updatelastLocation(Location location) {
+    private void updateLastLocation(Location location) {
         latLng = new LatLng(location.getLatitude(), location.getLongitude());
         if(map != null){
             map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -146,9 +146,7 @@ public class MapFragment extends Fragment {
         if (shouldProvideRationale) {
             Log.i(TAG, "Displaying permission rationale to provide additional context.");
             showSnackBar(R.string.permission_rationale,
-                    android.R.string.ok, view -> {
-                        startLocationPermissionRequest();
-                    });
+                    android.R.string.ok, view -> startLocationPermissionRequest());
         } else {
             Log.i(TAG, "Requesting permission");
             startLocationPermissionRequest();

@@ -13,9 +13,10 @@ import androidx.lifecycle.ViewModel;
 
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.SingleLiveEvent;
-import com.sursulet.go4lunch.model.Result;
+import com.sursulet.go4lunch.model.NearbyResult;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.NearbyPlacesRepository;
+import com.sursulet.go4lunch.repository.RestaurantRepository;
 import com.sursulet.go4lunch.repository.UserRepository;
 
 import java.util.ArrayList;
@@ -30,10 +31,11 @@ public class MapViewModel extends ViewModel {
     private final CurrentLocationRepository currentLocationRepository;
     @NonNull
     private final UserRepository userRepository;
+    @NonNull
+    private final RestaurantRepository restaurantRepository;
 
     private final MediatorLiveData<List<MapUiModel>> uiModelsMediatorLiveData = new MediatorLiveData<>();
     private final MutableLiveData<Boolean> isMapReadyLiveData = new MutableLiveData<>();
-    private final MutableLiveData<String> userQueryLiveData = new MutableLiveData<>();
 
     private final SingleLiveEvent<String> singleLiveEventLaunchDetailActivity = new SingleLiveEvent<>();
 
@@ -41,12 +43,13 @@ public class MapViewModel extends ViewModel {
             @NonNull Application application,
             @NonNull CurrentLocationRepository currentLocationRepository,
             @NonNull NearbyPlacesRepository nearbyPlacesRepository,
-            @NonNull UserRepository userRepository) {
+            @NonNull UserRepository userRepository, @NonNull RestaurantRepository restaurantRepository) {
         this.application = application;
         this.currentLocationRepository = currentLocationRepository;
         this.userRepository = userRepository;
+        this.restaurantRepository = restaurantRepository;
 
-        LiveData<List<Result>> nearbyPlacesDependingOnGps =
+        LiveData<List<NearbyResult>> nearbyPlacesDependingOnGps =
                 Transformations.switchMap(
                         currentLocationRepository.getLastLocationLiveData(),
                         location -> nearbyPlacesRepository.getNearByPlaces(
@@ -54,14 +57,14 @@ public class MapViewModel extends ViewModel {
                                 location.getLongitude()
                         ));
 
-        LiveData<Set<String>> activeRestaurantsLiveData = userRepository.getActiveRestaurants();
+        LiveData<Set<String>> activeRestaurantsLiveData = restaurantRepository.getAllActiveRestaurantsIds();
 
         uiModelsMediatorLiveData.addSource(
                 activeRestaurantsLiveData,
                 activeRestaurants -> combine(
                         nearbyPlacesDependingOnGps.getValue(),
                         isMapReadyLiveData.getValue(),
-                        userQueryLiveData.getValue(),
+                        userRepository.getSelectedQuery().getValue(),
                         activeRestaurants));
 
         uiModelsMediatorLiveData.addSource(
@@ -69,7 +72,7 @@ public class MapViewModel extends ViewModel {
                 results -> combine(
                         results,
                         isMapReadyLiveData.getValue(),
-                        userQueryLiveData.getValue(),
+                        userRepository.getSelectedQuery().getValue(),
                         activeRestaurantsLiveData.getValue()));
 
         uiModelsMediatorLiveData.addSource(
@@ -77,11 +80,11 @@ public class MapViewModel extends ViewModel {
                 isMapReady -> combine(
                         nearbyPlacesDependingOnGps.getValue(),
                         isMapReady,
-                        userQueryLiveData.getValue(),
+                        userRepository.getSelectedQuery().getValue(),
                         activeRestaurantsLiveData.getValue()));
 
         uiModelsMediatorLiveData.addSource(
-                userQueryLiveData,
+                userRepository.getSelectedQuery(),
                 userQuery -> combine(
                         nearbyPlacesDependingOnGps.getValue(),
                         isMapReadyLiveData.getValue(),
@@ -90,7 +93,7 @@ public class MapViewModel extends ViewModel {
     }
 
     private void combine(
-            @Nullable List<Result> resultsFromServer,
+            @Nullable List<NearbyResult> resultsFromServer,
             @Nullable Boolean isMapReady,
             @Nullable String userQuery,
             @Nullable Set<String> activeRestaurants
@@ -102,19 +105,21 @@ public class MapViewModel extends ViewModel {
         List<MapUiModel> results = new ArrayList<>();
 
         if (isMapReady) {
-            for (Result result : resultsFromServer) {
+            for (NearbyResult nearbyResult : resultsFromServer) {
 
-                boolean isGoing = activeRestaurants != null && activeRestaurants.contains(result.getPlaceId());
+                boolean isGoing = activeRestaurants != null && activeRestaurants.contains(nearbyResult.getPlaceId());
 
                 MapUiModel mapUiModel = new MapUiModel(
-                        result.getName(),
-                        result.getPlaceId(),
+                        nearbyResult.getName(),
+                        nearbyResult.getPlaceId(),
                         isGoing ? R.drawable.ic_map_marker_24 : R.drawable.ic_map_marker_48dp,
-                        result.getGeometry().getLocation().getLat(),
-                        result.getGeometry().getLocation().getLng()
+                        nearbyResult.getGeometry().getLocation().getLat(),
+                        nearbyResult.getGeometry().getLocation().getLng()
                 );
 
-                results.add(mapUiModel);
+                if (nearbyResult.getName().equalsIgnoreCase(userQuery) || nearbyResult.getVicinity().equalsIgnoreCase(userQuery)) {
+                    results.add(mapUiModel);
+                }
             }
         }
 
@@ -134,10 +139,6 @@ public class MapViewModel extends ViewModel {
 
     public SingleLiveEvent<String> getSingleLiveEventOpenDetailActivity() {
         return singleLiveEventLaunchDetailActivity;
-    }
-
-    public void onUserQueryChanged(String query) {
-        userQueryLiveData.setValue(query);
     }
 
     public void onMapReady() {

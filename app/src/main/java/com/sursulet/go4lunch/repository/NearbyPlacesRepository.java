@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.sursulet.go4lunch.model.GooglePlacesNearbySearchResult;
-import com.sursulet.go4lunch.model.Result;
+import com.sursulet.go4lunch.model.NearbyResult;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
 import com.sursulet.go4lunch.remote.RetrofitClient;
 
@@ -21,9 +21,9 @@ public class NearbyPlacesRepository {
     /**
      * @return a LiveData containing the nearby restaurant around the GPS position
      */
-    public LiveData<List<Result>> getNearByPlaces(double latitude, double longitude) {
+    public LiveData<List<NearbyResult>> getNearByPlaces(double latitude, double longitude) {
 
-        MutableLiveData<List<Result>> places = new MutableLiveData<>();
+        MutableLiveData<List<NearbyResult>> places = new MutableLiveData<>();
         mService.getNearByPlaces(
                 "", //TODO : KEY
                 latitude + "," + longitude,
@@ -37,8 +37,8 @@ public class NearbyPlacesRepository {
             ) {
 
                 if (response.isSuccessful()) {
-                    if (response.body() != null && response.body().getResults() != null) {
-                        places.setValue(response.body().getResults());
+                    if (response.body() != null && response.body().getNearbyResults() != null) {
+                        places.setValue(response.body().getNearbyResults());
                     }
                 }
             }

@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
@@ -19,7 +20,6 @@ import com.sursulet.go4lunch.model.User;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.repository.DetailPlaceRepository;
 import com.sursulet.go4lunch.repository.RestaurantRepository;
-import com.sursulet.go4lunch.repository.UserRepository;
 import com.sursulet.go4lunch.ui.workmates.WorkmatesUiModel;
 
 import java.util.ArrayList;
@@ -29,10 +29,9 @@ public class DetailPlaceViewModel extends ViewModel {
 
     @NonNull
     private final DetailPlaceRepository detailPlaceRepository;
+
     @NonNull
     private final RestaurantRepository restaurantRepository;
-    @NonNull
-    private final UserRepository userRepository;
 
     private String restaurantId;
     private String restaurantName;
@@ -40,25 +39,28 @@ public class DetailPlaceViewModel extends ViewModel {
     private boolean isLikeRestaurant;
 
     private final MediatorLiveData<DetailPlaceUiModel> uiModelMediatorLiveData = new MediatorLiveData<>();
+    LiveData<List<WorkmatesUiModel>> workmatesUiLiveData;
+
     private final SingleLiveEvent<String> eventOpenChatActivity = new SingleLiveEvent<>();
 
     public DetailPlaceViewModel(
             @NonNull DetailPlaceRepository detailPlaceRepository,
-            @NonNull RestaurantRepository restaurantRepository, @NonNull UserRepository userRepository) {
+            @NonNull RestaurantRepository restaurantRepository
+    ) {
         this.detailPlaceRepository = detailPlaceRepository;
         this.restaurantRepository = restaurantRepository;
-        this.userRepository = userRepository;
     }
 
     public void startDetailPlace(String id) {
         restaurantId = id;
 
         LiveData<GooglePlacesDetailResult> placesDetailResultLiveData = detailPlaceRepository.getDetailPlace(id);
-        LiveData<List<User>> usersLiveData = restaurantRepository.getUsersActiveRestaurant(restaurantId);
-        LiveData<Boolean> isGoingLiveData = restaurantRepository.getUserActiveRestaurant(restaurantId, FirebaseAuth.getInstance().getCurrentUser().getUid());
-        LiveData<Boolean> isLikePlaceLiveData = restaurantRepository.getUserLikeRestaurant(restaurantId, FirebaseAuth.getInstance().getCurrentUser().getUid());
+        //LiveData<GooglePlacesDetailResult> placesDetailResultLiveData = detailPlaceRepository.init();
+        LiveData<List<User>> usersLiveData = restaurantRepository.getAllBookings(restaurantId);
+        LiveData<Boolean> isGoingLiveData = restaurantRepository.isBooking(restaurantId);
+        LiveData<Boolean> isLikePlaceLiveData = restaurantRepository.isFollower(restaurantId);
 
-        LiveData<List<WorkmatesUiModel>> workmatesUiLiveData = Transformations.map(
+        workmatesUiLiveData = Transformations.map(
                 usersLiveData,
                 userList -> {
                     List<WorkmatesUiModel> results = new ArrayList<>();
@@ -129,30 +131,30 @@ public class DetailPlaceViewModel extends ViewModel {
             return;
         }
 
-        restaurantName = resultFromServer.getResult().getName();
+        restaurantName = resultFromServer.getDetailResult().getName();
         isGoingToRestaurant = isGoing;
         isLikeRestaurant = isLike;
-        String photo = Utils.getPhotoOfPlace(
-                resultFromServer.getResult()
+        String photo = "";/*Utils.getPhotoOfPlace(
+                resultFromServer.getDetailResult()
                         .getPhotos()
                         .get(0)
                         .getPhotoReference(),
-                1000);
+                1000);*/
         int isGoingColor = (isGoing) ? R.color.primary : R.color.secondary;
         int isLikeColor = (isLike) ? R.color.primary : R.color.secondary;
-        float rating = Utils.getRating(resultFromServer.getResult().getRating());
-        String opening = Utils.getOpeningHours(resultFromServer.getResult().getOpeningHours());
+        float rating = Utils.getRating(resultFromServer.getDetailResult().getRating());
+        String opening = Utils.getOpeningHours(resultFromServer.getDetailResult().getOpeningHours());
 
         uiModelMediatorLiveData.setValue(
                 new DetailPlaceUiModel(
                         restaurantName,
                         photo,
                         isGoingColor,
-                        resultFromServer.getResult().getFormattedAddress(),
+                        resultFromServer.getDetailResult().getFormattedAddress(),
                         rating,
-                        resultFromServer.getResult().getFormattedPhoneNumber(),
+                        resultFromServer.getDetailResult().getFormattedPhoneNumber(),
                         isLikeColor,
-                        resultFromServer.getResult().getWebsite(),
+                        resultFromServer.getDetailResult().getWebsite(),
                         workmatesUiModels,
                         opening
                 ));
@@ -181,13 +183,10 @@ public class DetailPlaceViewModel extends ViewModel {
                         username,
                         urlPicture
                 );
-
-                userRepository.addRestaurant(restaurantId, restaurantName, uid);
             }
 
         } else {
-            restaurantRepository.deleteUserActiveRestaurant(restaurantId, FirebaseAuth.getInstance().getCurrentUser().getUid());
-            userRepository.removeRestaurant(FirebaseAuth.getInstance().getCurrentUser().getUid());
+            restaurantRepository.deleteBooking(restaurantId, FirebaseAuth.getInstance().getCurrentUser().getUid());
         }
     }
 
@@ -209,12 +208,18 @@ public class DetailPlaceViewModel extends ViewModel {
                 );
             }
         } else {
-            restaurantRepository.deleteUserLikeRestaurant(restaurantId, FirebaseAuth.getInstance().getCurrentUser().getUid());
+            restaurantRepository.deleteFollower(restaurantId, FirebaseAuth.getInstance().getCurrentUser().getUid());
         }
     }
 
     public SingleLiveEvent<String> getEventOpenChatActivity() { return eventOpenChatActivity; }
     public void openChatActivity(String id) {
         eventOpenChatActivity.setValue(id);
+    }
+
+    public void setWorkmatesUiLiveData(List<WorkmatesUiModel> users) {
+        MutableLiveData<List<WorkmatesUiModel>> mutableLiveData = new MutableLiveData<>();
+        mutableLiveData.setValue(users);
+        workmatesUiLiveData = mutableLiveData;
     }
 }

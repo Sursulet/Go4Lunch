@@ -1,10 +1,9 @@
 package com.sursulet.go4lunch.repository;
 
-import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.sursulet.go4lunch.api.UserHelper;
@@ -28,14 +27,13 @@ public class UserRepository {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         User user = document.toObject(User.class);
-                        Log.d("PEACH", "getUser: " + user.getUid());
                         mutableLiveData.postValue(user);
                     }
                 });
         return mutableLiveData;
     }
 
-    public LiveData<List<User>> getUsers() {
+    public LiveData<List<User>> getAllUsers() {
         MutableLiveData<List<User>> mutableLiveData = new MutableLiveData<>();
 
         UserHelper.getUsersCollection()
@@ -44,7 +42,10 @@ public class UserRepository {
                     List<User> users = new ArrayList<>();
 
                     for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                        users.add(documentSnapshot.toObject(User.class));
+                        User user = documentSnapshot.toObject(User.class);
+                        if(!(user.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()))){
+                            users.add(user);
+                        }
                     }
 
                     mutableLiveData.setValue(users);
@@ -65,9 +66,9 @@ public class UserRepository {
                         Set<String> activeRestaurants = new HashSet<>();
                         for (QueryDocumentSnapshot documentSnapshot : task.getResult()) {
                             User currentUser = documentSnapshot.toObject(User.class);
-                            if (currentUser.getRestaurant() != null) {
+                            /*if (currentUser.getRestaurant() != null) {
                                 activeRestaurants.add(currentUser.getRestaurant().getId());
-                            }
+                            }*/
                         }
 
                         mutableLiveData.setValue(activeRestaurants);

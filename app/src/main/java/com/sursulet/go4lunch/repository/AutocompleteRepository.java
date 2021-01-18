@@ -25,7 +25,7 @@ public class AutocompleteRepository {
         try {
             Response<GooglePlacesAutocompleteResult> response = mService.getAutocompletePlaces(
                     "", //TODO : KEY
-                    input,
+                    input + " restaurant",
                     location.getLatitude() + "," + location.getLongitude(),
                     "500",
                     "establishment"

@@ -10,9 +10,9 @@ public class GooglePlacesDetailResult {
     @SerializedName("html_attributions")
     @Expose
     private List<Object> htmlAttributions = null;
-    @SerializedName("result")
+    @SerializedName("detailResult")
     @Expose
-    private Result result;
+    private DetailResult detailResult;
     @SerializedName("status")
     @Expose
     private String status;
@@ -25,12 +25,12 @@ public class GooglePlacesDetailResult {
         this.htmlAttributions = htmlAttributions;
     }
 
-    public Result getResult() {
-        return result;
+    public DetailResult getDetailResult() {
+        return detailResult;
     }
 
-    public void setResult(Result result) {
-        this.result = result;
+    public void setDetailResult(DetailResult detailResult) {
+        this.detailResult = detailResult;
     }
 
     public String getStatus() {

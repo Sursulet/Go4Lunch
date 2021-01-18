@@ -58,7 +58,7 @@ public class WorkmatesAdapter extends ListAdapter<WorkmatesUiModel, WorkmatesAda
         }
 
         public void bind(WorkmatesUiModel workmatesUiModel) {
-            txt.setText(workmatesUiModel.getTxt());
+            txt.setText(workmatesUiModel.getSentence());
             txt.setTypeface(null, workmatesUiModel.getTxtStyle());
             Glide.with(photo)
                     .load(workmatesUiModel.photo)
