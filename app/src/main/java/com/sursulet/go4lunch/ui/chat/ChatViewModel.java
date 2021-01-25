@@ -39,7 +39,7 @@ public class ChatViewModel extends ViewModel {
         userReceiver = userRepository.getUser(uidReceiver);
         Log.d("PEACH", "init: " + uidReceiver + "/");
         allMessagesLiveData = Transformations.map(
-                chatRepository.getAllMessages(FirebaseAuth.getInstance().getCurrentUser().getUid(), uidReceiver),
+                chatRepository.getAllMessages(uidReceiver),
                 messages -> {
                     List<MessageUiModel> results = new ArrayList<>();
                     for (Message message : messages) {
@@ -52,7 +52,7 @@ public class ChatViewModel extends ViewModel {
 
                         results.add(messageUiModel);
                     }
-                    Log.d("PEACH", "init: results " + results.get(0).getMessage());
+                    //Log.d("PEACH", "init: results " + results.get(0).getMessage());
                     return results;
                 });
     }

@@ -73,7 +73,7 @@ public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapte
 
         public void bind(ListUiModel listUiModel) {
             name.setText(listUiModel.name);
-            txt.setText(listUiModel.getSentence());
+            txt.setText(listUiModel.getTxt());
             opening.setText(listUiModel.getOpening());
             distance.setText(listUiModel.getDistance());
             nbWorkmates.setText(listUiModel.getNbWorkmates());

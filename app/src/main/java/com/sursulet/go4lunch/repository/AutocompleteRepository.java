@@ -4,12 +4,10 @@ import android.location.Location;
 
 import com.sursulet.go4lunch.model.autocomplete.GooglePlacesAutocompleteResult;
 import com.sursulet.go4lunch.model.autocomplete.Prediction;
-import com.sursulet.go4lunch.model.autocomplete.StructuredFormatting;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
 import com.sursulet.go4lunch.remote.RetrofitClient;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Response;
@@ -25,7 +23,7 @@ public class AutocompleteRepository {
         try {
             Response<GooglePlacesAutocompleteResult> response = mService.getAutocompletePlaces(
                     "", //TODO : KEY
-                    input + " restaurant",
+                    input,
                     location.getLatitude() + "," + location.getLongitude(),
                     "500",
                     "establishment"

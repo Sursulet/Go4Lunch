@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.sursulet.go4lunch.R;
 
-//TODO : Faut-il utiliser ListAdapter ?
 public class ChatAdapter extends ListAdapter<MessageUiModel, ChatAdapter.MessageViewHolder> {
 
     //FOR DATA

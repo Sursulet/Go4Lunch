@@ -14,6 +14,7 @@ import androidx.work.WorkerParameters;
 import java.util.concurrent.TimeUnit;
 
 public class EventHandler extends Worker {
+
     public EventHandler(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }

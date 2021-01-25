@@ -54,13 +54,11 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
             synchronized (ViewModelFactory.class) {
                 if (sFactory == null) {
                     sFactory = new ViewModelFactory(
-                            new UserRepository(),
-                            new CurrentLocationRepository(
-                                MainApplication.getApplication()
-                            ),
+                            new UserRepository(MainApplication.getApplication()),
+                            new CurrentLocationRepository(MainApplication.getApplication()),
                             new NearbyPlacesRepository(),
                             new DetailPlaceRepository(),
-                            new RestaurantRepository(),
+                            new RestaurantRepository(FirebaseAuth.getInstance()),
                             new AutocompleteRepository(),
                             new ChatRepository());
                 }
@@ -76,7 +74,6 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
         if (modelClass.isAssignableFrom(MapViewModel.class)) {
             return (T) new MapViewModel(
-                    MainApplication.getApplication(),
                     currentLocationRepository,
                     nearbyPlacesRepository,
                     userRepository,
@@ -88,13 +85,11 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
                     nearbyPlacesRepository,
                     detailPlaceRepository,
                     userRepository,
-                    restaurantRepository
-            );
+                    restaurantRepository);
         } else if (modelClass.isAssignableFrom(WorkmatesViewModel.class)) {
             return (T) new WorkmatesViewModel(
                     userRepository,
-                    restaurantRepository
-            );
+                    restaurantRepository);
         } else if (modelClass.isAssignableFrom(DetailPlaceViewModel.class)) {
             return (T) new DetailPlaceViewModel(
                     detailPlaceRepository,
@@ -103,12 +98,10 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         }else if (modelClass.isAssignableFrom(ChatViewModel.class)) {
             return (T) new ChatViewModel(
                     chatRepository,
-                    userRepository
-            );
+                    userRepository);
         } else if (modelClass.isAssignableFrom(MainViewModel.class)) {
             return (T) new MainViewModel(
                     MainApplication.getApplication(),
-                    FirebaseAuth.getInstance(),
                     currentLocationRepository,
                     autocompleteRepository,
                     userRepository);

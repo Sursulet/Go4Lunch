@@ -3,55 +3,156 @@ package com.sursulet.go4lunch.repository;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Transaction;
 import com.sursulet.go4lunch.api.ActiveRestaurantHelper;
 import com.sursulet.go4lunch.api.LikeRestaurantHelper;
-import com.sursulet.go4lunch.model.Geometry;
-import com.sursulet.go4lunch.model.NearbyResult;
-import com.sursulet.go4lunch.model.OpeningHours;
 import com.sursulet.go4lunch.model.Restaurant;
 import com.sursulet.go4lunch.model.User;
+import com.sursulet.go4lunch.model.nearby.Geometry;
+import com.sursulet.go4lunch.model.nearby.Location;
+import com.sursulet.go4lunch.model.nearby.OpeningHours;
+import com.sursulet.go4lunch.model.nearby.Result;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class RestaurantRepository {
 
     private static final String TAG = RestaurantRepository.class.getSimpleName();
-    private final FirebaseAuth auth = FirebaseAuth.getInstance();
-    private final FirebaseUser firebaseUser = auth.getCurrentUser();
+
+    private final FirebaseAuth firebaseAuth;
+
+    //String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+    public RestaurantRepository(FirebaseAuth firebaseAuth) {
+        this.firebaseAuth = firebaseAuth;
+    }
 
     // --- CREATE ---
 
     public void createActiveRestaurant(String restaurantId, String restaurantName, String uid, String username, String urlPicture) {
-        ActiveRestaurantHelper.createActiveRestaurant(restaurantId, restaurantName, uid, username, urlPicture)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully written!"))
-                .addOnFailureListener(e -> Log.w(TAG, "Error writing document", e));
+        ActiveRestaurantHelper.createActiveRestaurant(restaurantId, restaurantName, uid, username, urlPicture);
     }
 
     public void createLikeRestaurant(String restaurantId, String restaurantName, String uid, String username, String urlPicture) {
-        LikeRestaurantHelper.createLikeRestaurant(restaurantId, restaurantName, uid, username, urlPicture)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully written!"))
-                .addOnFailureListener(e -> Log.d(TAG, "DocumentSnapshot successfully written!"));
+        //LikeRestaurantHelper.createLikeRestaurant(restaurantId, restaurantName, uid, username, urlPicture);
+        LikeRestaurantHelper.getLikeRestaurantsCollection().document(restaurantId)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        return;
+                    }
+
+                    if (snapshot != null && snapshot.exists()) {
+                        Log.d(TAG, "Current data: " + snapshot.getData());
+                        LikeRestaurantHelper.deleteLikeRestaurantBooking(restaurantId, uid);
+                    } else {
+                        Log.d(TAG, "Current data: null");
+                        LikeRestaurantHelper.createLikeRestaurant(restaurantId, restaurantName, uid, username, urlPicture);
+                    }
+
+                });
     }
 
     // --- GET ---
 
-    public LiveData<Restaurant> getActiveRestaurant(String id) {
+    public LiveData<Boolean> isFollowing(String restaurantId) {
+        MutableLiveData<Boolean> mutableLiveData = new MutableLiveData<>();
+        LikeRestaurantHelper.getFollowersCollection(restaurantId)
+                .document(firebaseAuth.getCurrentUser().getUid())
+                .addSnapshotListener(
+                        (value, e) -> {
+                            if (e != null) { Log.w(TAG, "Listen failed.", e); return; }
+
+                            if (value != null && value.exists()) {
+                                Log.d(TAG, "Current data: " + value.getData());
+                                mutableLiveData.postValue(true);
+                            } else {
+                                Log.d(TAG, "Current data: null");
+                                mutableLiveData.postValue(false);
+                            }
+                        });
+        /*
+        LikeRestaurantHelper.getLikeRestaurantFollower(restaurantId, firebaseAuth.getCurrentUser().getUid())
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                            mutableLiveData.postValue(true);
+                        } else {
+                            Log.d(TAG, "No such document");
+                            mutableLiveData.setValue(false);
+                        }
+                    } else {
+                        Log.d(TAG, "get failed with ", task.getException());
+                    }
+                });
+
+         */
+
+        return mutableLiveData;
+    }
+
+    public LiveData<Boolean> isBooking(String restaurantId) {
+        MutableLiveData<Boolean> mutableLiveData = new MutableLiveData<>();
+        ActiveRestaurantHelper.getBookingsCollection(restaurantId)
+                .document(firebaseAuth.getCurrentUser().getUid())
+                .addSnapshotListener(
+                        (value, e) -> {
+                            if (e != null) {
+                                Log.w(TAG, "Listen failed.", e);
+                                return;
+                            }
+
+                            if (value != null && value.exists()) {
+                                Log.d(TAG, "Current data: " + value.getData());
+                                mutableLiveData.postValue(true);
+                            } else {
+                                Log.d(TAG, "Current data: null");
+                                mutableLiveData.postValue(false);
+                            }
+
+                        });
+        /*
+        ActiveRestaurantHelper.getActiveRestaurantBooking(restaurantId, firebaseAuth.getCurrentUser().getUid())
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document.exists()) {
+                            Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                            mutableLiveData.setValue(true);
+                        } else {
+                            Log.d(TAG, "No such document");
+                            mutableLiveData.setValue(false);
+                        }
+                    } else {
+                        Log.d(TAG, "get failed with ", task.getException());
+                    }
+
+                });
+
+         */
+
+        return mutableLiveData;
+    }
+
+    public LiveData<Restaurant> getActiveRestaurant(String restaurantId) {
         MutableLiveData<Restaurant> mutableLiveData = new MutableLiveData<>();
-        ActiveRestaurantHelper.getActiveRestaurant(id)
+        ActiveRestaurantHelper.getActiveRestaurant(restaurantId)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
@@ -70,68 +171,49 @@ public class RestaurantRepository {
         return mutableLiveData;
     }
 
-    public LiveData<Boolean> isBooking(String id) {
-        MutableLiveData<Boolean> mutableLiveData = new MutableLiveData<>();
-        ActiveRestaurantHelper.getBooking(id, firebaseUser.getUid())
+    public LiveData<Restaurant> getActiveRestaurantBooking(String restaurantId) {
+        MutableLiveData<Restaurant> mutableLiveData = new MutableLiveData<>();
+        ActiveRestaurantHelper.getActiveRestaurantBooking(restaurantId, firebaseAuth.getCurrentUser().getUid())
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
                             Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                            mutableLiveData.postValue(true);
+                            Restaurant restaurant = document.toObject(Restaurant.class);
+                            mutableLiveData.postValue(restaurant);
                         } else {
                             Log.d(TAG, "No such document");
-                            mutableLiveData.postValue(false);
                         }
                     } else {
                         Log.d(TAG, "get failed with ", task.getException());
                     }
                 });
-
         return mutableLiveData;
     }
 
-    public LiveData<List<Restaurant>> getAllActiveRestaurants() {
-        MutableLiveData<List<Restaurant>> mutableLiveData = new MutableLiveData<>();
+    public LiveData<List<String>> getAllActiveRestaurantsIds() {
+        MutableLiveData<List<String>> mutableLiveData = new MutableLiveData<>();
         ActiveRestaurantHelper.getActiveRestaurantsCollection()
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        List<Restaurant> restaurants = new ArrayList<>();
+                        List<String> ids = new ArrayList<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             Log.d(TAG, document.getId() + " => " + document.getData());
                             Restaurant restaurant = document.toObject(Restaurant.class);
-                            restaurants.add(restaurant);
+                            ids.add(restaurant.getId());
                         }
-                        mutableLiveData.postValue(restaurants);
+                        mutableLiveData.setValue(ids);
                     } else {
                         Log.d(TAG, "Error getting documents: ", task.getException());
                     }
+
                 });
+
         return mutableLiveData;
     }
 
-    public LiveData<Set<String>> getAllActiveRestaurantsIds() {
-        MutableLiveData<Set<String>> mutableLiveData = new MutableLiveData<>();
-        ActiveRestaurantHelper.getActiveRestaurantsCollection()
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        Set<String> activeRestaurantsIds = new HashSet<>();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            Log.d(TAG, document.getId() + " => " + document.getData());
-                            Restaurant restaurant = document.toObject(Restaurant.class);
-                            activeRestaurantsIds.add(restaurant.getId());
-                        }
-                        mutableLiveData.postValue(activeRestaurantsIds);
-                    } else {
-                        Log.d(TAG, "Error getting documents: ", task.getException());
-                    }
-                });
-        return mutableLiveData;
-    }
-
-    public LiveData<List<User>> getAllBookings(String id) {
+    public LiveData<List<User>> getActiveRestaurantAllBookings(String id) {
         MutableLiveData<List<User>> mutableLiveData = new MutableLiveData<>();
         ActiveRestaurantHelper.getBookingsCollection(id)
                 .get()
@@ -141,7 +223,9 @@ public class RestaurantRepository {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             Log.d(TAG, document.getId() + " => " + document.getData());
                             User user = document.toObject(User.class);
-                            users.add(user);
+                            if (!(user.getUid().equals(firebaseAuth.getCurrentUser().getUid()))) {
+                                users.add(user);
+                            }
                         }
                         mutableLiveData.setValue(users);
                     } else {
@@ -152,96 +236,45 @@ public class RestaurantRepository {
         return mutableLiveData;
     }
 
-    public LiveData<Restaurant> hasActiveRestaurantBooking(String uid) {
-        MutableLiveData<Restaurant> mutableLiveData = new MutableLiveData<>();
-        ActiveRestaurantHelper.getAllBookingsCollection()
-                .whereEqualTo("uid", uid)
+    public LiveData<String> getNameActiveRestaurant(String userId) {
+        MutableLiveData<String> mutableLiveData = new MutableLiveData<>();
+
+        FirebaseFirestore.getInstance()
+                .collectionGroup("bookings")
+                .whereEqualTo("uid", userId)
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<User> ids = new ArrayList<>();
-
-                    for(QueryDocumentSnapshot snap : queryDocumentSnapshots) {
-                        Log.d(TAG, snap.getId() + " => " + snap.getData()  + " => " + snap.getReference().getPath());
-                    }
-                    mutableLiveData.postValue(new Restaurant("1", "WHAT"));
-                })
-                .addOnFailureListener(new OnFailureListener() {
+                .continueWithTask(new Continuation<QuerySnapshot, Task<List<DocumentSnapshot>>>() {
                     @Override
-                    public void onFailure(@NonNull Exception e) {
-                        mutableLiveData.postValue(new Restaurant("0", "FAKE"));
-                    }
-                });
-
-        return mutableLiveData;
-    }
-
-    public LiveData<Restaurant> getLikeRestaurant(String id) {
-        MutableLiveData<Restaurant> mutableLiveData = new MutableLiveData<>();
-        LikeRestaurantHelper.getLikeRestaurant(id)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                            Restaurant restaurant = document.toObject(Restaurant.class);
-                            mutableLiveData.postValue(restaurant);
-                        } else {
-                            Log.d(TAG, "No such document");
+                    public Task<List<DocumentSnapshot>> then(@NonNull Task<QuerySnapshot> task) throws Exception {
+                        List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
+                        for (DocumentSnapshot document : task.getResult()) {
+                            Log.d(TAG, "Continue" + document.getId() + " => " + document.getData());
+                            tasks.add(document.getReference().getParent().getParent().get());
                         }
-                    } else {
-                        Log.d(TAG, "get failed with ", task.getException());
+                        return Tasks.whenAllSuccess(tasks);
+                    }
+                })
+                .addOnCompleteListener(new OnCompleteListener<List<DocumentSnapshot>>() {
+                    @Override
+                    public void onComplete(@NonNull Task<List<DocumentSnapshot>> task) {
+                        List<String> names = new ArrayList<>();
+                        for (DocumentSnapshot snapshot : task.getResult()) {
+                            Log.d(TAG, snapshot.getId() + " => " + snapshot.getData().get("name"));
+                            Restaurant restaurant = snapshot.toObject(Restaurant.class);
+                            names.add(restaurant.getName());
+                        }
+                        if(names.size() != 0){
+                            mutableLiveData.postValue(names.get(0));
+                        }
                     }
                 });
-
-        return mutableLiveData;
-    }
-
-    //Get Like button status
-    public LiveData<Boolean> isFollower(String id) {
-        MutableLiveData<Boolean> mutableLiveData = new MutableLiveData<>();
-
-        LikeRestaurantHelper.getLikeRestaurantsCollection()
-                .document(id)
-                .addSnapshotListener((snapshot, e) -> {
-                    if(e != null) {
-                        Log.w(TAG, "onEvent: ", e);
-                        return;
-                    }
-
-                    if (snapshot != null && snapshot.exists()) {
-                        Log.d(TAG, "Current data: " + snapshot.getData());
-                        mutableLiveData.postValue(true);
-                    } else {
-                        Log.d(TAG, "Current data: null");
-                        mutableLiveData.postValue(false);
-                    }
-                });
-        /*
-                .getFollower(id, firebaseUser.getUid())
-                .addOnCompleteListener(
-                        task -> {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
-                                if (document.exists()) {
-                                    Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                                    mutableLiveData.postValue(true);
-                                } else {
-                                    Log.d(TAG, "No such document");
-                                    mutableLiveData.postValue(false);
-                                }
-                            } else {
-                                Log.d(TAG, "get failed with ", task.getException());
-                            }
-                        });
-
-         */
 
         return mutableLiveData;
     }
 
     // -- DELETE --
-    public void deleteBooking(String id, String uid) {
-        ActiveRestaurantHelper.deleteBooking(id, uid)
+    public void deleteActiveRestaurantBooking(String id, String uid) {
+        ActiveRestaurantHelper.deleteActiveRestaurantBooking(id, uid)
                 .addOnCompleteListener(
                         task -> {
                             if (task.isSuccessful()) {
@@ -252,8 +285,8 @@ public class RestaurantRepository {
                         });
     }
 
-    public void deleteFollower(String id, String uid) {
-        LikeRestaurantHelper.deleteFollower(id, uid)
+    public void deleteLikeRestaurantBooking(String id, String uid) {
+        LikeRestaurantHelper.deleteLikeRestaurantBooking(id, uid)
                 .addOnCompleteListener(
                         task -> {
                             if (task.isSuccessful()) {
@@ -264,36 +297,84 @@ public class RestaurantRepository {
                         });
     }
 
-    public LiveData<List<NearbyResult>> init() {
-        MutableLiveData<List<NearbyResult>> mutableLiveData = new MutableLiveData<>();
-        List<NearbyResult> nearbyResults = new ArrayList<>();
-        NearbyResult nearbyResult = new NearbyResult();
-        nearbyResult.setBusinessStatus("OPERATIONAL");
-        Geometry geometry = new Geometry();
-        com.sursulet.go4lunch.model.Location location = new com.sursulet.go4lunch.model.Location();
-        location.setLat(48.858397);
-        location.setLng(2.3501027);
-        geometry.setLocation(location);
-        nearbyResult.setGeometry(geometry);
-        nearbyResult.setName("Benoit Paris");
-        nearbyResult.setIcon("https://maps.gstatic.com/mapfiles/place_api/icons/v1/png_71/restaurant-71.png");
-        OpeningHours openingHours = new OpeningHours();
-        openingHours.setOpenNow(false);
-        nearbyResult.setOpeningHours(openingHours);
-        nearbyResult.setPlaceId("ChIJQ0bNfR5u5kcR9Z0i41-E7sg");
-        nearbyResult.setPriceLevel(4);
-        nearbyResult.setRating(4.1);
-        nearbyResult.setReference("ChIJQ0bNfR5u5kcR9Z0i41-E7sg");
-        nearbyResult.setVicinity("20 Rue Saint-Martin, Paris");
+    public void onGoingButtonClick(String restaurantId) {
+        DocumentReference sfDocRef = ActiveRestaurantHelper.getBookingsCollection(restaurantId)
+                .document(firebaseAuth.getCurrentUser().getUid());
 
-        nearbyResults.add(nearbyResult);
-        mutableLiveData.postValue(nearbyResults);
-        return mutableLiveData;
+        FirebaseFirestore.getInstance().runTransaction(
+                (Transaction.Function<Void>) transaction -> {
+                    DocumentSnapshot snapshot = transaction.get(sfDocRef);
+    
+                    if (snapshot.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + snapshot.getData());
+                        transaction.delete(sfDocRef);
+                    } else {
+                        Log.d(TAG, "No such document");
+                        User userToCreate = new User(
+                                firebaseAuth.getCurrentUser().getUid(),
+                                firebaseAuth.getCurrentUser().getEmail(),
+                                null);
+                        transaction.set(sfDocRef, userToCreate);
+                    }
+    
+                    return null;
+                })
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Transaction success!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Transaction failure.", e));
+        /*
+        ActiveRestaurantHelper.getBookingsCollection(restaurantId)
+                .document(firebaseAuth.getCurrentUser().getUid())
+                .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+
+                        if (value != null && value.exists()) {
+                            Log.d(TAG, "Current data: " + value.getData());
+                            ActiveRestaurantHelper.getBookingsCollection(restaurantId)
+                                    .document(firebaseAuth.getCurrentUser().getUid()).delete();
+                        } else {
+                            Log.d(TAG, "Current data: null");
+                            User userToCreate = new User(
+                                    firebaseAuth.getCurrentUser().getUid(),
+                                    firebaseAuth.getCurrentUser().getEmail(),
+                                    null);
+                            ActiveRestaurantHelper.getBookingsCollection(restaurantId)
+                                    .document(firebaseAuth.getCurrentUser().getUid()).set(userToCreate);
+                        }
+
+                    }
+                });
+
+         */
     }
 
-    public LiveData<String> getFakeName(String uid) {
-        MutableLiveData<String > mutableLiveData = new MutableLiveData<>();
-        mutableLiveData.setValue("Benoit Paris");
-        return mutableLiveData;
+    public void onLikeButtonClick(String restaurantId) {
+        DocumentReference sfDocRef = LikeRestaurantHelper.getFollowersCollection(restaurantId)
+                .document(firebaseAuth.getCurrentUser().getUid());
+
+        FirebaseFirestore.getInstance().runTransaction(
+                (Transaction.Function<Void>) transaction -> {
+                    DocumentSnapshot snapshot = transaction.get(sfDocRef);
+
+                    if (snapshot.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + snapshot.getData());
+                        transaction.delete(sfDocRef);
+                    } else {
+                        Log.d(TAG, "No such document");
+                        User userToCreate = new User(
+                                firebaseAuth.getCurrentUser().getUid(),
+                                firebaseAuth.getCurrentUser().getEmail(),
+                                null);
+                        transaction.set(sfDocRef, userToCreate);
+                    }
+
+                    return null;
+                })
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Transaction success!"))
+                .addOnFailureListener(e -> Log.w(TAG, "Transaction failure.", e));
     }
 }

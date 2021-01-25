@@ -81,7 +81,6 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         chatViewModel.getUiModelMutableLiveData().observe(this, messages -> {
-            Log.d("PEACH", "onCreate: ACTIVITY " + messages.get(1).getMessage());
             chatAdapter.submitList(messages);
         });
 

@@ -11,8 +11,6 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.SingleLiveEvent;
 import com.sursulet.go4lunch.Utils;
@@ -39,6 +37,11 @@ public class DetailPlaceViewModel extends ViewModel {
     private boolean isLikeRestaurant;
 
     private final MediatorLiveData<DetailPlaceUiModel> uiModelMediatorLiveData = new MediatorLiveData<>();
+
+    LiveData<GooglePlacesDetailResult> placesDetailResultLiveData;
+    LiveData<List<User>> usersLiveData;
+    LiveData<Boolean> isGoingLiveData;
+    LiveData<Boolean> isLikePlaceLiveData;
     LiveData<List<WorkmatesUiModel>> workmatesUiLiveData;
 
     private final SingleLiveEvent<String> eventOpenChatActivity = new SingleLiveEvent<>();
@@ -54,19 +57,17 @@ public class DetailPlaceViewModel extends ViewModel {
     public void startDetailPlace(String id) {
         restaurantId = id;
 
-        LiveData<GooglePlacesDetailResult> placesDetailResultLiveData = detailPlaceRepository.getDetailPlace(id);
-        //LiveData<GooglePlacesDetailResult> placesDetailResultLiveData = detailPlaceRepository.init();
-        LiveData<List<User>> usersLiveData = restaurantRepository.getAllBookings(restaurantId);
-        LiveData<Boolean> isGoingLiveData = restaurantRepository.isBooking(restaurantId);
-        LiveData<Boolean> isLikePlaceLiveData = restaurantRepository.isFollower(restaurantId);
+        placesDetailResultLiveData = detailPlaceRepository.getDetailPlace(id);
+        usersLiveData = restaurantRepository.getActiveRestaurantAllBookings(restaurantId);
+        isGoingLiveData = restaurantRepository.isBooking(restaurantId);
+        isLikePlaceLiveData = restaurantRepository.isFollowing(restaurantId);
 
         workmatesUiLiveData = Transformations.map(
                 usersLiveData,
                 userList -> {
                     List<WorkmatesUiModel> results = new ArrayList<>();
                     for (User user : userList) {
-                        if(!(user.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()))){
-                            String sentence = user.getUsername() + " is joining! ";
+                            String sentence = user.getUsername() + " is joining!";
                             WorkmatesUiModel workmatesUiModel = new WorkmatesUiModel(
                                     user.getUid(),
                                     sentence,
@@ -75,7 +76,6 @@ public class DetailPlaceViewModel extends ViewModel {
                             );
 
                             results.add(workmatesUiModel);
-                        }
                     }
 
                     return results;
@@ -131,30 +131,32 @@ public class DetailPlaceViewModel extends ViewModel {
             return;
         }
 
-        restaurantName = resultFromServer.getDetailResult().getName();
+        restaurantName = resultFromServer.getResult().getName();
         isGoingToRestaurant = isGoing;
         isLikeRestaurant = isLike;
-        String photo = "";/*Utils.getPhotoOfPlace(
-                resultFromServer.getDetailResult()
+        String photo = Utils.getPhotoOfPlace(
+                resultFromServer.getResult()
                         .getPhotos()
                         .get(0)
                         .getPhotoReference(),
-                1000);*/
+                1000);
         int isGoingColor = (isGoing) ? R.color.primary : R.color.secondary;
         int isLikeColor = (isLike) ? R.color.primary : R.color.secondary;
-        float rating = Utils.getRating(resultFromServer.getDetailResult().getRating());
-        String opening = Utils.getOpeningHours(resultFromServer.getDetailResult().getOpeningHours());
+        float rating = Utils.getRating(resultFromServer.getResult().getRating());
+        String opening = Utils.getOpeningHours(resultFromServer.getResult().getOpeningHours());
+
+        Log.d("PEACH", "combine: " + isLikeColor);
 
         uiModelMediatorLiveData.setValue(
                 new DetailPlaceUiModel(
                         restaurantName,
                         photo,
                         isGoingColor,
-                        resultFromServer.getDetailResult().getFormattedAddress(),
+                        resultFromServer.getResult().getFormattedAddress(),
                         rating,
-                        resultFromServer.getDetailResult().getFormattedPhoneNumber(),
+                        resultFromServer.getResult().getFormattedPhoneNumber(),
                         isLikeColor,
-                        resultFromServer.getDetailResult().getWebsite(),
+                        resultFromServer.getResult().getWebsite(),
                         workmatesUiModels,
                         opening
                 ));
@@ -167,49 +169,18 @@ public class DetailPlaceViewModel extends ViewModel {
     public void onGoingButtonClick() {
         String s = String.valueOf(isGoingToRestaurant);
         Log.d("PEACH", "onGoingButtonClick: is? : " + s + " / ");
+        restaurantRepository.onGoingButtonClick(restaurantId);
 
+        //Si il va déjà à un restaurant l'empecher d''activer un autre
         if (!isGoingToRestaurant) {
-            FirebaseUser userValue = FirebaseAuth.getInstance().getCurrentUser();
-            if (userValue != null) {
-                String urlPicture = (userValue.getPhotoUrl() != null) ? userValue.getPhotoUrl().toString() : null;
-                String username = userValue.getDisplayName();
-                String uid = userValue.getUid();
-
-                Log.d("PEACH", "onGoingButtonClick not true: " + restaurantId);
-                restaurantRepository.createActiveRestaurant(
-                        restaurantId,
-                        restaurantName,
-                        uid,
-                        username,
-                        urlPicture
-                );
-            }
-
-        } else {
-            restaurantRepository.deleteBooking(restaurantId, FirebaseAuth.getInstance().getCurrentUser().getUid());
+            //Toast.makeText(,"You going to", Toast.LENGTH_SHORT).show();
         }
+
+
     }
 
     public void onLikeButtonClick() {
-        if(!isLikeRestaurant){
-            FirebaseUser userValue = FirebaseAuth.getInstance().getCurrentUser();
-            if (userValue != null) {
-                String urlPicture = (userValue.getPhotoUrl() != null) ? userValue.getPhotoUrl().toString() : null;
-                String username = userValue.getDisplayName();
-                String uid = userValue.getUid();
-
-                Log.d("PEACH", "onLikeButtonClick: Not true" + restaurantId);
-                restaurantRepository.createLikeRestaurant(
-                        restaurantId,
-                        restaurantName,
-                        uid,
-                        username,
-                        urlPicture
-                );
-            }
-        } else {
-            restaurantRepository.deleteFollower(restaurantId, FirebaseAuth.getInstance().getCurrentUser().getUid());
-        }
+        restaurantRepository.onLikeButtonClick(restaurantId);
     }
 
     public SingleLiveEvent<String> getEventOpenChatActivity() { return eventOpenChatActivity; }
@@ -217,9 +188,9 @@ public class DetailPlaceViewModel extends ViewModel {
         eventOpenChatActivity.setValue(id);
     }
 
-    public void setWorkmatesUiLiveData(List<WorkmatesUiModel> users) {
+    public void setWorkmatesUiLiveData(List<WorkmatesUiModel> workmates) {
         MutableLiveData<List<WorkmatesUiModel>> mutableLiveData = new MutableLiveData<>();
-        mutableLiveData.setValue(users);
+        mutableLiveData.setValue(workmates);
         workmatesUiLiveData = mutableLiveData;
     }
 }

@@ -1,6 +1,6 @@
 package com.sursulet.go4lunch.remote;
 
-import com.sursulet.go4lunch.model.GooglePlacesNearbySearchResult;
+import com.sursulet.go4lunch.model.nearby.GooglePlacesNearbySearchResult;
 import com.sursulet.go4lunch.model.autocomplete.GooglePlacesAutocompleteResult;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 

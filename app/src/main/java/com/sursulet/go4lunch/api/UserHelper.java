@@ -40,8 +40,4 @@ public class UserHelper {
         return UserHelper.getUsersCollection().document(uid).delete();
     }
 
-    public static Task<Void> deleteRestaurant(String uid) {
-        return UserHelper.getUsersCollection().document(uid).update("restaurant", null);
-    }
-
 }

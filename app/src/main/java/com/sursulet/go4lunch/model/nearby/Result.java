@@ -1,11 +1,11 @@
 
-package com.sursulet.go4lunch.model;
+package com.sursulet.go4lunch.model.nearby;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class NearbyResult {
+public class Result {
 
     @SerializedName("business_status")
     @Expose

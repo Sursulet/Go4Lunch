@@ -4,8 +4,6 @@ import android.app.Application;
 import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.text.TextUtils;
-import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
@@ -13,10 +11,6 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.sursulet.go4lunch.api.UserHelper;
 import com.sursulet.go4lunch.model.autocomplete.Prediction;
 import com.sursulet.go4lunch.repository.AutocompleteRepository;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
@@ -29,106 +23,61 @@ import java.util.List;
 public class MainViewModel extends ViewModel {
 
     private final Application application;
-    private final FirebaseAuth firebaseAuth;
     private final CurrentLocationRepository currentLocationRepository;
     private final AutocompleteRepository autocompleteRepository;
     private final UserRepository userRepository;
 
     private AutocompleteAsyncTask myCurrentAutocompleteAsyncTask;
 
-    private final MutableLiveData<MainUiModel> uiModelMutableLiveData = new MutableLiveData<>();
+    private final MediatorLiveData<MainUiModel> uiModelMutableLiveData = new MediatorLiveData<>();
     private final MutableLiveData<List<Prediction>> predictionsLiveData = new MutableLiveData<>();
     private final MutableLiveData<String> selectedQueryLiveData = new MutableLiveData<>();
-    MediatorLiveData<List<String>> queriesMediatorLiveData = new MediatorLiveData<>();
     LiveData<Location> currentLocationLiveData;
 
     public MainViewModel(
             Application application,
-            FirebaseAuth firebaseAuth,
             CurrentLocationRepository currentLocationRepository,
             AutocompleteRepository autocompleteRepository,
-            UserRepository userRepository) {
-        this.firebaseAuth = firebaseAuth;
+            UserRepository userRepository
+    ) {
         this.application = application;
         this.currentLocationRepository = currentLocationRepository;
         this.autocompleteRepository = autocompleteRepository;
         this.userRepository = userRepository;
 
-        if (firebaseAuth.getCurrentUser() != null) {
-            uiModelMutableLiveData.setValue(
-                    new MainUiModel(
-                            getCurrentUserName(firebaseAuth.getCurrentUser().getDisplayName()),
-                            getCurrentUserEmail(firebaseAuth.getCurrentUser().getEmail()),
-                            getCurrentUserPhoto(firebaseAuth.getCurrentUser().getPhotoUrl())
-                    )
-            );
-        }
-
         currentLocationLiveData = currentLocationRepository.getLastLocationLiveData();
 
-        /*
-        queriesMediatorLiveData.addSource(selectedQueryLiveData, s -> combine(s, predictionsLiveData.getValue()));
-        queriesMediatorLiveData.addSource(predictionsLiveData, predictions -> combine(selectedQueryLiveData.getValue(), predictions));
+        LiveData<String> nameLiveData = userRepository.getCurrentUserName();
+        LiveData<String> emailLiveData = userRepository.getCurrentUserEmail();
+        LiveData<Uri> photoLiveData = userRepository.getCurrentUserPhoto();
 
-         */
+        uiModelMutableLiveData.addSource(nameLiveData, name -> combine(name, emailLiveData.getValue(), photoLiveData.getValue()));
+        uiModelMutableLiveData.addSource(emailLiveData, email -> combine(nameLiveData.getValue(), email, photoLiveData.getValue()));
+        uiModelMutableLiveData.addSource(photoLiveData, uri -> combine(nameLiveData.getValue(), emailLiveData.getValue(), uri));
+
     }
 
-    /*
-    private void combine(String query, List<Prediction> predictions) {
-        if (query == null || predictions == null) return;
-
-        List<String> results = new ArrayList<>();
-        for (Prediction prediction : predictions) {
-            results.add(prediction.getStructuredFormatting().getMainText());
+    private void combine(String name, String email, Uri uri) {
+        if (name == null || email == null || uri == null) {
+            return;
         }
 
-        queriesMediatorLiveData.setValue(results);
+        if (isCurrentUserLogged()) {
+            uiModelMutableLiveData.setValue(new MainUiModel(name, email, uri));
+        }
     }
 
-    public LiveData<List<String>> getQueriesMediatorLiveData() { return queriesMediatorLiveData; }
-
-     */
 
     public Boolean isCurrentUserLogged() {
-        return firebaseAuth.getCurrentUser() != null;
+        return userRepository.isCurrentUserLogged();
     }
 
     public LiveData<MainUiModel> getUiModelLiveData() {
         return uiModelMutableLiveData;
     }
 
-    private String getCurrentUserName(String name) {
-        return TextUtils.isEmpty(name) ? application.getString(R.string.info_no_username_found) : name;
-    }
-
-    private String getCurrentUserEmail(String email) {
-        return TextUtils.isEmpty(email) ? application.getString(R.string.info_no_email_found) : email;
-    }
-
-    private Uri getCurrentUserPhoto(Uri photo) {
-        Uri url = null;
-        if (photo != null) url = photo;
-        return url;
-    }
-
     public void createUser() {
-        FirebaseUser userValue = firebaseAuth.getCurrentUser();
-
-        if (userValue != null) {
-            String urlPicture = (userValue.getPhotoUrl() != null) ? userValue.getPhotoUrl().toString() : null;
-            String username = userValue.getDisplayName();
-            String uid = userValue.getUid();
-
-            UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
-        }
-    }
-
-    protected OnFailureListener onFailureListener() {
-        return e -> Toast.makeText(
-                application,
-                application.getString(R.string.error_unknown_error),
-                Toast.LENGTH_LONG
-        ).show();
+        userRepository.createUser();
     }
 
     public void onQueryTextChange(String newText) {

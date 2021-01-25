@@ -6,14 +6,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.sursulet.go4lunch.SingleLiveEvent;
 import com.sursulet.go4lunch.Utils;
-import com.sursulet.go4lunch.model.NearbyResult;
-import com.sursulet.go4lunch.model.User;
+import com.sursulet.go4lunch.model.nearby.Result;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.DetailPlaceRepository;
@@ -42,7 +40,6 @@ public class ListViewModel extends ViewModel {
     private final MediatorLiveData<List<ListUiModel>> uiModelMediator = new MediatorLiveData<>();
     private final MediatorLiveData<Map<String, GooglePlacesDetailResult>> detailPlaceMediator = new MediatorLiveData<>();
     private final MediatorLiveData<Map<String, Integer>> workmatesMediator = new MediatorLiveData<>();
-    LiveData<List<NearbyResult>> nearbyPlacesDependingOnGps;
 
     private final List<String> alreadyRequiredUIds = new ArrayList<>();
     private final List<String> alreadyRequiredIds = new ArrayList<>();
@@ -62,7 +59,7 @@ public class ListViewModel extends ViewModel {
         this.restaurantRepository = restaurantRepository;
 
         LiveData<Location> currentLocationLiveData = currentLocationRepository.getLastLocationLiveData();
-        nearbyPlacesDependingOnGps = Transformations.switchMap(
+        LiveData<List<Result>> nearbyPlacesDependingOnGps = Transformations.switchMap(
                 currentLocationRepository.getLastLocationLiveData(),
                 location -> nearbyPlacesRepository.getNearByPlaces(
                         location.getLatitude(),
@@ -113,14 +110,14 @@ public class ListViewModel extends ViewModel {
 
     private void combine(
             @Nullable Location location,
-            @Nullable List<NearbyResult> nearbyPlaces,
+            @Nullable List<Result> nearbyPlaces,
             @Nullable Map<String, GooglePlacesDetailResult> mapDetail,
             @Nullable Map<String, Integer> numberWorkmatesMap
     ) {
         if (location == null || nearbyPlaces == null) return;
 
         List<ListUiModel> uiStateList = new ArrayList<>();
-        for (NearbyResult nearbyPlace : nearbyPlaces) {
+        for (Result nearbyPlace : nearbyPlaces) {
             String placeId = nearbyPlace.getPlaceId();
 
             GooglePlacesDetailResult existingPlaceDetail = mapDetail.get(nearbyPlace.getPlaceId());
@@ -140,7 +137,7 @@ public class ListViewModel extends ViewModel {
                 if (!alreadyRequiredIds.contains(placeId)) {
                     alreadyRequiredIds.add(placeId);
                     workmatesMediator.addSource(
-                            restaurantRepository.getAllBookings(placeId),
+                            restaurantRepository.getActiveRestaurantAllBookings(placeId),
                             users -> {
                                 int size = users.size();
                                 Map<String, Integer> existingMap = workmatesMediator.getValue();
@@ -150,14 +147,15 @@ public class ListViewModel extends ViewModel {
                             });
                 }
             } else {
-                String url = "https://unsplash.com/photos/gjlMT52gy5M";//Utils.getPhotoOfPlace(nearbyPlace.getPhotos().get(0).getPhotoReference(), 500);
+
+                String url = Utils.getPhotoOfPlace(nearbyPlace.getPhotos().get(0).getPhotoReference(), 500);
                 String sentence = nearbyPlace.getVicinity();
-                String opening = Utils.getOpeningHours(existingPlaceDetail.getDetailResult().getOpeningHours());
+                String opening = Utils.getOpeningHours(existingPlaceDetail.getResult().getOpeningHours());
                 float rating = Utils.getRating(nearbyPlace.getRating());
                 String distance = Utils.getDistance(
-                        48, 2,//location.getLatitude(), location.getLongitude(),
+                        location.getLatitude(), location.getLongitude(),
                         nearbyPlace.getGeometry().getLocation().getLat(), nearbyPlace.getGeometry().getLocation().getLng()
-                );
+                        );
                 String numberWorkmates = "(" + numberWorkmatesMap.get(placeId) + ")";
 
                 ListUiModel listUiModel = new ListUiModel(
@@ -176,10 +174,12 @@ public class ListViewModel extends ViewModel {
 
         }
 
-        uiModelMediator.setValue(uiStateList);
+        if(!uiStateList.isEmpty()) {
+            uiModelMediator.setValue(uiStateList);
+        }
     }
 
-    public LiveData<List<ListUiModel>> getUiModelMediator() {
+    public MediatorLiveData<List<ListUiModel>> getUiModelMediator() {
         return uiModelMediator;
     }
 
@@ -195,31 +195,4 @@ public class ListViewModel extends ViewModel {
         return userRepository.getSelectedQuery();
     }
 
-    public void setNearbyPlacesDependingOnGps(List<NearbyResult> nearbyResults) {
-        MutableLiveData<List<NearbyResult>> mutableLiveData = new MutableLiveData<>();
-        mutableLiveData.postValue(nearbyResults);
-
-        nearbyPlacesDependingOnGps = mutableLiveData;
-    }
-
-    public void setDetailPlaceMediator(
-            String nearbyPlaceId,
-            GooglePlacesDetailResult detailPlace
-    ) {
-        Map<String, GooglePlacesDetailResult> existingMap = detailPlaceMediator.getValue();
-        //assert existingMap != null;
-        existingMap.put(nearbyPlaceId, detailPlace);
-        detailPlaceMediator.setValue(existingMap);
-    }
-
-    public void setWorkmatesMediator(
-            String placeId,
-            List<User> users
-    ) {
-        int size = users.size();
-        Map<String, Integer> existingMap = workmatesMediator.getValue();
-        //assert existingMap != null;
-        existingMap.put(placeId, size);
-        workmatesMediator.setValue(existingMap);
-    }
 }

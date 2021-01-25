@@ -1,10 +1,10 @@
 
-package com.sursulet.go4lunch.model;
+package com.sursulet.go4lunch.model.nearby;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Location {
+public class Southwest {
 
     @SerializedName("lat")
     @Expose

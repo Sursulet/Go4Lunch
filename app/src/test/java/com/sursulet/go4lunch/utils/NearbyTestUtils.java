@@ -1,23 +1,26 @@
 package com.sursulet.go4lunch.utils;
 
-import com.sursulet.go4lunch.model.Geometry;
-import com.sursulet.go4lunch.model.Location;
-import com.sursulet.go4lunch.model.Northeast;
-import com.sursulet.go4lunch.model.OpeningHours;
-import com.sursulet.go4lunch.model.NearbyResult;
-import com.sursulet.go4lunch.model.Southwest;
-import com.sursulet.go4lunch.model.Viewport;
+import com.sursulet.go4lunch.model.nearby.Geometry;
+import com.sursulet.go4lunch.model.nearby.Location;
+import com.sursulet.go4lunch.model.nearby.Northeast;
+import com.sursulet.go4lunch.model.nearby.OpeningHours;
+import com.sursulet.go4lunch.model.nearby.Photo;
+import com.sursulet.go4lunch.model.nearby.Result;
+import com.sursulet.go4lunch.model.nearby.Southwest;
+import com.sursulet.go4lunch.model.nearby.Viewport;
 
-public class DataUtils {
+import java.util.ArrayList;
+import java.util.List;
 
-    public static NearbyResult buildResult(
+public class NearbyTestUtils {
+    public static Result buildResult(
             double latitude, double longitude,
             double northLatitude, double northLongitude,
             double southLatitude, double southLongitude,
             String name, boolean openNow, String placeId,
             double rating, String reference, String vicinity
     ) {
-        NearbyResult nearbyResult = new NearbyResult();
+        Result nearbyResult = new Result();
 
         Location location = new Location();
         location.setLat(latitude); location.setLng(longitude);
@@ -39,6 +42,12 @@ public class DataUtils {
         OpeningHours openingHours = new OpeningHours();
         openingHours.setOpenNow(openNow);
 
+        List<Photo> photos = new ArrayList<>();
+        Photo photo = new Photo();
+        photo.setPhotoReference("photoRef");
+        photos.add(photo);
+
+        nearbyResult.setPhotos(photos);
         nearbyResult.setGeometry(geometry);
         nearbyResult.setName(name);
         nearbyResult.setOpeningHours(openingHours);

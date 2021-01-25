@@ -16,6 +16,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -23,7 +24,6 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.FirebaseApp;
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
 import com.sursulet.go4lunch.ui.OnItemClickListener;
@@ -62,7 +62,6 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_place);
-        FirebaseApp.initializeApp(this);
 
         Intent i = getIntent();
         String id = i.getStringExtra("id");
@@ -96,8 +95,9 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
 
             address.setText(detailPlaceUiModel.getSentence());
             rating.setRating(detailPlaceUiModel.getRating());
-            fab.setImageTintList(ColorStateList.valueOf(detailPlaceUiModel.getIsGoing()));
-            likeBtn.setBackgroundTintList(ColorStateList.valueOf(detailPlaceUiModel.getIsLike()));
+            fab.setImageTintList(ContextCompat.getColorStateList(DetailPlaceActivity.this,detailPlaceUiModel.getIsGoing()));
+            likeBtn.setCompoundDrawableTintList(ContextCompat.getColorStateList(DetailPlaceActivity.this ,detailPlaceUiModel.getIsLike()));
+            likeBtn.setTextColor(ContextCompat.getColorStateList(DetailPlaceActivity.this ,detailPlaceUiModel.getIsLike()));
 
             phoneNumber = detailPlaceUiModel.getPhoneNumber();
             websiteUrl = detailPlaceUiModel.getUrlWebsite();

@@ -1,5 +1,5 @@
 
-package com.sursulet.go4lunch.model;
+package com.sursulet.go4lunch.model.nearby;
 
 import java.util.List;
 import com.google.gson.annotations.Expose;
@@ -10,9 +10,9 @@ public class GooglePlacesNearbySearchResult {
     @SerializedName("next_page_token")
     @Expose
     private String nextPageToken;
-    @SerializedName("nearbyResults")
+    @SerializedName("results")
     @Expose
-    private List<NearbyResult> nearbyResults = null;
+    private List<Result> results = null;
     @SerializedName("status")
     @Expose
     private String status;
@@ -25,12 +25,12 @@ public class GooglePlacesNearbySearchResult {
         this.nextPageToken = nextPageToken;
     }
 
-    public List<NearbyResult> getNearbyResults() {
-        return nearbyResults;
+    public List<Result> getResults() {
+        return results;
     }
 
-    public void setNearbyResults(List<NearbyResult> nearbyResults) {
-        this.nearbyResults = nearbyResults;
+    public void setResults(List<Result> results) {
+        this.results = results;
     }
 
     public String getStatus() {

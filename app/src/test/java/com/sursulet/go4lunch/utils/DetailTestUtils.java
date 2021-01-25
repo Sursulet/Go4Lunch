@@ -1,24 +1,23 @@
 package com.sursulet.go4lunch.utils;
 
 import com.sursulet.go4lunch.model.details.Close;
-import com.sursulet.go4lunch.model.details.DetailResult;
 import com.sursulet.go4lunch.model.details.Open;
 import com.sursulet.go4lunch.model.details.OpeningHours;
 import com.sursulet.go4lunch.model.details.Period;
 import com.sursulet.go4lunch.model.details.Photo;
+import com.sursulet.go4lunch.model.details.Result;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class DetailTestUtils {
-
-    public static DetailResult buildDetailResult(
+    public static Result buildDetailResult(
             String formattedAddress, String formattedPhoneNumber,
             String name, boolean openNew, String photo_reference, String placeId, double rating,
             String reference, String vicinity, String website
     ) {
-        DetailResult detailResult = new DetailResult();
+        Result detailResult = new Result();
         List<String> weekdayText = Arrays.asList(
                 "Monday: Closed",
                 "Tuesday: Closed",

@@ -1,6 +1,5 @@
 package com.sursulet.go4lunch;
 
-import com.sursulet.go4lunch.model.GooglePlacesNearbySearchResult;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
 import com.sursulet.go4lunch.remote.RetrofitClient;
 

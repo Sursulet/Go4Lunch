@@ -4,13 +4,9 @@ import android.util.Log;
 
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.Query;
 import com.sursulet.go4lunch.model.Message;
 import com.sursulet.go4lunch.model.User;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class MessageHelper {
     private static final String COLLECTION_NAME = "messages";
