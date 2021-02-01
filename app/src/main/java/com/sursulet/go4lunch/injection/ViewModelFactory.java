@@ -54,13 +54,13 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
             synchronized (ViewModelFactory.class) {
                 if (sFactory == null) {
                     sFactory = new ViewModelFactory(
-                            new UserRepository(MainApplication.getApplication()),
+                            new UserRepository(MainApplication.getApplication(), FirebaseAuth.getInstance()),
                             new CurrentLocationRepository(MainApplication.getApplication()),
                             new NearbyPlacesRepository(),
                             new DetailPlaceRepository(),
                             new RestaurantRepository(FirebaseAuth.getInstance()),
                             new AutocompleteRepository(),
-                            new ChatRepository());
+                            new ChatRepository(MainApplication.getApplication(), FirebaseAuth.getInstance()));
                 }
             }
         }

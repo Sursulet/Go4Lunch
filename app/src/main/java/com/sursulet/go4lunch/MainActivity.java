@@ -34,6 +34,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
+import com.sursulet.go4lunch.notifications.EventHandler;
 import com.sursulet.go4lunch.ui.OnItemClickListener;
 import com.sursulet.go4lunch.ui.autocomplete.PlaceAutocompleteAdapter;
 import com.sursulet.go4lunch.ui.detail.DetailPlaceActivity;
@@ -64,6 +65,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //EventHandler.oneOffRequest();
+        EventHandler.periodRequest();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -156,17 +160,6 @@ public class MainActivity extends AppCompatActivity
                 return false;
             }
         });
-
-        /*
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                mainViewModel.onQueryTextChange("");
-                return false;
-            }
-        });
-
-         */
 
         return true;
     }

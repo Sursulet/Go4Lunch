@@ -12,8 +12,8 @@ public class MessageHelper {
     private static final String COLLECTION_NAME = "messages";
 
     // --- CREATE --
-    public static Task<DocumentReference> createMessageForChat(String textMessage, User userSender, String chat){
-        Log.d("PEACH", "createMessageForChat: " + textMessage + "/" + userSender.getUid() + "/" + chat);
+    public static Task<DocumentReference> createMessageForChat(String chat, String textMessage, User userSender){
+        //Log.d("PEACH", "createMessageForChat: " + textMessage + "/" + userSender.getUid() + "/" + chat);
 
         Message message = new Message(textMessage, userSender);
         return ChatHelper.getChatCollection()
@@ -21,8 +21,6 @@ public class MessageHelper {
                 .collection(COLLECTION_NAME)
                 .add(message);
     }
-
-
 
     // --- GET ---
 
@@ -34,21 +32,4 @@ public class MessageHelper {
                 .orderBy("dateCreated")
                 .limit(50);
     }
-
-    // -- UPDATE ---
-
-    /*
-    public static Task<Void> updateDate(String textMessage, User userSender, String chat) {
-        Message message = new Message(textMessage, userSender);
-        Map<String,Object> updates = new HashMap<>();
-        updates.put("timestamp", FieldValue.serverTimestamp());
-
-        return ChatHelper.getChatCollection()
-                .document(chat)
-                .collection(COLLECTION_NAME)
-                .document(message)
-                .update(updates);
-    }
-
-     */
 }

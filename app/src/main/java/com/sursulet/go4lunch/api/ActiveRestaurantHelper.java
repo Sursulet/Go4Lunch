@@ -4,6 +4,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.sursulet.go4lunch.model.Restaurant;
 import com.sursulet.go4lunch.model.User;
 
@@ -40,6 +41,13 @@ public class ActiveRestaurantHelper {
     // --- GET ---
     public static Task<DocumentSnapshot> getActiveRestaurant(String id) {
         return ActiveRestaurantHelper.getActiveRestaurantsCollection().document(id).get();
+    }
+
+    public static Task<QuerySnapshot> getActiveRestaurantId(String userId) {
+        return FirebaseFirestore.getInstance()
+                .collectionGroup("bookings")
+                .whereEqualTo("uid", userId)
+                .get();
     }
 
     public static Task<DocumentSnapshot> getActiveRestaurantBooking(

@@ -21,10 +21,6 @@ import com.sursulet.go4lunch.api.ActiveRestaurantHelper;
 import com.sursulet.go4lunch.api.LikeRestaurantHelper;
 import com.sursulet.go4lunch.model.Restaurant;
 import com.sursulet.go4lunch.model.User;
-import com.sursulet.go4lunch.model.nearby.Geometry;
-import com.sursulet.go4lunch.model.nearby.Location;
-import com.sursulet.go4lunch.model.nearby.OpeningHours;
-import com.sursulet.go4lunch.model.nearby.Result;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +30,6 @@ public class RestaurantRepository {
     private static final String TAG = RestaurantRepository.class.getSimpleName();
 
     private final FirebaseAuth firebaseAuth;
-
-    //String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
     public RestaurantRepository(FirebaseAuth firebaseAuth) {
         this.firebaseAuth = firebaseAuth;
@@ -75,7 +69,10 @@ public class RestaurantRepository {
                 .document(firebaseAuth.getCurrentUser().getUid())
                 .addSnapshotListener(
                         (value, e) -> {
-                            if (e != null) { Log.w(TAG, "Listen failed.", e); return; }
+                            if (e != null) {
+                                Log.w(TAG, "Listen failed.", e);
+                                return;
+                            }
 
                             if (value != null && value.exists()) {
                                 Log.d(TAG, "Current data: " + value.getData());
@@ -243,29 +240,43 @@ public class RestaurantRepository {
                 .collectionGroup("bookings")
                 .whereEqualTo("uid", userId)
                 .get()
-                .continueWithTask(new Continuation<QuerySnapshot, Task<List<DocumentSnapshot>>>() {
-                    @Override
-                    public Task<List<DocumentSnapshot>> then(@NonNull Task<QuerySnapshot> task) throws Exception {
-                        List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
-                        for (DocumentSnapshot document : task.getResult()) {
-                            Log.d(TAG, "Continue" + document.getId() + " => " + document.getData());
-                            tasks.add(document.getReference().getParent().getParent().get());
-                        }
-                        return Tasks.whenAllSuccess(tasks);
+                .continueWithTask((Continuation<QuerySnapshot, Task<List<DocumentSnapshot>>>) task -> {
+                    List<Task<DocumentSnapshot>> tasks = new ArrayList<>();
+                    for (DocumentSnapshot document : task.getResult()) {
+                        Log.d(TAG, "Continue" + document.getId() + " => " + document.getData());
+                        tasks.add(document.getReference().getParent().getParent().get());
                     }
+                    return Tasks.whenAllSuccess(tasks);
                 })
-                .addOnCompleteListener(new OnCompleteListener<List<DocumentSnapshot>>() {
-                    @Override
-                    public void onComplete(@NonNull Task<List<DocumentSnapshot>> task) {
-                        List<String> names = new ArrayList<>();
-                        for (DocumentSnapshot snapshot : task.getResult()) {
-                            Log.d(TAG, snapshot.getId() + " => " + snapshot.getData().get("name"));
-                            Restaurant restaurant = snapshot.toObject(Restaurant.class);
-                            names.add(restaurant.getName());
-                        }
-                        if(names.size() != 0){
-                            mutableLiveData.postValue(names.get(0));
-                        }
+                .addOnCompleteListener(task -> {
+                    List<String> names = new ArrayList<>();
+                    for (DocumentSnapshot snapshot : task.getResult()) {
+                        Log.d(TAG, snapshot.getId() + " => " + snapshot.getData().get("name"));
+                        Restaurant restaurant = snapshot.toObject(Restaurant.class);
+                        names.add(restaurant.getName());
+                    }
+                    if (names.size() != 0) {
+                        mutableLiveData.postValue(names.get(0));
+                    }
+                });
+
+        return mutableLiveData;
+    }
+
+    public LiveData<String> getActiveRestaurantId(String userId) {
+        MutableLiveData<String> mutableLiveData = new MutableLiveData<>();
+
+        ActiveRestaurantHelper.getActiveRestaurantId(userId)
+                .addOnCompleteListener(task -> {
+                    List<String> tasks = new ArrayList<>();
+                    for (DocumentSnapshot document : task.getResult()) {
+                        Log.d(TAG, "onComplete" + document.getId() + " => " + document.getData());
+                        Log.d(TAG, "getActiveRestaurantId: " + document.getReference().getParent().getParent().getId());
+                        tasks.add(document.getReference().getParent().getParent().getId());
+                    }
+
+                    if (tasks.size() != 0) {
+                        mutableLiveData.postValue(tasks.get(0));
                     }
                 });
 
@@ -304,7 +315,7 @@ public class RestaurantRepository {
         FirebaseFirestore.getInstance().runTransaction(
                 (Transaction.Function<Void>) transaction -> {
                     DocumentSnapshot snapshot = transaction.get(sfDocRef);
-    
+
                     if (snapshot.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + snapshot.getData());
                         transaction.delete(sfDocRef);
@@ -316,7 +327,7 @@ public class RestaurantRepository {
                                 null);
                         transaction.set(sfDocRef, userToCreate);
                     }
-    
+
                     return null;
                 })
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "Transaction success!"))

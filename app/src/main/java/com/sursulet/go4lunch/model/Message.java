@@ -14,7 +14,6 @@ public class Message {
 
     public Message(String message, User userSender) {
         this.message = message;
-        this.dateCreated = dateCreated;
         this.userSender = userSender;
     }
 

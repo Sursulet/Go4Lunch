@@ -2,7 +2,6 @@ package com.sursulet.go4lunch;
 
 import android.app.Application;
 import android.location.Location;
-import android.net.Uri;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.MutableLiveData;
@@ -23,9 +22,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,11 +50,11 @@ public class MainViewModelTest {
     Location location;
 
     private MutableLiveData<Location> currentLocation;
-    private MutableLiveData<List<Prediction>> predictionsLiveData;
+    private List<Prediction> predictions;
     private MutableLiveData<User> uiModelMutableLiveData;
     private MutableLiveData<String> name;
     private MutableLiveData<String> email;
-    private MutableLiveData<Uri> photo;
+    private MutableLiveData<String> photo;
 
     MainViewModel viewModel;
 
@@ -72,7 +68,7 @@ public class MainViewModelTest {
         photo = new MutableLiveData<>();
         currentLocation = new MutableLiveData<>();
         uiModelMutableLiveData = new MutableLiveData<>();
-        predictionsLiveData = new MutableLiveData<>();
+        predictions = getPredictions();
 
         doReturn(LATITUDE).when(location).getLatitude();
         doReturn(LONGITUDE).when(location).getLongitude();
@@ -81,7 +77,8 @@ public class MainViewModelTest {
         doReturn(name).when(userRepository).getCurrentUserName();
         doReturn(email).when(userRepository).getCurrentUserEmail();
         doReturn(photo).when(userRepository).getCurrentUserPhoto();
-        //doReturn(predictionsLiveData).when(autocompleteRepository).getAutocompleteByLocation(Mockito.any(), Mockito.any());
+        doReturn(true).when(userRepository).isCurrentUserLogged();
+        doReturn(predictions).when(autocompleteRepository).getAutocompleteByLocation(Mockito.any(), Mockito.any());
 
 
         viewModel = new MainViewModel(
@@ -97,7 +94,7 @@ public class MainViewModelTest {
         name.setValue("Steffy");
         email.setValue("zer@gjk.com");
         String url = "https://unsplash.com/photos/gKXKBY-C-Dk";
-        photo.setValue(getUri(url));
+        photo.setValue(url);
         currentLocation.setValue(location);
 
         //When
@@ -106,34 +103,17 @@ public class MainViewModelTest {
         assertEquals("Steffy", result.getUsername());
     }
 
-    private Uri getUri(String myUrlStr) {
-        //final String myUrlStr = "xyz";
-        URL url;
-        Uri uri = null;
-        try {
-            url = new URL(myUrlStr);
-            uri = Uri.parse( url.toURI().toString() );
-        } catch (MalformedURLException e1) {
-            e1.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        return uri;
-    }
-
     @Test
     public void displayPredictions() throws InterruptedException {
-        /*
-        viewModel.onQueryTextChange("Benoit");
         currentLocation.setValue(location);
-        predictionsLiveData.setValue(getPredictions());
+        viewModel.onQueryTextChange("Benoit");
+        viewModel.onPredictionsChange(predictions);
 
         //When
         List<String> result = LiveDataTestUtils.getOrAwaitValue(viewModel.getPredictionsLiveData());
 
-        assertEquals("Bennoit", result);
-
-         */
+        assertEquals(1, result.size());
+        assertEquals("Benoit Paris", result.get(0));
     }
 
     List<Prediction> getPredictions() {

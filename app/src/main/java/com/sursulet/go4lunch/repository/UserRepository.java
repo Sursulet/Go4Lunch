@@ -3,10 +3,8 @@ package com.sursulet.go4lunch.repository;
 import android.app.Application;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -14,8 +12,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.api.UserHelper;
@@ -26,22 +22,24 @@ import java.util.List;
 
 public class UserRepository {
 
-    private static final String TAG = UserRepository.class.getSimpleName();
+    //private static final String TAG = UserRepository.class.getSimpleName();
 
     private final Application application;
+    private final FirebaseAuth firebaseAuth;
 
     MutableLiveData<String> selectedQuery = new MutableLiveData<>();
 
-    public UserRepository(Application application) {
+    public UserRepository(Application application, FirebaseAuth firebaseAuth) {
         this.application = application;
+        this.firebaseAuth = firebaseAuth;
     }
 
     public Boolean isCurrentUserLogged() {
-        return FirebaseAuth.getInstance().getCurrentUser() != null;
+        return firebaseAuth.getCurrentUser() != null;
     }
 
     public void createUser() {
-        FirebaseUser userValue = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser userValue = firebaseAuth.getCurrentUser();
 
         if (userValue != null) {
             String urlPicture = (userValue.getPhotoUrl() != null) ? userValue.getPhotoUrl().toString() : null;
@@ -52,28 +50,42 @@ public class UserRepository {
         }
     }
 
+    public LiveData<User> getCurrentUser() {
+        MutableLiveData<User> mutableLiveData = new MutableLiveData<>();
+        FirebaseUser userValue = firebaseAuth.getCurrentUser();
+
+        if (userValue != null) {
+            String urlPicture = (userValue.getPhotoUrl() != null) ? userValue.getPhotoUrl().toString() : null;
+            String username = userValue.getDisplayName();
+            String uid = userValue.getUid();
+
+            mutableLiveData.postValue(new User(uid, username, urlPicture));
+        }
+
+        return mutableLiveData;
+    }
+
     public LiveData<User> getUser(String uid) {
         MutableLiveData<User> mutableLiveData = new MutableLiveData<>();
-        UserHelper.getUsersCollection().document(uid)
-                .addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException e) {
-                        if (e != null) {
-                            Log.w(TAG, "Listen failed.", e);
-                            return;
-                        }
-
-                        if (value != null && value.exists()) {
-                            Log.d(TAG, "Current data: " + value.getData());
-                            User user = value.toObject(User.class);
-                            mutableLiveData.postValue(user);
-                        } else {
-                            Log.d(TAG, "Current data: null");
-                        }
-
-                    }
-                });
         /*
+        UserHelper.getUsersCollection().document(uid)
+                .addSnapshotListener((value, e) -> {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        return;
+                    }
+
+                    if (value != null && value.exists()) {
+                        Log.d(TAG, "Current data: " + value.getData());
+                        User user = value.toObject(User.class);
+                        mutableLiveData.postValue(user);
+                    } else {
+                        Log.d(TAG, "Current data: null");
+                    }
+
+                });
+
+         */
         UserHelper.getUser(uid).addOnCompleteListener(
                 task -> {
                     if (task.isSuccessful()) {
@@ -83,7 +95,6 @@ public class UserRepository {
                     }
                 });
 
-         */
         return mutableLiveData;
     }
 
@@ -97,8 +108,8 @@ public class UserRepository {
 
                     for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                         User user = documentSnapshot.toObject(User.class);
-                        if (FirebaseAuth.getInstance().getCurrentUser() != null
-                                && !(user.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()))
+                        if (firebaseAuth.getCurrentUser() != null
+                                && !(user.getUid().equals(firebaseAuth.getCurrentUser().getUid()))
                         ) { users.add(user); }
                     }
 
@@ -109,7 +120,7 @@ public class UserRepository {
     }
 
     public LiveData<String> getCurrentUserName() {
-        FirebaseUser userValue = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser userValue = firebaseAuth.getCurrentUser();
         MutableLiveData<String> mutableLiveData = new MutableLiveData<>();
         if(userValue != null){
             String name = TextUtils.isEmpty(userValue.getDisplayName()) ? application.getString(R.string.info_no_username_found) : userValue.getDisplayName();
@@ -119,7 +130,7 @@ public class UserRepository {
     }
 
     public LiveData<String> getCurrentUserEmail() {
-        FirebaseUser userValue = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser userValue = firebaseAuth.getCurrentUser();
         MutableLiveData<String> mutableLiveData = new MutableLiveData<>();
         if(userValue != null){
             String email = TextUtils.isEmpty(userValue.getEmail()) ? application.getString(R.string.info_no_email_found) : userValue.getEmail();
@@ -128,14 +139,14 @@ public class UserRepository {
         return mutableLiveData;
     }
 
-    public LiveData<Uri> getCurrentUserPhoto() {
-        FirebaseUser userValue = FirebaseAuth.getInstance().getCurrentUser();
-        MutableLiveData<Uri> mutableLiveData = new MutableLiveData<>();
+    public LiveData<String> getCurrentUserPhoto() {
+        FirebaseUser userValue = firebaseAuth.getCurrentUser();
+        MutableLiveData<String> mutableLiveData = new MutableLiveData<>();
 
         if(userValue != null){
             Uri photo = userValue.getPhotoUrl();
-            Uri url = null;
-            if (photo != null) url = photo;
+            String url = null;
+            if (photo != null) url = photo.toString();
             mutableLiveData.setValue(url);
         }
         return mutableLiveData;

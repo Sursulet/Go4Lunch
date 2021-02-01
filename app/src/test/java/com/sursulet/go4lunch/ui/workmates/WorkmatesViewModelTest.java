@@ -37,6 +37,7 @@ public class WorkmatesViewModelTest {
 
     private MutableLiveData<List<User>> usersLiveData;
     private MutableLiveData<String> nameRestaurantLiveData;
+    private MutableLiveData<String> nameRestaurantLiveData2;
 
     private WorkmatesViewModel viewModel;
 
@@ -44,9 +45,11 @@ public class WorkmatesViewModelTest {
     public void SetUp() {
         usersLiveData = new MutableLiveData<>();
         nameRestaurantLiveData = new MutableLiveData<>();
+        nameRestaurantLiveData2 = new MutableLiveData<>();
 
         doReturn(usersLiveData).when(userRepository).getAllUsers();
-        doReturn(nameRestaurantLiveData).when(restaurantRepository).getNameActiveRestaurant(Mockito.any());
+        doReturn(nameRestaurantLiveData).when(restaurantRepository).getNameActiveRestaurant(Mockito.eq("0"));
+        doReturn(nameRestaurantLiveData2).when(restaurantRepository).getNameActiveRestaurant(Mockito.eq("1"));
 
         viewModel = new WorkmatesViewModel(userRepository, restaurantRepository);
     }
@@ -58,6 +61,7 @@ public class WorkmatesViewModelTest {
         // Mock LiveData returned from Repository
         usersLiveData.setValue(get2Users());
         nameRestaurantLiveData.setValue("Benoit Paris");
+        nameRestaurantLiveData2.setValue("Hotel de ville");
 
         // When
         List<WorkmatesUiModel> result = LiveDataTestUtils.getOrAwaitValue(viewModel.getWorkmatesUiModelLiveData());
@@ -65,8 +69,9 @@ public class WorkmatesViewModelTest {
         // Then
         assertEquals(2, result.size());
 
-        assertFirstWorkmateIsInPosition(result, 0);
-        assertSecondWorkmateIsInPosition(result, 1);
+        assertFirstWorkmateIsInPosition(result);
+        assertSecondWorkmateIsInPosition(result);
+        //verifier les noms
     }
 
     // --- Region mock
@@ -78,15 +83,15 @@ public class WorkmatesViewModelTest {
     }
 
     // region Assert
-    private void assertFirstWorkmateIsInPosition(@NonNull List<WorkmatesUiModel> result, int position) {
-        assertEquals(result.get(position).getUid(), "0");
-        assertEquals(result.get(position).getSentence(), "Peach hasn't decided yet");
-        assertEquals(result.get(position).getPhoto(), "https://unsplash.com/photos/gjlMT52gy5M");
+    private void assertFirstWorkmateIsInPosition(@NonNull List<WorkmatesUiModel> result) {
+        assertEquals(result.get(0).getUid(), "0");
+        assertEquals(result.get(0).getSentence(), "Peach hasn't decided yet");
+        assertEquals(result.get(0).getPhoto(), "https://unsplash.com/photos/gjlMT52gy5M");
     }
 
-    private void assertSecondWorkmateIsInPosition(@NonNull List<WorkmatesUiModel> result, int position) {
-        assertEquals(result.get(position).getUid(), "1");
-        assertEquals(result.get(position).getSentence(), "Yoshi hasn't decided yet");
-        assertEquals(result.get(position).getPhoto(), "https://unsplash.com/photos/WO-t5wT_zSw");
+    private void assertSecondWorkmateIsInPosition(@NonNull List<WorkmatesUiModel> result) {
+        assertEquals(result.get(1).getUid(), "1");
+        assertEquals(result.get(1).getSentence(), "Yoshi hasn't decided yet");
+        assertEquals(result.get(1).getPhoto(), "https://unsplash.com/photos/WO-t5wT_zSw");
     }
 }

@@ -15,12 +15,16 @@ import com.sursulet.go4lunch.model.details.Open;
 import com.sursulet.go4lunch.model.details.OpeningHours;
 import com.sursulet.go4lunch.model.details.Period;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class Utils {
 
@@ -123,6 +127,11 @@ public class Utils {
     private static LocalTime getStringTimeNew(String str) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmm");
         return LocalTime.parse(str, formatter);
+    }
+
+    public static String convertDateToHour(Date date){
+        DateFormat dfTime = new SimpleDateFormat("HH:mm", Locale.FRANCE);
+        return dfTime.format(date);
     }
 
     /*

@@ -2,9 +2,9 @@ package com.sursulet.go4lunch;
 
 import android.app.Application;
 import android.location.Location;
-import android.net.Uri;
 import android.os.AsyncTask;
 
+import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -49,7 +49,7 @@ public class MainViewModel extends ViewModel {
 
         LiveData<String> nameLiveData = userRepository.getCurrentUserName();
         LiveData<String> emailLiveData = userRepository.getCurrentUserEmail();
-        LiveData<Uri> photoLiveData = userRepository.getCurrentUserPhoto();
+        LiveData<String> photoLiveData = userRepository.getCurrentUserPhoto();
 
         uiModelMutableLiveData.addSource(nameLiveData, name -> combine(name, emailLiveData.getValue(), photoLiveData.getValue()));
         uiModelMutableLiveData.addSource(emailLiveData, email -> combine(nameLiveData.getValue(), email, photoLiveData.getValue()));
@@ -57,7 +57,7 @@ public class MainViewModel extends ViewModel {
 
     }
 
-    private void combine(String name, String email, Uri uri) {
+    private void combine(String name, String email, String uri) {
         if (name == null || email == null || uri == null) {
             return;
         }
@@ -131,7 +131,8 @@ public class MainViewModel extends ViewModel {
         }
     }
 
-    private void onPredictionsChange(List<Prediction> predictions) {
+    @VisibleForTesting
+    void onPredictionsChange(List<Prediction> predictions) {
         predictionsLiveData.setValue(predictions);
     }
 

@@ -1,14 +1,12 @@
 package com.sursulet.go4lunch;
 
-import android.net.Uri;
-
 public class MainUiModel {
 
     String username;
     String email;
-    Uri photoUrl;
+    String photoUrl;
 
-    public MainUiModel(String username, String email, Uri photoUrl) {
+    public MainUiModel(String username, String email, String photoUrl) {
         this.username = username;
         this.email = email;
         this.photoUrl = photoUrl;
@@ -22,7 +20,7 @@ public class MainUiModel {
         return email;
     }
 
-    public Uri getPhotoUrl() {
+    public String getPhotoUrl() {
         return photoUrl;
     }
 }

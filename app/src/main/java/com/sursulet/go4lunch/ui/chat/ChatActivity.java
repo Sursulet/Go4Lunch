@@ -1,15 +1,14 @@
 package com.sursulet.go4lunch.ui.chat;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -27,22 +26,16 @@ public class ChatActivity extends AppCompatActivity {
 
     //private static final String TAG = ChatActivity.class.getSimpleName();
 
-    // FOR DESIGN
     ImageView userAvatar;
     TextView username;
 
     RecyclerView recyclerView;
-    //@BindView(R.id.activity_chat_text_view_recycler_view_empty) TextView textViewRecyclerViewEmpty;
     TextInputEditText editTextMessage;
-    //@BindView(R.id.activity_chat_image_chosen_preview) ImageView imageViewPreview;
 
     ImageButton sendBtn;
 
-    // FOR DATA
     ChatViewModel chatViewModel;
     private ChatAdapter chatAdapter;
-    @Nullable private User modelCurrentUser;
-    private String currentChatName;
 
     public static Intent getStartIntent(Context context, String id) {
         Intent intent = new Intent(context, ChatActivity.class);
@@ -65,36 +58,34 @@ public class ChatActivity extends AppCompatActivity {
         sendBtn = findViewById(R.id.activity_chat_send_button);
 
         chatViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance()).get(ChatViewModel.class);
-        chatViewModel.init(id);
+        chatViewModel.setUid(id);
 
         this.configureToolbar();
         this.configureRecyclerView();
-        chatViewModel.getUserReceiver().observe(this, new Observer<User>() {
-            @Override
-            public void onChanged(User user) {
-                username.setText(user.getUsername());
-                Glide.with(userAvatar)
-                        .load(user.getAvatarUrl())
-                        .circleCrop()
-                        .into(userAvatar);
-            }
-        });
+        chatViewModel.getUserReceiver().observe(this, this::updateUIProfileUserReceiver);
 
         chatViewModel.getUiModelMutableLiveData().observe(this, messages -> {
+            Log.d("PEACH", "onCreate: " + messages.size());
             chatAdapter.submitList(messages);
+            recyclerView.smoothScrollToPosition(messages.size() - 1);
         });
 
         sendBtn.setOnClickListener(v -> {
-            assert editTextMessage.getText() != null;
-            String msg = editTextMessage.getText().toString();
-            Log.d("PEACH", "onClick: " + id + " msg : " + msg);
-            if(!msg.equals("")) {
-                chatViewModel.onSendMessage(msg, FirebaseAuth.getInstance().getCurrentUser().getUid(), id);
+            if(!TextUtils.isEmpty(editTextMessage.getText())) {
+                chatViewModel.onSendMessage(editTextMessage.getText().toString());
             } else {
                 Toast.makeText(ChatActivity.this, "You can't send empty message", Toast.LENGTH_SHORT).show();
             }
             editTextMessage.setText("");
         });
+    }
+
+    private void updateUIProfileUserReceiver(User user) {
+        username.setText(user.getUsername());
+        Glide.with(userAvatar)
+                .load(user.getAvatarUrl())
+                .circleCrop()
+                .into(userAvatar);
     }
 
     private void configureToolbar() {
@@ -106,11 +97,12 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void configureRecyclerView(){
-        //recyclerView.addItemDecoration(new DividerItemDecoration(ChatActivity.this, DividerItemDecoration.VERTICAL));
         this.chatAdapter = new ChatAdapter(
-                ChatAdapter.DIFF_CALLBACK,
+                MessageUiModel.DIFF_CALLBACK,
+                ChatActivity.this,
                 FirebaseAuth.getInstance().getCurrentUser().getUid()
         );
+
         recyclerView.setAdapter(this.chatAdapter);
     }
 
