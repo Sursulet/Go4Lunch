@@ -3,23 +3,19 @@ package com.sursulet.go4lunch.repository;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.sursulet.go4lunch.model.details.Close;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
-import com.sursulet.go4lunch.model.details.Open;
-import com.sursulet.go4lunch.model.details.OpeningHours;
-import com.sursulet.go4lunch.model.details.Period;
-import com.sursulet.go4lunch.model.details.Result;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
 import com.sursulet.go4lunch.remote.RetrofitClient;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DetailPlaceRepository {
+
+    GooglePlacesDetailResult googlePlacesDetailResult;
 
     IGoogleAPIService mService = RetrofitClient
             .getClient("https://maps.googleapis.com/")
@@ -52,6 +48,15 @@ public class DetailPlaceRepository {
         });
 
         return placeMutableLiveData;
+    }
+
+    public Response<GooglePlacesDetailResult> getDetailPlaceSync(String place_id) throws IOException {
+
+        return mService.getDetailPlace(
+                place_id,
+                "" //TODO : KEY
+        ).execute();
+
     }
 
 }

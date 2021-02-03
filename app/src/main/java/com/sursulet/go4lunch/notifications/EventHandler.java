@@ -14,14 +14,11 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
-import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import com.google.android.gms.tasks.Continuation;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,30 +27,24 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.sursulet.go4lunch.MainActivity;
+import com.sursulet.go4lunch.MainApplication;
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.api.ActiveRestaurantHelper;
 import com.sursulet.go4lunch.model.Restaurant;
 import com.sursulet.go4lunch.model.User;
-import com.sursulet.go4lunch.remote.IGoogleAPIService;
-import com.sursulet.go4lunch.remote.RetrofitClient;
+import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.repository.DetailPlaceRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import retrofit2.Response;
+
 public class EventHandler extends Worker {
 
-    private final int NOTIFICATION_ID = 007;
-    private final String NOTIFICATION_TAG = "GO4LUNCH";
-
-    Restaurant place;
-    List<User> users;
-    StringBuilder userNames;
-
-    IGoogleAPIService mService = RetrofitClient
-            .getClient("https://maps.googleapis.com/")
-            .create(IGoogleAPIService.class);
+    private String address;
+    private StringBuilder workmates;
 
     public EventHandler(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -62,83 +53,66 @@ public class EventHandler extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        //sendVisualNotification("Notification HERE");
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-            DetailPlaceRepository detailPlaceRepository = new DetailPlaceRepository();
+            //Parmi les collegues enlever le current user
+            //Si il n'y a pas de resto choisi.
 
             try {
 
                 Task<DocumentSnapshot> task = ActiveRestaurantHelper.getActiveRestaurantId(currentUser.getUid())
-                        .continueWithTask(new Continuation<QuerySnapshot, Task<QuerySnapshot>>() {
-                            @Override
-                            public Task<QuerySnapshot> then(@NonNull Task<QuerySnapshot> task) throws Exception {
-                                List<Task<QuerySnapshot>> tasks = new ArrayList<>();
-                                for (DocumentSnapshot document : task.getResult()) {
-                                    Log.d("PEACH", "Continue " + document.getId() + " => " + document.getData());
-                                    Log.d("PEACH", "PATH " + document.getReference().getParent().get());
-                                    tasks.add(document.getReference().getParent().get());
-                                }
-
-                                return tasks.get(0);
+                        .continueWithTask(queryTask -> {
+                            List<Task<QuerySnapshot>> tasks = new ArrayList<>();
+                            for (DocumentSnapshot document : queryTask.getResult()) {
+                                tasks.add(document.getReference().getParent().get());
                             }
+
+                            return tasks.get(0);
                         })
-                        .continueWithTask(new Continuation<QuerySnapshot, Task<DocumentSnapshot>>() {
-                            @Override
-                            public Task<DocumentSnapshot> then(@NonNull Task<QuerySnapshot> task) throws Exception {
-                                if (task.isSuccessful()) {
-                                    List<Task<DocumentSnapshot>> snapshots = new ArrayList<>();
-                                    users = new ArrayList<>();
-                                    userNames = new StringBuilder();
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d("PEACH", document.getId() + " => " + document.getData());
+                        .continueWithTask(querySnapshotTask -> {
+                            if (querySnapshotTask.isSuccessful()) {
+                                List<Task<DocumentSnapshot>> snapshots = new ArrayList<>();
+                                workmates = new StringBuilder();
+                                for (QueryDocumentSnapshot document : querySnapshotTask.getResult()) {
+
+                                    User user = document.toObject(User.class);
+                                    workmates.append(user.getUsername());
+
+                                    if (document.getReference().getParent().getParent() != null) {
                                         snapshots.add(document.getReference().getParent().getParent().get());
-                                        User user = document.toObject(User.class);
-                                        users.add(user);
-                                        userNames.append(user.getUsername());
                                     }
-
-                                    return snapshots.get(0);
-                                } else {
-                                    Log.d("PEACH", "Error getting documents: ", task.getException());
                                 }
 
+                                return snapshots.get(0);
+                            } else {
+                                Log.d("PEACH", "Error getting documents: ", querySnapshotTask.getException());
                                 return null;
-                            }
-                        })
-                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                DocumentSnapshot documentSnapshot = task.getResult();
-                                Log.d("PEACH", "onComplete: " + documentSnapshot.getData());
-                                place = documentSnapshot.toObject(Restaurant.class);
-                                sendVisualNotification("A table! " + place.getName() + " " + userNames);
                             }
                         });
 
                 Tasks.await(task);
+                Restaurant restaurant = task.getResult().toObject(Restaurant.class);
+
+                if (restaurant != null) {
+                    DetailPlaceRepository detailPlaceRepository = new DetailPlaceRepository();
+                    Response<GooglePlacesDetailResult> response = detailPlaceRepository.getDetailPlaceSync(restaurant.getId());
+                    GooglePlacesDetailResult detailResult = response.body();
+
+                    if (detailResult != null) {
+                        address = detailResult.getResult().getFormattedAddress();
+                    }
+                    //address = detailResult != null ? detailResult.getResult().getFormattedAddress() : null;
+
+                    sendVisualNotification(restaurant.getName(), address, workmates);
+                }
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        Log.d("PEACH", "doWork: SUCCESS");
         return Result.success();
-    }
-
-    public static void oneOffRequest() {
-        OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(EventHandler.class)
-                .setInitialDelay(10, TimeUnit.SECONDS)
-                .setConstraints(setCons())
-                .build();
-
-        WorkManager.getInstance().enqueue(oneTimeWorkRequest);
-
-        //WorkManager workManager = WorkManager.getInstance(MainApplication.getApplication());
-        //workManager.enqueue(new OneTimeWorkRequest.Builder(EventHandler.class).build());
     }
 
     public static void periodRequest() {
@@ -148,7 +122,10 @@ public class EventHandler extends Worker {
                         .setConstraints(setCons())
                         .build();
 
-        WorkManager.getInstance().enqueueUniquePeriodicWork(
+        WorkManager workManager = WorkManager.getInstance(
+                MainApplication.getApplication().getApplicationContext());
+
+        workManager.enqueueUniquePeriodicWork(
                 "periodic",
                 ExistingPeriodicWorkPolicy.REPLACE,
                 periodicWorkRequest
@@ -156,19 +133,17 @@ public class EventHandler extends Worker {
     }
 
     private static Constraints setCons() {
-        Constraints constraints = new Constraints.Builder().build();
-        return constraints;
+        return new Constraints.Builder().build();
     }
 
-    private void sendVisualNotification(String messageBody) {
-        Log.d("PEACH", "sendVisualNotification: NOTIF");
+    private void sendVisualNotification(String restaurantName, String restaurantAddress, StringBuilder workmates) {
 
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_ONE_SHOT);
 
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
         inboxStyle.setBigContentTitle(getApplicationContext().getString(R.string.notification_title));
-        inboxStyle.addLine(messageBody);
+        inboxStyle.addLine("A table! ").addLine(restaurantName).addLine(restaurantAddress).addLine(workmates);
 
         String channelId = getApplicationContext().getString(R.string.default_notification_channel_id);
 
@@ -185,12 +160,12 @@ public class EventHandler extends Worker {
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(getApplicationContext());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence channelName = "Message provenant de Firebase";
+            CharSequence channelName = "Message";
             int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel mChannel = new NotificationChannel(channelId, channelName, importance);
             notificationManagerCompat.createNotificationChannel(mChannel);
         }
 
-        notificationManagerCompat.notify(NOTIFICATION_TAG, NOTIFICATION_ID, notificationBuilder.build());
+        notificationManagerCompat.notify("GO4LUNCH", 7, notificationBuilder.build());
     }
 }

@@ -20,10 +20,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("deprecation")
 public class MainViewModel extends ViewModel {
 
-    private final Application application;
-    private final CurrentLocationRepository currentLocationRepository;
     private final AutocompleteRepository autocompleteRepository;
     private final UserRepository userRepository;
 
@@ -40,8 +39,6 @@ public class MainViewModel extends ViewModel {
             AutocompleteRepository autocompleteRepository,
             UserRepository userRepository
     ) {
-        this.application = application;
-        this.currentLocationRepository = currentLocationRepository;
         this.autocompleteRepository = autocompleteRepository;
         this.userRepository = userRepository;
 
@@ -91,6 +88,8 @@ public class MainViewModel extends ViewModel {
                 autocompleteRepository,
                 new WeakReference<>(this)
         );
+
+
         myCurrentAutocompleteAsyncTask.execute();
     }
 
@@ -99,6 +98,7 @@ public class MainViewModel extends ViewModel {
         userRepository.setSelectedQuery(text);
     }
 
+    @SuppressWarnings("deprecation")
     private static class AutocompleteAsyncTask extends AsyncTask<Void, Void, List<Prediction>> {
 
         private final String query;

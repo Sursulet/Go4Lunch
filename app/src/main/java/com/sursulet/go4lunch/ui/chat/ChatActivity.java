@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageButton;
@@ -67,7 +68,13 @@ public class ChatActivity extends AppCompatActivity {
         chatViewModel.getUiModelMutableLiveData().observe(this, messages -> {
             Log.d("PEACH", "onCreate: " + messages.size());
             chatAdapter.submitList(messages);
-            recyclerView.smoothScrollToPosition(messages.size() - 1);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    recyclerView.smoothScrollToPosition(messages.size());
+                }
+            }, 500);
+
         });
 
         sendBtn.setOnClickListener(v -> {

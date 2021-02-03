@@ -14,6 +14,7 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -34,7 +35,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
-import com.sursulet.go4lunch.notifications.EventHandler;
 import com.sursulet.go4lunch.ui.OnItemClickListener;
 import com.sursulet.go4lunch.ui.autocomplete.PlaceAutocompleteAdapter;
 import com.sursulet.go4lunch.ui.detail.DetailPlaceActivity;
@@ -66,8 +66,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //EventHandler.oneOffRequest();
-        EventHandler.periodRequest();
+        //EventHandler.periodRequest();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -121,6 +120,7 @@ public class MainActivity extends AppCompatActivity
         recyclerView.setAdapter(this.adapter);
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
@@ -177,6 +177,7 @@ public class MainActivity extends AppCompatActivity
                 });
     }
 
+    //TODO: doit revenir à la page de connexion
     public void signOutUserFromFirebase() {
         AuthUI.getInstance()
                 .signOut(this)

@@ -1,7 +1,6 @@
 package com.sursulet.go4lunch.ui.chat;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,10 +67,16 @@ public class ChatAdapter extends ListAdapter<MessageUiModel, ChatAdapter.Message
             params.addRule(RelativeLayout.ALIGN_PARENT_END);
 
             if (isCurrentUser) {
-                message.setLayoutParams(params);
+                params.addRule(RelativeLayout.ALIGN_PARENT_END);
                 message.setBackground(ContextCompat.getDrawable(context, R.drawable.message_left));
                 message.setTextColor(ContextCompat.getColorStateList(context, R.color.white));
+            } else {
+                params.addRule(RelativeLayout.ALIGN_PARENT_START);
+                message.setBackground(ContextCompat.getDrawable(context, R.drawable.message_right));
+                message.setTextColor(ContextCompat.getColorStateList(context, R.color.black));
             }
+
+            message.setLayoutParams(params);
 
             message.setText(messageUiModel.getMessage());
             date.setText(messageUiModel.getDateCreated());
