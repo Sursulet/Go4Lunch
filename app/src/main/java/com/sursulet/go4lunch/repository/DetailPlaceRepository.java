@@ -15,8 +15,6 @@ import retrofit2.Response;
 
 public class DetailPlaceRepository {
 
-    GooglePlacesDetailResult googlePlacesDetailResult;
-
     IGoogleAPIService mService = RetrofitClient
             .getClient("https://maps.googleapis.com/")
             .create(IGoogleAPIService.class);

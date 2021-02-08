@@ -11,7 +11,7 @@ import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.sursulet.go4lunch.R;
-import com.sursulet.go4lunch.SingleLiveEvent;
+import com.sursulet.go4lunch.utils.SingleLiveEvent;
 import com.sursulet.go4lunch.model.nearby.Result;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.NearbyPlacesRepository;
@@ -25,15 +25,6 @@ public class MapViewModel extends ViewModel {
 
     @NonNull
     private final CurrentLocationRepository currentLocationRepository;
-
-    @NonNull
-    private final NearbyPlacesRepository nearbyPlacesRepository;
-
-    @NonNull
-    private final UserRepository userRepository;
-
-    @NonNull
-    private final RestaurantRepository restaurantRepository;
 
     LiveData<Location> currentLocationLiveData;
     LiveData<List<Result>> nearbyPlacesDependingOnGps;
@@ -49,9 +40,6 @@ public class MapViewModel extends ViewModel {
             @NonNull RestaurantRepository restaurantRepository
     ) {
         this.currentLocationRepository = currentLocationRepository;
-        this.nearbyPlacesRepository = nearbyPlacesRepository;
-        this.userRepository = userRepository;
-        this.restaurantRepository = restaurantRepository;
 
         currentLocationLiveData = currentLocationRepository.getLastLocationLiveData();
 
@@ -123,7 +111,7 @@ public class MapViewModel extends ViewModel {
                 MapUiModel mapUiModel = new MapUiModel(
                         result.getName(),
                         result.getPlaceId(),
-                        isGoing ? R.drawable.ic_map_marker_24 : R.drawable.ic_map_marker_48dp,
+                        isGoing ? R.drawable.ic_map_marker_24 : R.drawable.ic_map_marker_48dp, //TODO Taille marqueurs
                         result.getGeometry().getLocation().getLat(),
                         result.getGeometry().getLocation().getLng()
                 );
@@ -152,12 +140,6 @@ public class MapViewModel extends ViewModel {
 
     public void onMapReady() {
         isMapReadyLiveData.setValue(true);
-    }
-
-    public void checkPermission(boolean hasGpsPermissions) {
-        if (hasGpsPermissions) {
-            currentLocationRepository.startLocationUpdates();
-        }
     }
 
     public void getStartLocationUpdates() {

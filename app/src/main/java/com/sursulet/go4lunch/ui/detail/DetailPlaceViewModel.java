@@ -7,13 +7,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MediatorLiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.sursulet.go4lunch.R;
-import com.sursulet.go4lunch.SingleLiveEvent;
-import com.sursulet.go4lunch.Utils;
+import com.sursulet.go4lunch.utils.SingleLiveEvent;
+import com.sursulet.go4lunch.utils.Utils;
 import com.sursulet.go4lunch.model.User;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.repository.DetailPlaceRepository;
@@ -33,8 +32,7 @@ public class DetailPlaceViewModel extends ViewModel {
 
     private String restaurantId;
     private String restaurantName;
-    private boolean isGoingToRestaurant;
-    private boolean isLikeRestaurant;
+    private String restaurantAddress;
 
     private final MediatorLiveData<DetailPlaceUiModel> uiModelMediatorLiveData = new MediatorLiveData<>();
 
@@ -59,8 +57,8 @@ public class DetailPlaceViewModel extends ViewModel {
 
         placesDetailResultLiveData = detailPlaceRepository.getDetailPlace(id);
         usersLiveData = restaurantRepository.getActiveRestaurantAllBookings(restaurantId);
-        isGoingLiveData = restaurantRepository.isBooking(restaurantId);
-        isLikePlaceLiveData = restaurantRepository.isFollowing(restaurantId);
+        isGoingLiveData = restaurantRepository.isBooked(restaurantId);
+        isLikePlaceLiveData = restaurantRepository.isFollowed(restaurantId);
 
         workmatesUiLiveData = Transformations.map(
                 usersLiveData,
@@ -132,27 +130,25 @@ public class DetailPlaceViewModel extends ViewModel {
         }
 
         restaurantName = resultFromServer.getResult().getName();
-        isGoingToRestaurant = isGoing;
-        isLikeRestaurant = isLike;
+        restaurantAddress = resultFromServer.getResult().getFormattedAddress();
+
         String photo = Utils.getPhotoOfPlace(
                 resultFromServer.getResult()
                         .getPhotos()
                         .get(0)
                         .getPhotoReference(),
                 1000);
-        int isGoingColor = (isGoing) ? R.color.primary : R.color.secondary;
-        int isLikeColor = (isLike) ? R.color.primary : R.color.secondary;
+        int isGoingColor = (isGoing) ? R.color.secondary : R.color.primary;
+        int isLikeColor = (isLike) ? R.color.secondary : R.color.primary;
         float rating = Utils.getRating(resultFromServer.getResult().getRating());
         String opening = Utils.getOpeningHours(resultFromServer.getResult().getOpeningHours());
-
-        Log.d("PEACH", "combine: " + isLikeColor);
 
         uiModelMediatorLiveData.setValue(
                 new DetailPlaceUiModel(
                         restaurantName,
                         photo,
                         isGoingColor,
-                        resultFromServer.getResult().getFormattedAddress(),
+                        restaurantAddress,
                         rating,
                         resultFromServer.getResult().getFormattedPhoneNumber(),
                         isLikeColor,
@@ -167,16 +163,7 @@ public class DetailPlaceViewModel extends ViewModel {
     }
 
     public void onGoingButtonClick() {
-        String s = String.valueOf(isGoingToRestaurant);
-        Log.d("PEACH", "onGoingButtonClick: is? : " + s + " / ");
-        restaurantRepository.onGoingButtonClick(restaurantId);
-
-        //Si il va déjà à un restaurant l'empecher d''activer un autre
-        if (!isGoingToRestaurant) {
-            //Toast.makeText(,"You going to", Toast.LENGTH_SHORT).show();
-        }
-
-
+        restaurantRepository.onGoingButtonClick(restaurantId, restaurantName, restaurantAddress);
     }
 
     public void onLikeButtonClick() {
@@ -188,9 +175,4 @@ public class DetailPlaceViewModel extends ViewModel {
         eventOpenChatActivity.setValue(id);
     }
 
-    public void setWorkmatesUiLiveData(List<WorkmatesUiModel> workmates) {
-        MutableLiveData<List<WorkmatesUiModel>> mutableLiveData = new MutableLiveData<>();
-        mutableLiveData.setValue(workmates);
-        workmatesUiLiveData = mutableLiveData;
-    }
 }

@@ -22,22 +22,6 @@ public class LikeRestaurantHelper {
                 .collection(SUB_COLLECTION_NAME);
     }
 
-    // --- CREATE ---
-    public static void createLikeRestaurant(String id, String name, String uid, String username, String urlPicture) {
-        Restaurant likeRestaurantToCreate = new Restaurant(id, name);
-        User userToCreate = new User(uid, username, urlPicture);
-
-        LikeRestaurantHelper.getLikeRestaurantsCollection()
-                .document(id)
-                .collection(SUB_COLLECTION_NAME)
-                .document(uid)
-                .set(userToCreate);
-
-        LikeRestaurantHelper.getLikeRestaurantsCollection()
-                .document(id)
-                .set(likeRestaurantToCreate);
-    }
-
     // --- GET ---
     public static Task<DocumentSnapshot> getLikeRestaurant(String id){
         return LikeRestaurantHelper.getLikeRestaurantsCollection().document(id).get();
@@ -52,10 +36,4 @@ public class LikeRestaurantHelper {
                 .get();
     }
 
-    // --- DELETE ---
-    public static Task<Void> deleteLikeRestaurantBooking(String restaurantId, String userId) {
-        return LikeRestaurantHelper.getFollowersCollection(restaurantId)
-                .document(userId)
-                .delete();
-    }
 }

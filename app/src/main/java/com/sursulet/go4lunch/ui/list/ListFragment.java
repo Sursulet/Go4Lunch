@@ -48,8 +48,8 @@ public class ListFragment extends Fragment implements OnItemClickListener {
 
         listViewModel.getSelectedQuery().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
-            public void onChanged(String s) {
-                Toast.makeText(requireActivity(), "Search Query : " + s, Toast.LENGTH_SHORT).show();
+            public void onChanged(String string) {
+                Toast.makeText(requireActivity(), "Search Query : " + string, Toast.LENGTH_SHORT).show();
             }
         });
 

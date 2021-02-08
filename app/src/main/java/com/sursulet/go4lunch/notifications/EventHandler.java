@@ -58,10 +58,12 @@ public class EventHandler extends Worker {
             FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
             //Parmi les collegues enlever le current user
             //Si il n'y a pas de resto choisi.
+            //TODO change this, now i have address in model Restaurant
+            //TODO settings / Traduction
 
             try {
 
-                Task<DocumentSnapshot> task = ActiveRestaurantHelper.getActiveRestaurantId(currentUser.getUid())
+                Task<DocumentSnapshot> task = ActiveRestaurantHelper.getBooking(currentUser.getUid())
                         .continueWithTask(queryTask -> {
                             List<Task<QuerySnapshot>> tasks = new ArrayList<>();
                             for (DocumentSnapshot document : queryTask.getResult()) {

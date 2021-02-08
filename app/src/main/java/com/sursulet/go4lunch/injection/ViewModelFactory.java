@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.sursulet.go4lunch.MainApplication;
 import com.sursulet.go4lunch.MainViewModel;
+import com.sursulet.go4lunch.SignInViewModel;
 import com.sursulet.go4lunch.repository.AutocompleteRepository;
 import com.sursulet.go4lunch.repository.ChatRepository;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
@@ -58,7 +59,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
                             new CurrentLocationRepository(MainApplication.getApplication()),
                             new NearbyPlacesRepository(),
                             new DetailPlaceRepository(),
-                            new RestaurantRepository(FirebaseAuth.getInstance()),
+                            new RestaurantRepository(MainApplication.getApplication(),FirebaseAuth.getInstance()),
                             new AutocompleteRepository(),
                             new ChatRepository(MainApplication.getApplication(), FirebaseAuth.getInstance()));
                 }
@@ -89,13 +90,14 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         } else if (modelClass.isAssignableFrom(WorkmatesViewModel.class)) {
             return (T) new WorkmatesViewModel(
                     userRepository,
-                    restaurantRepository);
+                    restaurantRepository
+            );
         } else if (modelClass.isAssignableFrom(DetailPlaceViewModel.class)) {
             return (T) new DetailPlaceViewModel(
                     detailPlaceRepository,
                     restaurantRepository
             );
-        }else if (modelClass.isAssignableFrom(ChatViewModel.class)) {
+        } else if (modelClass.isAssignableFrom(ChatViewModel.class)) {
             return (T) new ChatViewModel(
                     chatRepository,
                     userRepository);
@@ -105,7 +107,10 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
                     currentLocationRepository,
                     autocompleteRepository,
                     userRepository);
+        } else if(modelClass.isAssignableFrom(SignInViewModel.class)) {
+            return (T) new SignInViewModel(userRepository);
         }
+
         throw new IllegalArgumentException("Unknown ViewModel class");
     }
 }

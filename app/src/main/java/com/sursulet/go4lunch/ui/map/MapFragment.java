@@ -22,7 +22,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.sursulet.go4lunch.R;
-import com.sursulet.go4lunch.Utils;
+import com.sursulet.go4lunch.utils.Utils;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
 import com.sursulet.go4lunch.ui.detail.DetailPlaceActivity;
 
@@ -146,9 +146,7 @@ public class MapFragment extends Fragment {
         if (shouldProvideRationale) {
             Log.i(TAG, "Displaying permission rationale to provide additional context.");
             showSnackBar(R.string.permission_rationale,
-                    android.R.string.ok, view -> {
-                        startLocationPermissionRequest();
-                    });
+                    android.R.string.ok, view -> startLocationPermissionRequest());
         } else {
             Log.i(TAG, "Requesting permission");
             startLocationPermissionRequest();

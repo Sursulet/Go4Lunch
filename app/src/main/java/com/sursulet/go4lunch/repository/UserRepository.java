@@ -48,6 +48,8 @@ public class UserRepository {
 
             UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
         }
+
+        //return null;
     }
 
     public LiveData<User> getCurrentUser() {

@@ -9,8 +9,8 @@ import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import com.sursulet.go4lunch.SingleLiveEvent;
-import com.sursulet.go4lunch.Utils;
+import com.sursulet.go4lunch.utils.SingleLiveEvent;
+import com.sursulet.go4lunch.utils.Utils;
 import com.sursulet.go4lunch.model.nearby.Result;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
@@ -26,10 +26,6 @@ import java.util.Map;
 
 public class ListViewModel extends ViewModel {
 
-    @NonNull
-    private final CurrentLocationRepository currentLocationRepository;
-    @NonNull
-    private final NearbyPlacesRepository nearbyPlacesRepository;
     @NonNull
     private final DetailPlaceRepository detailPlaceRepository;
     @NonNull
@@ -52,8 +48,6 @@ public class ListViewModel extends ViewModel {
             @NonNull DetailPlaceRepository detailPlaceRepository,
             @NonNull UserRepository userRepository,
             @NonNull RestaurantRepository restaurantRepository) {
-        this.currentLocationRepository = currentLocationRepository;
-        this.nearbyPlacesRepository = nearbyPlacesRepository;
         this.detailPlaceRepository = detailPlaceRepository;
         this.userRepository = userRepository;
         this.restaurantRepository = restaurantRepository;
@@ -120,6 +114,8 @@ public class ListViewModel extends ViewModel {
         for (Result nearbyPlace : nearbyPlaces) {
             String placeId = nearbyPlace.getPlaceId();
 
+            assert mapDetail != null;
+            assert numberWorkmatesMap != null;
             GooglePlacesDetailResult existingPlaceDetail = mapDetail.get(nearbyPlace.getPlaceId());
             if (existingPlaceDetail == null) {
                 if (!alreadyRequiredUIds.contains(nearbyPlace.getPlaceId())) {

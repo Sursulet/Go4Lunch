@@ -181,7 +181,12 @@ public class MainActivity extends AppCompatActivity
     public void signOutUserFromFirebase() {
         AuthUI.getInstance()
                 .signOut(this)
-                .addOnSuccessListener(this, this.updateUIAfterRESTRequestsCompleted(SIGN_OUT_TASK));
+                .addOnSuccessListener(this, aVoid -> startSignInActivity());
+    }
+
+    public void startSignInActivity() {
+        Intent intent = new Intent(this, SignInActivity.class);
+        startActivity(intent);
     }
 
     private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted(final int origin) {

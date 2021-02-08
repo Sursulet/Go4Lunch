@@ -1,4 +1,4 @@
-package com.sursulet.go4lunch;
+package com.sursulet.go4lunch.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;

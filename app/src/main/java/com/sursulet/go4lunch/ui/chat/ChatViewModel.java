@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
-import com.sursulet.go4lunch.Utils;
+import com.sursulet.go4lunch.utils.Utils;
 import com.sursulet.go4lunch.model.Message;
 import com.sursulet.go4lunch.model.User;
 import com.sursulet.go4lunch.repository.ChatRepository;
