@@ -59,7 +59,7 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
                             new CurrentLocationRepository(MainApplication.getApplication()),
                             new NearbyPlacesRepository(),
                             new DetailPlaceRepository(),
-                            new RestaurantRepository(MainApplication.getApplication(),FirebaseAuth.getInstance()),
+                            new RestaurantRepository(FirebaseAuth.getInstance()),
                             new AutocompleteRepository(),
                             new ChatRepository(MainApplication.getApplication(), FirebaseAuth.getInstance()));
                 }
@@ -103,7 +103,6 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
                     userRepository);
         } else if (modelClass.isAssignableFrom(MainViewModel.class)) {
             return (T) new MainViewModel(
-                    MainApplication.getApplication(),
                     currentLocationRepository,
                     autocompleteRepository,
                     userRepository);

@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.MutableLiveData;
 
+import com.sursulet.go4lunch.BuildConfig;
 import com.sursulet.go4lunch.model.User;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.model.details.Result;
@@ -54,8 +55,8 @@ public class DetailPlaceViewModelTest {
         workmatesLiveData = new MutableLiveData<>();
 
         doReturn(detailPlaceLiveData).when(detailPlaceRepository).getDetailPlace(any());
-        doReturn(isGoingLiveData).when(restaurantRepository).isBooking(any());
-        doReturn(isLikeLiveData).when(restaurantRepository).isFollowing(any());
+        doReturn(isGoingLiveData).when(restaurantRepository).isBooked(any());
+        doReturn(isLikeLiveData).when(restaurantRepository).isFollowed(any());
         doReturn(workmatesLiveData).when(restaurantRepository).getActiveRestaurantAllBookings(any());
 
         viewModel = new DetailPlaceViewModel(detailPlaceRepository, restaurantRepository);
@@ -75,8 +76,8 @@ public class DetailPlaceViewModelTest {
 
         assertDetailRestaurant(result);
         assertEquals(2, result.getWorkmates().size());
-        assertFirstWorkmatesIsInPosition(result.getWorkmates(),0);
-        assertSecondWorkmatesIsInPosition(result.getWorkmates(),1);
+        assertFirstWorkmatesIsInPosition(result.getWorkmates());
+        assertSecondWorkmatesIsInPosition(result.getWorkmates());
     }
 
     // --- Region mock
@@ -109,7 +110,7 @@ public class DetailPlaceViewModelTest {
     // region Assert
     private void assertDetailRestaurant(@NonNull DetailPlaceUiModel result) {
         assertEquals("Benoit Paris", result.getName());
-        assertEquals("https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=ATtYBwLpXhMNGQ2d7MLf2xQ7OLZLJfnpYw2ZgTaXctClkoABb0CWjVBQzAQcqsTACZxX912_b1YXYbUSfuBqjZDcmoSxvxud38Yvy6pYpojHvhdj_rn1upQSC1UB2pYzOXYw5MRRo&key=", result.getUrlPhoto());
+        assertEquals("https://maps.googleapis.com/maps/api/place/photo?maxwidth=1000&photoreference=ATtYBwLpXhMNGQ2d7MLf2xQ7OLZLJfnpYw2ZgTaXctClkoABb0CWjVBQzAQcqsTACZxX912_b1YXYbUSfuBqjZDcmoSxvxud38Yvy6pYpojHvhdj_rn1upQSC1UB2pYzOXYw5MRRo&key="+ BuildConfig.GOOGLE_PLACES_KEY, result.getUrlPhoto());
         assertEquals("20 Rue Saint-Martin, 75004 Paris, France", result.getSentence());
         assertEquals("01 42 72 25 76", result.getPhoneNumber());
         assertEquals("http://www.benoit-paris.com/", result.getUrlWebsite());
@@ -117,17 +118,17 @@ public class DetailPlaceViewModelTest {
         assertEquals(2, result.getWorkmates().size());
     }
 
-    private void assertFirstWorkmatesIsInPosition(@NonNull List<WorkmatesUiModel> result, int position) {
-        assertEquals("0", result.get(position).getUid());
-        assertEquals("Peach is joining!", result.get(position).getSentence());
-        assertEquals("https://unsplash.com/photos/gKXKBY-C-Dk", result.get(position).getPhoto());
-        assertEquals(1, result.get(position).getTxtStyle());
+    private void assertFirstWorkmatesIsInPosition(@NonNull List<WorkmatesUiModel> result) {
+        assertEquals("0", result.get(0).getUid());
+        assertEquals("Peach is joining!", result.get(0).getSentence());
+        assertEquals("https://unsplash.com/photos/gKXKBY-C-Dk", result.get(0).getPhoto());
+        assertEquals(1, result.get(0).getTxtStyle());
     }
 
-    private void assertSecondWorkmatesIsInPosition(@NonNull List<WorkmatesUiModel> result, int position) {
-        assertEquals("1", result.get(position).getUid());
-        assertEquals("Yoshi is joining!", result.get(position).getSentence());
-        assertEquals("https://unsplash.com/photos/gjlMT52gy5M", result.get(position).getPhoto());
-        assertEquals(1, result.get(position).getTxtStyle());
+    private void assertSecondWorkmatesIsInPosition(@NonNull List<WorkmatesUiModel> result) {
+        assertEquals("1", result.get(1).getUid());
+        assertEquals("Yoshi is joining!", result.get(1).getSentence());
+        assertEquals("https://unsplash.com/photos/gjlMT52gy5M", result.get(1).getPhoto());
+        assertEquals(1, result.get(1).getTxtStyle());
     }
 }

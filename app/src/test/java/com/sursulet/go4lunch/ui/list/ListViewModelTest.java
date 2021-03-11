@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.MutableLiveData;
 
+import com.sursulet.go4lunch.BuildConfig;
 import com.sursulet.go4lunch.model.User;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.model.nearby.Result;
@@ -165,7 +166,7 @@ public class ListViewModelTest {
     private void assertFirstRestaurantIsInPosition(@NonNull List<ListUiModel> result) {
         assertEquals(result.get(0).getId(), "ChIJQ0bNfR5u5kcR9Z0i41");
         assertEquals(result.get(0).getName(), "Benoit Paris");
-        assertEquals(result.get(0).getPhotoUrl(), "https://maps.googleapis.com/maps/api/place/photo?maxwidth=500&photoreference=photoRef&key=");
+        assertEquals(result.get(0).getPhotoUrl(), "https://maps.googleapis.com/maps/api/place/photo?maxwidth=500&photoreference=photoRef&key="+ BuildConfig.GOOGLE_PLACES_KEY);
         assertEquals(result.get(0).getTxt(), "20 Rue Saint-Martin, Paris");
         assertEquals(result.get(0).getOpening(), "Close");
         assertEquals(result.get(0).getDistance(), "2m");

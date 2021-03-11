@@ -8,7 +8,6 @@ import android.app.Application;
  */
 public class MainApplication extends Application {
 
-    // This is OK because Application is "unique" so we can't leak this context. This wouldn't be allowed for an Activity, tho.
     private static Application sApplication;
 
     @Override

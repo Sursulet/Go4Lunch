@@ -3,21 +3,26 @@ package com.sursulet.go4lunch.ui.workmates;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 
+import java.util.Map;
+
 public class WorkmatesUiModel {
 
-    String uid;
-    String sentence;
-    String photo;
-    int sentenceStyle;
+    final String uid;
+    final String sentence;
+    final Map<String, String> map;
+    final String photo;
+    final int sentenceStyle;
 
-    public WorkmatesUiModel(String id, String sentence, String photo, int sentenceStyle) {
+    public WorkmatesUiModel(String id, Map<String, String> map, String sentence, String photo, int sentenceStyle) {
         this.uid = id;
+        this.map = map;
         this.sentence = sentence;
         this.photo = photo;
         this.sentenceStyle = sentenceStyle;
     }
 
     public String getUid() { return uid; }
+    public Map<String, String> getMap() { return map; }
     public String getSentence() { return sentence; }
     public String getPhoto() {
         return photo;

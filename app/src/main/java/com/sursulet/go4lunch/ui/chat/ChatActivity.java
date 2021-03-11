@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -66,19 +65,13 @@ public class ChatActivity extends AppCompatActivity {
         chatViewModel.getUserReceiver().observe(this, this::updateUIProfileUserReceiver);
 
         chatViewModel.getUiModelMutableLiveData().observe(this, messages -> {
-            Log.d("PEACH", "onCreate: " + messages.size());
             chatAdapter.submitList(messages);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    recyclerView.smoothScrollToPosition(messages.size());
-                }
-            }, 500);
+            new Handler().postDelayed(() -> recyclerView.smoothScrollToPosition(messages.size()), 500);
 
         });
 
         sendBtn.setOnClickListener(v -> {
-            if(!TextUtils.isEmpty(editTextMessage.getText())) {
+            if (!TextUtils.isEmpty(editTextMessage.getText())) {
                 chatViewModel.onSendMessage(editTextMessage.getText().toString());
             } else {
                 Toast.makeText(ChatActivity.this, "You can't send empty message", Toast.LENGTH_SHORT).show();
@@ -103,12 +96,14 @@ public class ChatActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
     }
 
-    private void configureRecyclerView(){
-        this.chatAdapter = new ChatAdapter(
-                MessageUiModel.DIFF_CALLBACK,
-                ChatActivity.this,
-                FirebaseAuth.getInstance().getCurrentUser().getUid()
-        );
+    private void configureRecyclerView() {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            this.chatAdapter = new ChatAdapter(
+                    MessageUiModel.DIFF_CALLBACK,
+                    ChatActivity.this,
+                    FirebaseAuth.getInstance().getCurrentUser().getUid()
+            );
+        }
 
         recyclerView.setAdapter(this.chatAdapter);
     }

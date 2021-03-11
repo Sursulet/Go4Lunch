@@ -1,12 +1,10 @@
 package com.sursulet.go4lunch;
 
-import android.app.Application;
 import android.location.Location;
 import android.os.AsyncTask;
 
 import androidx.annotation.VisibleForTesting;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
@@ -15,10 +13,12 @@ import com.sursulet.go4lunch.model.autocomplete.Prediction;
 import com.sursulet.go4lunch.repository.AutocompleteRepository;
 import com.sursulet.go4lunch.repository.CurrentLocationRepository;
 import com.sursulet.go4lunch.repository.UserRepository;
+import com.sursulet.go4lunch.utils.SingleLiveEvent;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @SuppressWarnings("deprecation")
 public class MainViewModel extends ViewModel {
@@ -28,13 +28,13 @@ public class MainViewModel extends ViewModel {
 
     private AutocompleteAsyncTask myCurrentAutocompleteAsyncTask;
 
-    private final MediatorLiveData<MainUiModel> uiModelMutableLiveData = new MediatorLiveData<>();
-    private final MutableLiveData<List<Prediction>> predictionsLiveData = new MutableLiveData<>();
+    final LiveData<Map<String, String>> mapLiveData;
+    final LiveData<Location> currentLocationLiveData;
     private final MutableLiveData<String> selectedQueryLiveData = new MutableLiveData<>();
-    LiveData<Location> currentLocationLiveData;
+    private final MutableLiveData<List<Prediction>> predictionsLiveData = new MutableLiveData<>();
+    private final SingleLiveEvent<String> singleLiveEventLaunchDetailActivity = new SingleLiveEvent<>();
 
     public MainViewModel(
-            Application application,
             CurrentLocationRepository currentLocationRepository,
             AutocompleteRepository autocompleteRepository,
             UserRepository userRepository
@@ -42,39 +42,18 @@ public class MainViewModel extends ViewModel {
         this.autocompleteRepository = autocompleteRepository;
         this.userRepository = userRepository;
 
+        mapLiveData = userRepository.getCurrentUserInstance();
         currentLocationLiveData = currentLocationRepository.getLastLocationLiveData();
 
-        LiveData<String> nameLiveData = userRepository.getCurrentUserName();
-        LiveData<String> emailLiveData = userRepository.getCurrentUserEmail();
-        LiveData<String> photoLiveData = userRepository.getCurrentUserPhoto();
-
-        uiModelMutableLiveData.addSource(nameLiveData, name -> combine(name, emailLiveData.getValue(), photoLiveData.getValue()));
-        uiModelMutableLiveData.addSource(emailLiveData, email -> combine(nameLiveData.getValue(), email, photoLiveData.getValue()));
-        uiModelMutableLiveData.addSource(photoLiveData, uri -> combine(nameLiveData.getValue(), emailLiveData.getValue(), uri));
-
-    }
-
-    private void combine(String name, String email, String uri) {
-        if (name == null || email == null || uri == null) {
-            return;
-        }
-
-        if (isCurrentUserLogged()) {
-            uiModelMutableLiveData.setValue(new MainUiModel(name, email, uri));
-        }
-    }
-
-
-    public Boolean isCurrentUserLogged() {
-        return userRepository.isCurrentUserLogged();
     }
 
     public LiveData<MainUiModel> getUiModelLiveData() {
-        return uiModelMutableLiveData;
-    }
-
-    public void createUser() {
-        userRepository.createUser();
+        return Transformations.map(mapLiveData, map ->
+                new MainUiModel(
+                        map.get("name"),
+                        map.get("email"),
+                        map.get("url")
+                ));
     }
 
     public void onQueryTextChange(String newText) {
@@ -89,13 +68,25 @@ public class MainViewModel extends ViewModel {
                 new WeakReference<>(this)
         );
 
-
         myCurrentAutocompleteAsyncTask.execute();
     }
 
     public void onQuerySelected(String text) {
         selectedQueryLiveData.setValue(text);
         userRepository.setSelectedQuery(text);
+        onQueryTextChange("");
+    }
+
+    public void openDetailActivity(String id) {
+        singleLiveEventLaunchDetailActivity.setValue(id);
+    }
+
+    public SingleLiveEvent<String> getSingleLiveEventOpenDetailActivity() {
+        return singleLiveEventLaunchDetailActivity;
+    }
+
+    public LiveData<String> getCurrentUserRestaurant() {
+        return userRepository.getCurrentUserRestaurant();
     }
 
     @SuppressWarnings("deprecation")

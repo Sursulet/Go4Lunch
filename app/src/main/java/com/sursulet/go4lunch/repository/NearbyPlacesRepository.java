@@ -3,6 +3,7 @@ package com.sursulet.go4lunch.repository;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.sursulet.go4lunch.BuildConfig;
 import com.sursulet.go4lunch.model.nearby.GooglePlacesNearbySearchResult;
 import com.sursulet.go4lunch.model.nearby.Result;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
@@ -16,7 +17,7 @@ import retrofit2.Response;
 
 public class NearbyPlacesRepository {
 
-    IGoogleAPIService mService = RetrofitClient.getClient("https://maps.googleapis.com/").create(IGoogleAPIService.class);
+    final IGoogleAPIService mService = RetrofitClient.getClient("https://maps.googleapis.com/").create(IGoogleAPIService.class);
 
     /**
      * @return a LiveData containing the nearby restaurant around the GPS position
@@ -25,7 +26,7 @@ public class NearbyPlacesRepository {
 
         MutableLiveData<List<Result>> places = new MutableLiveData<>();
         mService.getNearByPlaces(
-                "AIzaSyB8eGXF61T52BsOhZ8Ale23Z_6Pmwyqp8I", //TODO : KEY
+                BuildConfig.GOOGLE_PLACES_KEY,
                 latitude + "," + longitude,
                 "restaurant",
                 "500"

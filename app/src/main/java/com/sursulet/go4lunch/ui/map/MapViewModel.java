@@ -26,8 +26,8 @@ public class MapViewModel extends ViewModel {
     @NonNull
     private final CurrentLocationRepository currentLocationRepository;
 
-    LiveData<Location> currentLocationLiveData;
-    LiveData<List<Result>> nearbyPlacesDependingOnGps;
+    final LiveData<Location> currentLocationLiveData;
+    final LiveData<List<Result>> nearbyPlacesDependingOnGps;
     private final MediatorLiveData<List<MapUiModel>> uiModelsMediatorLiveData = new MediatorLiveData<>();
     private final MutableLiveData<Boolean> isMapReadyLiveData = new MutableLiveData<>();
 
@@ -103,7 +103,7 @@ public class MapViewModel extends ViewModel {
             for (Result result : resultsFromServer) {
 
                 boolean isGoing = activeRestaurantIds != null && activeRestaurantIds.contains(result.getPlaceId());
-                int icon;
+                int icon = isGoing ? R.drawable.ic_map_marker_24 : R.drawable.ic_map_marker_48dp;
                 if (result.getName().equalsIgnoreCase(userQuery) || result.getVicinity().equalsIgnoreCase(userQuery)) {
                     icon = R.drawable.ic_baseline_add_circle_24;
                 }
@@ -111,7 +111,7 @@ public class MapViewModel extends ViewModel {
                 MapUiModel mapUiModel = new MapUiModel(
                         result.getName(),
                         result.getPlaceId(),
-                        isGoing ? R.drawable.ic_map_marker_24 : R.drawable.ic_map_marker_48dp, //TODO Taille marqueurs
+                        icon,
                         result.getGeometry().getLocation().getLat(),
                         result.getGeometry().getLocation().getLng()
                 );

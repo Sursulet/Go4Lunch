@@ -47,13 +47,11 @@ public class ChatAdapter extends ListAdapter<MessageUiModel, ChatAdapter.Message
 
     public static class MessageViewHolder extends RecyclerView.ViewHolder {
 
-        RelativeLayout item;
-        TextView message;
-        TextView date;
+        final TextView message;
+        final TextView date;
 
         public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
-            item = itemView.findViewById(R.id.chat_item_root_view);
             message = itemView.findViewById(R.id.chat_item_message);
             date = itemView.findViewById(R.id.chat_item_message_date);
         }

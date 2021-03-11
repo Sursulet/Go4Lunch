@@ -34,7 +34,7 @@ public class CurrentLocationRepository {
     }
 
     public void buildLocationRequest(){
-        locationRequest = new LocationRequest()
+        locationRequest = LocationRequest.create()
                 .setInterval(10_000)
                 .setFastestInterval(5_000)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);

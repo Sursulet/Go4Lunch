@@ -55,22 +55,6 @@ public class ChatRepository {
                     mutableLiveData.setValue(messages);
 
                 });
-        /*
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        List<Message> messages = new ArrayList<>();
-                        for (DocumentSnapshot document : task.getResult()) {
-                            Log.d("PEACH", document.getId() + " => " + document.getData());
-                            Message message = document.toObject(Message.class);
-                            messages.add(message);
-                        }
-                        Log.d("PEACH", "onComplete: " + messages.get(0).getMessage());
-                        mutableLiveData.setValue(messages);
-                    }
-                });
-
-         */
 
         return mutableLiveData;
     }

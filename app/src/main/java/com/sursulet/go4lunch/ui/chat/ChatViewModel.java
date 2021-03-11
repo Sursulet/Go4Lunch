@@ -18,7 +18,6 @@ public class ChatViewModel extends ViewModel {
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
 
-    //MutableLiveData<List<MessageUiModel>> uiModelMutableLiveData = new MutableLiveData<>();
     LiveData<List<Message>> allMessagesLiveData;
     private LiveData<User> userReceiver;
     private LiveData<User> currentUser;

@@ -140,7 +140,7 @@ public class MapViewModelTest {
 
         // Then
         assertEquals(2, result.size());
-        assertFirstRestaurant(result);
+        assertSearchRestaurant(result);
         assertSecondRestaurant(result);
     }
 
@@ -177,6 +177,14 @@ public class MapViewModelTest {
     }
 
     // region Assert
+    private void assertSearchRestaurant(@NonNull List<MapUiModel> result) {
+        assertEquals("ChIJQ0bNfR5u5kcR9Z0i41",result.get(0).getPlaceId());
+        assertEquals("Benoit Paris",result.get(0).getName());
+        assertEquals(R.drawable.ic_baseline_add_circle_24,result.get(0).getIcon());
+        assertEquals(48.858397, result.get(0).getLat(), 0);
+        assertEquals(2.3501027, result.get(0).getLng(), 0);
+    }
+
     private void assertFirstRestaurant(@NonNull List<MapUiModel> result) {
         assertEquals("ChIJQ0bNfR5u5kcR9Z0i41",result.get(0).getPlaceId());
         assertEquals("Benoit Paris",result.get(0).getName());

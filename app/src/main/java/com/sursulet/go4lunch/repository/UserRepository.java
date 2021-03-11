@@ -3,6 +3,7 @@ package com.sursulet.go4lunch.repository;
 import android.app.Application;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
@@ -15,19 +16,22 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.api.UserHelper;
+import com.sursulet.go4lunch.model.Restaurant;
 import com.sursulet.go4lunch.model.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UserRepository {
 
-    //private static final String TAG = UserRepository.class.getSimpleName();
+    private static final String TAG = UserRepository.class.getSimpleName();
 
     private final Application application;
     private final FirebaseAuth firebaseAuth;
 
-    MutableLiveData<String> selectedQuery = new MutableLiveData<>();
+    final MutableLiveData<String> selectedQuery = new MutableLiveData<>();
 
     public UserRepository(Application application, FirebaseAuth firebaseAuth) {
         this.application = application;
@@ -48,8 +52,6 @@ public class UserRepository {
 
             UserHelper.createUser(uid, username, urlPicture).addOnFailureListener(this.onFailureListener());
         }
-
-        //return null;
     }
 
     public LiveData<User> getCurrentUser() {
@@ -69,25 +71,7 @@ public class UserRepository {
 
     public LiveData<User> getUser(String uid) {
         MutableLiveData<User> mutableLiveData = new MutableLiveData<>();
-        /*
-        UserHelper.getUsersCollection().document(uid)
-                .addSnapshotListener((value, e) -> {
-                    if (e != null) {
-                        Log.w(TAG, "Listen failed.", e);
-                        return;
-                    }
 
-                    if (value != null && value.exists()) {
-                        Log.d(TAG, "Current data: " + value.getData());
-                        User user = value.toObject(User.class);
-                        mutableLiveData.postValue(user);
-                    } else {
-                        Log.d(TAG, "Current data: null");
-                    }
-
-                });
-
-         */
         UserHelper.getUser(uid).addOnCompleteListener(
                 task -> {
                     if (task.isSuccessful()) {
@@ -112,7 +96,9 @@ public class UserRepository {
                         User user = documentSnapshot.toObject(User.class);
                         if (firebaseAuth.getCurrentUser() != null
                                 && !(user.getUid().equals(firebaseAuth.getCurrentUser().getUid()))
-                        ) { users.add(user); }
+                        ) {
+                            users.add(user);
+                        }
                     }
 
                     mutableLiveData.setValue(users);
@@ -121,36 +107,48 @@ public class UserRepository {
         return mutableLiveData;
     }
 
-    public LiveData<String> getCurrentUserName() {
+    public LiveData<Map<String,String>> getCurrentUserInstance() {
         FirebaseUser userValue = firebaseAuth.getCurrentUser();
-        MutableLiveData<String> mutableLiveData = new MutableLiveData<>();
-        if(userValue != null){
+        MutableLiveData<Map<String,String>> mutableLiveData = new MutableLiveData<>();
+        Map<String,String> map = new HashMap<>();
+
+        if (userValue != null) {
             String name = TextUtils.isEmpty(userValue.getDisplayName()) ? application.getString(R.string.info_no_username_found) : userValue.getDisplayName();
-            mutableLiveData.setValue(name);
-        }
-        return mutableLiveData;
-    }
-
-    public LiveData<String> getCurrentUserEmail() {
-        FirebaseUser userValue = firebaseAuth.getCurrentUser();
-        MutableLiveData<String> mutableLiveData = new MutableLiveData<>();
-        if(userValue != null){
             String email = TextUtils.isEmpty(userValue.getEmail()) ? application.getString(R.string.info_no_email_found) : userValue.getEmail();
-            mutableLiveData.setValue(email);
-        }
-        return mutableLiveData;
-    }
 
-    public LiveData<String> getCurrentUserPhoto() {
-        FirebaseUser userValue = firebaseAuth.getCurrentUser();
-        MutableLiveData<String> mutableLiveData = new MutableLiveData<>();
-
-        if(userValue != null){
             Uri photo = userValue.getPhotoUrl();
             String url = null;
             if (photo != null) url = photo.toString();
-            mutableLiveData.setValue(url);
+
+            map.put("name",name);
+            map.put("email",email);
+            map.put("url",url);
+
+            mutableLiveData.setValue(map);
         }
+
+        return mutableLiveData;
+    }
+
+    public LiveData<String> getCurrentUserRestaurant() {
+        MutableLiveData<String> mutableLiveData = new MutableLiveData<>();
+        if (firebaseAuth.getCurrentUser() != null) {
+            UserHelper.getLockupUser(firebaseAuth.getCurrentUser().getUid())
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                                Restaurant restaurant = document.toObject(Restaurant.class);
+
+                                if (restaurant != null) {
+                                    mutableLiveData.postValue(restaurant.getId());
+                                }
+                            }
+                        }
+                    });
+        }
+
         return mutableLiveData;
     }
 

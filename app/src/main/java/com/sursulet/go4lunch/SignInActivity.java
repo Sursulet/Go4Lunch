@@ -1,18 +1,16 @@
 package com.sursulet.go4lunch;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
 
 import java.util.Arrays;
@@ -20,10 +18,9 @@ import java.util.List;
 
 public class SignInActivity extends AppCompatActivity {
 
-    private static final String TAG = "SignInActivity";
+    //private static final String TAG = SignInActivity.class.getSimpleName();
     private static final int RC_SIGN_IN = 123;
 
-    private CoordinatorLayout coordinatorLayout;
     private SignInViewModel viewModel;
 
     @Override
@@ -31,25 +28,25 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
         initViewModel();
+
+        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+            startMainActivity();
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        //FirebaseUser currentUser = mAuth.getCurrentUser();
-        //updateUI(currentUser);
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            startMainActivity();
-        } else {
+
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             createSignInIntent();
-        }
+        } /*else {
+            startMainActivity();
+        }*/
     }
 
     public void initViewModel() {
-        viewModel = new ViewModelProvider(
-                this,
-                ViewModelFactory.getInstance()).get(SignInViewModel.class
-        );
+        viewModel = new ViewModelProvider(this, ViewModelFactory.getInstance()).get(SignInViewModel.class);
     }
 
     private void startMainActivity() {
@@ -74,47 +71,30 @@ public class SignInActivity extends AppCompatActivity {
                 RC_SIGN_IN);
     }
 
-    private void updateUI(FirebaseUser user) {
-        /*hideProgressBar();
-        if (user != null) {
-            mBinding.status.setText(getString(R.string.google_status_fmt, user.getEmail()));
-            mBinding.detail.setText(getString(R.string.firebase_status_fmt, user.getUid()));
-
-            mBinding.signInButton.setVisibility(View.GONE);
-            mBinding.signOutAndDisconnect.setVisibility(View.VISIBLE);
-        } else {
-            mBinding.status.setText(R.string.signed_out);
-            mBinding.detail.setText(null);
-
-            mBinding.signInButton.setVisibility(View.VISIBLE);
-            mBinding.signOutAndDisconnect.setVisibility(View.GONE);
-        }*/
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        IdpResponse response = IdpResponse.fromResultIntent(data);
-
         if (requestCode == RC_SIGN_IN) {
+            IdpResponse response = IdpResponse.fromResultIntent(data);
+
             if (resultCode == RESULT_OK) {
-                showSnackBar(this.coordinatorLayout, getString(R.string.connection_succeed));
+                Toast.makeText(this, getString(R.string.connection_succeed), Toast.LENGTH_SHORT).show();
+                viewModel.createUser();
+                startMainActivity();
+                finish();
             } else {
-                if (response == null) {
-                    showSnackBar(this.coordinatorLayout, getString(R.string.error_authentication_canceled));
-                } else if (response.getError() != null) {
-                    if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
-                        showSnackBar(this.coordinatorLayout, getString(R.string.error_no_internet));
-                    } else if (response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
-                        showSnackBar(this.coordinatorLayout, getString(R.string.error_unknown_error));
+                if(response == null) {
+                    Toast.makeText(this, getString(R.string.error_authentication_canceled), Toast.LENGTH_SHORT).show();
+                } else if(response.getError() != null) {
+                    if(response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
+                        Toast.makeText(this,getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
+                    } else if(response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                        Toast.makeText(this, getString(R.string.error_unknown_error), Toast.LENGTH_SHORT).show();
                     }
                 }
             }
         }
     }
 
-    private void showSnackBar(CoordinatorLayout coordinatorLayout, String message) {
-        Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_SHORT).show();
-    }
 }

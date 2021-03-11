@@ -73,7 +73,7 @@ public class MapFragment extends Fragment {
             });
         }
 
-        mapViewModel.getLastLocation().observe(getViewLifecycleOwner(), this::updatelastLocation);
+        mapViewModel.getLastLocation().observe(getViewLifecycleOwner(), this::updateLastLocation);
         mapViewModel.getMapUiModelLiveData().observe(getViewLifecycleOwner(), this::updateUi);
         mapViewModel.getSingleLiveEventOpenDetailActivity().observe(getViewLifecycleOwner(), this::openDetailActivity);
 
@@ -88,6 +88,8 @@ public class MapFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
+        Log.d("PEACH", "onResume: ");
+
         if (!checkPermissions()) {
             requestPermissions();
         } else {
@@ -98,12 +100,14 @@ public class MapFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        mapViewModel.getStopLocationUpdates();
+        if (checkPermissions()) {
+            mapViewModel.getStopLocationUpdates();
+        }
     }
 
-    private void updatelastLocation(Location location) {
+    private void updateLastLocation(Location location) {
         latLng = new LatLng(location.getLatitude(), location.getLongitude());
-        if(map != null){
+        if (map != null) {
             map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
             map.animateCamera(CameraUpdateFactory.zoomTo(DEFAULT_ZOOM));
         }
@@ -112,14 +116,16 @@ public class MapFragment extends Fragment {
     public void updateUi(List<MapUiModel> models) {
         latitude = 0;
         longitude = 0;
-        for (MapUiModel model : models) {
-            map.addMarker(
-                    new MarkerOptions()
-                            .position(new LatLng(model.getLat(), model.getLng()))
-                            .title(model.getName())
-                            .icon(Utils.bitmapDescriptorFromVector(model.getIcon(), requireContext()))
-                            .snippet(model.getPlaceId())
-            );
+        if (map != null) {
+            for (MapUiModel model : models) {
+                map.addMarker(
+                        new MarkerOptions()
+                                .position(new LatLng(model.getLat(), model.getLng()))
+                                .title(model.getName())
+                                .icon(Utils.bitmapDescriptorFromVector(model.getIcon(), requireContext()))
+                                .snippet(model.getPlaceId())
+                );
+            }
         }
     }
 
@@ -180,13 +186,6 @@ public class MapFragment extends Fragment {
         }
     }
 
-    /**
-     * Shows a {@link Snackbar}.
-     *
-     * @param mainTextStringId The id for the string resource for the Snackbar text.
-     * @param actionStringId   The text of the action item.
-     * @param listener         The listener associated with the Snackbar action.
-     */
     private void showSnackBar(final int mainTextStringId, final int actionStringId,
                               View.OnClickListener listener) {
         Snackbar.make(

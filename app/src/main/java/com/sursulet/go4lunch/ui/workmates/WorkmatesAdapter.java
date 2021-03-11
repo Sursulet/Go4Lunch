@@ -7,7 +7,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -43,22 +42,30 @@ public class WorkmatesAdapter extends ListAdapter<WorkmatesUiModel, WorkmatesAda
 
     class WorkmatesViewHolder extends RecyclerView.ViewHolder {
 
-        CardView workmatesItem;
-        ImageView photo;
-        TextView txt;
+        final ImageView photo;
+        final TextView txt;
+        final TextView name;
 
         public WorkmatesViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            workmatesItem = itemView.findViewById(R.id.workmates_item);
             photo = itemView.findViewById(R.id.workmate_photo);
             txt = itemView.findViewById(R.id.workmate_txt);
+            name = itemView.findViewById(R.id.workmate_name);
 
             itemView.setOnClickListener(v -> onItemClickListener.onItemClick(getAdapterPosition()));
         }
 
         public void bind(WorkmatesUiModel workmatesUiModel) {
             txt.setText(workmatesUiModel.getSentence());
+            if(workmatesUiModel.getMap() != null){
+                String string = "(" + workmatesUiModel.getMap().get("name") + ")";
+                name.setText(string);
+                name.setOnClickListener(v -> onItemClickListener.onItemName(workmatesUiModel.getMap()));
+            } else {
+                name.setText("");
+            }
+
             txt.setTypeface(null, workmatesUiModel.getTxtStyle());
             Glide.with(photo)
                     .load(workmatesUiModel.photo)

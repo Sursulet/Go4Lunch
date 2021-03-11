@@ -1,7 +1,6 @@
 package com.sursulet.go4lunch.ui.detail;
 
 import android.graphics.Typeface;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -68,6 +67,7 @@ public class DetailPlaceViewModel extends ViewModel {
                             String sentence = user.getUsername() + " is joining!";
                             WorkmatesUiModel workmatesUiModel = new WorkmatesUiModel(
                                     user.getUid(),
+                                    null,
                                     sentence,
                                     user.getAvatarUrl(),
                                     Typeface.BOLD

@@ -43,10 +43,4 @@ public class ActiveRestaurantHelper {
                 .get();
     }
 
-    public static CollectionReference getActiveRestaurantAllBookings(String restaurantId) {
-        return ActiveRestaurantHelper.getActiveRestaurantsCollection()
-                .document(restaurantId)
-                .collection(SUB_COLLECTION_NAME);
-    }
-
 }

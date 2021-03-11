@@ -1,12 +1,10 @@
 package com.sursulet.go4lunch;
 
-import android.app.Application;
 import android.location.Location;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
 import androidx.lifecycle.MutableLiveData;
 
-import com.sursulet.go4lunch.model.User;
 import com.sursulet.go4lunch.model.autocomplete.Prediction;
 import com.sursulet.go4lunch.model.autocomplete.StructuredFormatting;
 import com.sursulet.go4lunch.repository.AutocompleteRepository;
@@ -23,7 +21,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
@@ -33,9 +33,6 @@ public class MainViewModelTest {
 
     @Rule
     public InstantTaskExecutorRule instantTaskExecutorRule = new InstantTaskExecutorRule();
-
-    @Mock
-    Application application;
 
     @Mock
     UserRepository userRepository;
@@ -51,10 +48,7 @@ public class MainViewModelTest {
 
     private MutableLiveData<Location> currentLocation;
     private List<Prediction> predictions;
-    private MutableLiveData<User> uiModelMutableLiveData;
-    private MutableLiveData<String> name;
-    private MutableLiveData<String> email;
-    private MutableLiveData<String> photo;
+    private MutableLiveData<Map<String,String>> userMap;
 
     MainViewModel viewModel;
 
@@ -63,26 +57,20 @@ public class MainViewModelTest {
 
     @Before
     public void setUp() {
-        name = new MutableLiveData<>();
-        email = new MutableLiveData<>();
-        photo = new MutableLiveData<>();
+        userMap = new MutableLiveData<>();
         currentLocation = new MutableLiveData<>();
-        uiModelMutableLiveData = new MutableLiveData<>();
         predictions = getPredictions();
 
         doReturn(LATITUDE).when(location).getLatitude();
         doReturn(LONGITUDE).when(location).getLongitude();
 
         doReturn(currentLocation).when(currentLocationRepository).getLastLocationLiveData();
-        doReturn(name).when(userRepository).getCurrentUserName();
-        doReturn(email).when(userRepository).getCurrentUserEmail();
-        doReturn(photo).when(userRepository).getCurrentUserPhoto();
+        doReturn(userMap).when(userRepository).getCurrentUserInstance();
         doReturn(true).when(userRepository).isCurrentUserLogged();
         doReturn(predictions).when(autocompleteRepository).getAutocompleteByLocation(Mockito.any(), Mockito.any());
 
 
         viewModel = new MainViewModel(
-                application,
                 currentLocationRepository,
                 autocompleteRepository,
                 userRepository
@@ -91,22 +79,25 @@ public class MainViewModelTest {
 
     @Test
     public void displayBasic() throws InterruptedException {
-        name.setValue("Steffy");
-        email.setValue("zer@gjk.com");
-        String url = "https://unsplash.com/photos/gKXKBY-C-Dk";
-        photo.setValue(url);
+        Map<String,String> map = new HashMap<>();
+        map.put("name","Peach");
+        map.put("email","peach@mario.com");
+        map.put("url", "https://unsplash.com/photos/gKXKBY-C-Dk");
+
+        userMap.setValue(map);
         currentLocation.setValue(location);
 
         //When
         MainUiModel result = LiveDataTestUtils.getOrAwaitValue(viewModel.getUiModelLiveData());
 
-        assertEquals("Steffy", result.getUsername());
+        assertEquals("Peach", result.getUsername());
+        assertEquals("peach@mario.com", result.getEmail());
+        assertEquals("https://unsplash.com/photos/gKXKBY-C-Dk", result.getPhotoUrl());
     }
 
     @Test
     public void displayPredictions() throws InterruptedException {
         currentLocation.setValue(location);
-        viewModel.onQueryTextChange("Benoit");
         viewModel.onPredictionsChange(predictions);
 
         //When

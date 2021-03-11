@@ -3,7 +3,6 @@ package com.sursulet.go4lunch.ui.list;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
@@ -17,11 +16,12 @@ import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
 import com.sursulet.go4lunch.ui.detail.DetailPlaceActivity;
 import com.sursulet.go4lunch.ui.OnItemClickListener;
-import com.sursulet.go4lunch.ui.map.MapFragment;
+
+import java.util.Map;
 
 public class ListFragment extends Fragment implements OnItemClickListener {
 
-    private static final String TAG = MapFragment.class.getSimpleName();
+    //private static final String TAG = MapFragment.class.getSimpleName();
 
     ListViewModel listViewModel;
     RestaurantAdapter adapter;
@@ -46,9 +46,8 @@ public class ListFragment extends Fragment implements OnItemClickListener {
         listViewModel.getSingleLiveEventOpenDetailActivity().observe(this,
                 id -> requireActivity().startActivity(DetailPlaceActivity.getStartIntent(requireActivity(), id)));
 
-        listViewModel.getSelectedQuery().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(String string) {
+        listViewModel.getSelectedQuery().observe(getViewLifecycleOwner(), string -> {
+            if (string != null && !(string.equals(""))) {
                 Toast.makeText(requireActivity(), "Search Query : " + string, Toast.LENGTH_SHORT).show();
             }
         });
@@ -61,4 +60,7 @@ public class ListFragment extends Fragment implements OnItemClickListener {
         ListUiModel place = adapter.getCurrentList().get(position);
         listViewModel.openDetailPlaceActivity(place.getId());
     }
+
+    @Override
+    public void onItemName(Map<String, String> position) { }
 }

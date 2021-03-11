@@ -11,8 +11,7 @@
         android:id="@+id/detail_app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="300dp"
-        android:fitsSystemWindows="true"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:fitsSystemWindows="true">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/detail_collapsing_toolbar"
@@ -40,6 +39,7 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="@android:color/transparent"
                 android:elevation="0dp"
+                app:layout_collapseMode="pin"
                 android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -97,7 +97,7 @@
                     android:textColor="@color/white"
                     app:layout_constraintStart_toStartOf="@+id/detail_name"
                     app:layout_constraintTop_toBottomOf="@+id/detail_name"
-                    tools:text="French restaurant - 12 rue du Faubourg Poissonière" />
+                    tools:text="@string/tools_address" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -123,7 +123,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
+                <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/detail_like_btn"
                     android:layout_width="60dp"
                     android:layout_height="wrap_content"

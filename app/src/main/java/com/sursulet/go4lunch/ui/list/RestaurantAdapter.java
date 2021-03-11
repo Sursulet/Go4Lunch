@@ -48,15 +48,15 @@ public class RestaurantAdapter extends ListAdapter<ListUiModel, RestaurantAdapte
 
     public class RestaurantViewHolder extends RecyclerView.ViewHolder {
 
-        ConstraintLayout item;
+        final ConstraintLayout item;
 
-        ImageView photo;
-        TextView name;
-        TextView txt;
-        TextView opening;
-        TextView distance;
-        TextView nbWorkmates;
-        RatingBar ratingBar;
+        final ImageView photo;
+        final TextView name;
+        final TextView txt;
+        final TextView opening;
+        final TextView distance;
+        final TextView nbWorkmates;
+        final RatingBar ratingBar;
 
         public RestaurantViewHolder(@NonNull View itemView) {
             super(itemView);

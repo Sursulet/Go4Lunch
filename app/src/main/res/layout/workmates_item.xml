@@ -27,7 +27,15 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="16dp"
             android:textStyle="italic"
-            tools:text="Scarlett is eating french (Le Zinc)" />
+            tools:text="Scarlett is eating french" />
+
+        <TextView
+            android:id="@+id/workmate_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textStyle="italic"
+            tools:text=" (Le Zinc)" />
 
     </LinearLayout>
 

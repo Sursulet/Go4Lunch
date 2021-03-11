@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.sursulet.go4lunch.BuildConfig;
 import com.sursulet.go4lunch.model.details.Close;
 import com.sursulet.go4lunch.model.details.Open;
 import com.sursulet.go4lunch.model.details.OpeningHours;
@@ -42,7 +43,7 @@ public class Utils {
         return "https://maps.googleapis.com/maps/api/place/photo" +
                 "?maxwidth=" + maxWidth +
                 "&photoreference=" + reference +
-                "&key=" + ""; //TODO:KEY
+                "&key=" + BuildConfig.GOOGLE_PLACES_KEY;
     }
 
     public static Float getRating(double rating) {
@@ -83,7 +84,7 @@ public class Utils {
 
     public static String getOpeningHours(OpeningHours openingHours) {
         if (openingHours == null) {
-            return "unknow";
+            return "unknown";
         } else if (openingHours.getOpenNow()) {
             ZoneId zone = ZoneId.of("Europe/Paris");
             LocalDate date = LocalDate.now();

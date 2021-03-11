@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.os.Build;
 import android.util.Log;
@@ -22,29 +23,23 @@ import androidx.work.WorkerParameters;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.sursulet.go4lunch.MainActivity;
 import com.sursulet.go4lunch.MainApplication;
 import com.sursulet.go4lunch.R;
-import com.sursulet.go4lunch.api.ActiveRestaurantHelper;
 import com.sursulet.go4lunch.model.Restaurant;
 import com.sursulet.go4lunch.model.User;
-import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
-import com.sursulet.go4lunch.repository.DetailPlaceRepository;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.concurrent.TimeUnit;
-
-import retrofit2.Response;
 
 public class EventHandler extends Worker {
 
-    private String address;
-    private StringBuilder workmates;
+    private static final String TAG = EventHandler.class.getSimpleName();
 
     public EventHandler(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
@@ -55,58 +50,53 @@ public class EventHandler extends Worker {
     public Result doWork() {
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-            //Parmi les collegues enlever le current user
-            //Si il n'y a pas de resto choisi.
-            //TODO change this, now i have address in model Restaurant
-            //TODO settings / Traduction
-
             try {
 
-                Task<DocumentSnapshot> task = ActiveRestaurantHelper.getBooking(currentUser.getUid())
-                        .continueWithTask(queryTask -> {
-                            List<Task<QuerySnapshot>> tasks = new ArrayList<>();
-                            for (DocumentSnapshot document : queryTask.getResult()) {
-                                tasks.add(document.getReference().getParent().get());
-                            }
+                Task<DocumentSnapshot> task = FirebaseFirestore.getInstance()
+                        .collection(LocalDate.now() + "_UsersActiveRestaurants")
+                        .document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                        .get();
 
-                            return tasks.get(0);
-                        })
-                        .continueWithTask(querySnapshotTask -> {
-                            if (querySnapshotTask.isSuccessful()) {
-                                List<Task<DocumentSnapshot>> snapshots = new ArrayList<>();
-                                workmates = new StringBuilder();
-                                for (QueryDocumentSnapshot document : querySnapshotTask.getResult()) {
+                Tasks.await(task);
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                        Restaurant restaurant = document.toObject(Restaurant.class);
+                        if (restaurant != null) {
 
-                                    User user = document.toObject(User.class);
-                                    workmates.append(user.getUsername());
+                            Task<QuerySnapshot> listTask = FirebaseFirestore.getInstance()
+                                    .collection(LocalDate.now() + "_activeRestaurants")
+                                    .get();
 
-                                    if (document.getReference().getParent().getParent() != null) {
-                                        snapshots.add(document.getReference().getParent().getParent().get());
+                            Tasks.await(listTask);
+
+                            if (listTask.isSuccessful()) {
+                                StringBuilder workmates = new StringBuilder();
+                                for (QueryDocumentSnapshot snapshot : listTask.getResult()) {
+                                    Log.d(TAG, snapshot.getId() + " => " + snapshot.getData());
+                                    User user = snapshot.toObject(User.class);
+                                    if(!(user.getUid().equals(FirebaseAuth.getInstance().getCurrentUser().getUid()))){
+                                        workmates.append(user.getUsername());
                                     }
                                 }
 
-                                return snapshots.get(0);
+                                if (workmates.length() == 0)
+                                    workmates.append("No colleagues go to this restaurant");
+
+                                sendVisualNotification(restaurant.getName(), restaurant.getAddress(), workmates);
+
                             } else {
-                                Log.d("PEACH", "Error getting documents: ", querySnapshotTask.getException());
-                                return null;
+                                Log.d(TAG, "Error getting documents: ", listTask.getException());
                             }
-                        });
+                        }
 
-                Tasks.await(task);
-                Restaurant restaurant = task.getResult().toObject(Restaurant.class);
-
-                if (restaurant != null) {
-                    DetailPlaceRepository detailPlaceRepository = new DetailPlaceRepository();
-                    Response<GooglePlacesDetailResult> response = detailPlaceRepository.getDetailPlaceSync(restaurant.getId());
-                    GooglePlacesDetailResult detailResult = response.body();
-
-                    if (detailResult != null) {
-                        address = detailResult.getResult().getFormattedAddress();
+                    } else {
+                        Log.d(TAG, "No such document");
                     }
-                    //address = detailResult != null ? detailResult.getResult().getFormattedAddress() : null;
 
-                    sendVisualNotification(restaurant.getName(), address, workmates);
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
                 }
 
             } catch (Exception e) {
@@ -119,8 +109,8 @@ public class EventHandler extends Worker {
 
     public static void periodRequest() {
         PeriodicWorkRequest periodicWorkRequest =
-                new PeriodicWorkRequest.Builder(EventHandler.class, 10, TimeUnit.SECONDS)
-                        .setInitialDelay(5, TimeUnit.SECONDS)
+                new PeriodicWorkRequest.Builder(EventHandler.class, 1, TimeUnit.DAYS)
+                        .setInitialDelay(setDelay(), TimeUnit.MINUTES)
                         .setConstraints(setCons())
                         .build();
 
@@ -132,6 +122,18 @@ public class EventHandler extends Worker {
                 ExistingPeriodicWorkPolicy.REPLACE,
                 periodicWorkRequest
         );
+    }
+
+    private static int setDelay() {
+        if (LocalTime.now().getHour() < 11) {
+            return (11 - LocalTime.now().getHour()) * 60 + 60 - LocalTime.now().getMinute();
+        } else if (LocalTime.now().getHour() < 12) {
+            return 60 - LocalTime.now().getMinute();
+        } else if (LocalTime.now().getHour() > 12) {
+            return (23 - LocalTime.now().getHour()) * 60 + 60 - LocalTime.now().getMinute() + 720;
+        } else {
+            return 0;
+        }
     }
 
     private static Constraints setCons() {
@@ -165,6 +167,11 @@ public class EventHandler extends Worker {
             CharSequence channelName = "Message";
             int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel mChannel = new NotificationChannel(channelId, channelName, importance);
+
+            mChannel.enableLights(true);
+            mChannel.setLightColor(Color.GREEN);
+            mChannel.enableVibration(true);
+
             notificationManagerCompat.createNotificationChannel(mChannel);
         }
 

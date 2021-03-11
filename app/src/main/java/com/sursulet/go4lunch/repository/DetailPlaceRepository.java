@@ -3,6 +3,7 @@ package com.sursulet.go4lunch.repository;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.sursulet.go4lunch.BuildConfig;
 import com.sursulet.go4lunch.model.details.GooglePlacesDetailResult;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
 import com.sursulet.go4lunch.remote.RetrofitClient;
@@ -15,7 +16,7 @@ import retrofit2.Response;
 
 public class DetailPlaceRepository {
 
-    IGoogleAPIService mService = RetrofitClient
+    final IGoogleAPIService mService = RetrofitClient
             .getClient("https://maps.googleapis.com/")
             .create(IGoogleAPIService.class);
 
@@ -25,7 +26,7 @@ public class DetailPlaceRepository {
 
         mService.getDetailPlace(
                 place_id,
-                "" //TODO : KEY
+                BuildConfig.GOOGLE_PLACES_KEY
         ).enqueue(new Callback<GooglePlacesDetailResult>() {
             @Override
             public void onResponse(
@@ -52,7 +53,7 @@ public class DetailPlaceRepository {
 
         return mService.getDetailPlace(
                 place_id,
-                "" //TODO : KEY
+                BuildConfig.GOOGLE_PLACES_KEY
         ).execute();
 
     }

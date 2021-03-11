@@ -2,6 +2,7 @@ package com.sursulet.go4lunch.repository;
 
 import android.location.Location;
 
+import com.sursulet.go4lunch.BuildConfig;
 import com.sursulet.go4lunch.model.autocomplete.GooglePlacesAutocompleteResult;
 import com.sursulet.go4lunch.model.autocomplete.Prediction;
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
@@ -14,7 +15,7 @@ import retrofit2.Response;
 
 public class AutocompleteRepository {
 
-    IGoogleAPIService mService = RetrofitClient.getClient("https://maps.googleapis.com/")
+    final IGoogleAPIService mService = RetrofitClient.getClient("https://maps.googleapis.com/")
             .create(IGoogleAPIService.class);
 
     public List<Prediction> getAutocompleteByLocation(String input, Location location) {
@@ -22,10 +23,10 @@ public class AutocompleteRepository {
         List<Prediction> predictions = null;
         try {
             Response<GooglePlacesAutocompleteResult> response = mService.getAutocompletePlaces(
-                    "", //TODO : KEY
-                    input,
+                    BuildConfig.GOOGLE_PLACES_KEY,
+                     input,
                     location.getLatitude() + "," + location.getLongitude(),
-                    "500",
+                    "50",
                     "establishment"
             ).execute();
             if(response.isSuccessful()) {

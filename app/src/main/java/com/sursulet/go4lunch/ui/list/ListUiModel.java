@@ -5,14 +5,14 @@ import androidx.recyclerview.widget.DiffUtil;
 
 public class ListUiModel {
 
-    String id;
-    String name;
-    String photoUrl;
-    String txt;
-    String opening;
-    String distance;
-    float rating;
-    String nbWorkmates;
+    final String id;
+    final String name;
+    final String photoUrl;
+    final String txt;
+    final String opening;
+    final String distance;
+    final float rating;
+    final String nbWorkmates;
 
     public ListUiModel(
             String id, String name, String photoUrl,
@@ -79,14 +79,11 @@ public class ListUiModel {
                 @Override
                 public boolean areItemsTheSame(
                         @NonNull ListUiModel oldListUiModel, @NonNull ListUiModel newListUiModel) {
-                    // User properties may have changed if reloaded from the DB, but ID is fixed
                     return oldListUiModel.getId().equals(newListUiModel.getId());
                 }
                 @Override
                 public boolean areContentsTheSame(
                         @NonNull ListUiModel oldListUiModel, @NonNull ListUiModel newListUiModel) {
-                    // NOTE: if you use equals, your object must properly override Object#equals()
-                    // Incorrectly returning false here will result in too many animations.
                     return oldListUiModel.equals(newListUiModel);
                 }
             };

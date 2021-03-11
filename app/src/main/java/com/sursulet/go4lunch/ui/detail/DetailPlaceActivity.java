@@ -1,6 +1,8 @@
 package com.sursulet.go4lunch.ui.detail;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -10,10 +12,12 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.RatingBar;
@@ -28,6 +32,8 @@ import com.sursulet.go4lunch.ui.OnItemClickListener;
 import com.sursulet.go4lunch.ui.chat.ChatActivity;
 import com.sursulet.go4lunch.ui.workmates.WorkmatesAdapter;
 import com.sursulet.go4lunch.ui.workmates.WorkmatesUiModel;
+
+import java.util.Map;
 
 public class DetailPlaceActivity extends AppCompatActivity implements OnItemClickListener {
 
@@ -56,6 +62,8 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
         return intent;
     }
 
+    @SuppressLint("UseCompatTextViewDrawableApis")
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,14 +124,18 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
     }
 
     private void configureToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
+        Toolbar toolbar = findViewById(R.id.detail_toolbar);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        ActionBar actionBar = getSupportActionBar();
+        if(actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+
         toolbar.setNavigationOnClickListener(v -> finish());
     }
 
-    //TODO : Phone call
     private void onMakePhoneCall() {
         String number = phoneNumber;
         if(number.trim().length() > 0) {
@@ -158,5 +170,10 @@ public class DetailPlaceActivity extends AppCompatActivity implements OnItemClic
     public void onItemClick(int position) {
         String workmateId = adapter.getCurrentList().get(position).getUid();
         placeViewModel.openChatActivity(workmateId);
+    }
+
+    @Override
+    public void onItemName(Map<String, String> position) {
+
     }
 }

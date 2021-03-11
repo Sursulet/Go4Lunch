@@ -42,7 +42,7 @@ public class PlaceAutocompleteAdapter extends ListAdapter<String, PlaceAutocompl
     }
 
     public class AutocompleteViewHolder extends RecyclerView.ViewHolder {
-        ConstraintLayout item;
+        final ConstraintLayout item;
         private final TextView textView;
 
         public AutocompleteViewHolder(@NonNull View itemView) {

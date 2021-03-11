@@ -6,16 +6,16 @@ import java.util.List;
 
 public class DetailPlaceUiModel {
 
-    String name;
-    String urlPhoto;
-    int isGoing;
-    String sentence;
-    float rating;
-    String phoneNumber;
-    int isLike;
-    String urlWebsite;
-    List<WorkmatesUiModel> workmates;
-    String openingHours;
+    final String name;
+    final String urlPhoto;
+    final int isGoing;
+    final String sentence;
+    final float rating;
+    final String phoneNumber;
+    final int isLike;
+    final String urlWebsite;
+    final List<WorkmatesUiModel> workmates;
+    final String openingHours;
 
 
     public DetailPlaceUiModel(

@@ -15,6 +15,9 @@ import com.sursulet.go4lunch.R;
 import com.sursulet.go4lunch.injection.ViewModelFactory;
 import com.sursulet.go4lunch.ui.OnItemClickListener;
 import com.sursulet.go4lunch.ui.chat.ChatActivity;
+import com.sursulet.go4lunch.ui.detail.DetailPlaceActivity;
+
+import java.util.Map;
 
 public class WorkmatesFragment extends Fragment implements OnItemClickListener {
 
@@ -39,6 +42,8 @@ public class WorkmatesFragment extends Fragment implements OnItemClickListener {
                 getViewLifecycleOwner(),
                 workmatesUiModels -> adapter.submitList(workmatesUiModels));
 
+        workmatesViewModel.getEventDetailActivity().observe(getViewLifecycleOwner(), this::openDetailActivity);
+
         workmatesViewModel.getEventOpenChatActivity().observe(
                 getViewLifecycleOwner(),
                 id -> requireActivity().startActivity(
@@ -51,5 +56,14 @@ public class WorkmatesFragment extends Fragment implements OnItemClickListener {
     public void onItemClick(int position) {
         String workmateId = adapter.getCurrentList().get(position).getUid();
         workmatesViewModel.openChatActivity(workmateId);
+    }
+
+    @Override
+    public void onItemName(Map<String, String> map) {
+        workmatesViewModel.openDetailActivity(map.get("id"));
+    }
+
+    private void openDetailActivity(String id) {
+        startActivity(DetailPlaceActivity.getStartIntent(requireActivity(), id));
     }
 }

@@ -2,9 +2,9 @@ package com.sursulet.go4lunch;
 
 public class MainUiModel {
 
-    String username;
-    String email;
-    String photoUrl;
+    final String username;
+    final String email;
+    final String photoUrl;
 
     public MainUiModel(String username, String email, String photoUrl) {
         this.username = username;

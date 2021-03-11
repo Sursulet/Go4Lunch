@@ -1,4 +1,4 @@
-package com.sursulet.go4lunch;
+package com.sursulet.go4lunch.utils;
 
 import com.sursulet.go4lunch.remote.IGoogleAPIService;
 import com.sursulet.go4lunch.remote.RetrofitClient;
